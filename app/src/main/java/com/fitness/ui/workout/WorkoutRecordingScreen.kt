@@ -13,11 +13,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkoutRecordingScreen(
     exerciseName: String,
     viewModel: WorkoutViewModel,
+    onBack: () -> Unit,
     onFinished: () -> Unit
 ) {
     var weightInput by remember { mutableStateOf("0") }
@@ -26,7 +30,14 @@ fun WorkoutRecordingScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text("正在记录: $exerciseName") })
+            TopAppBar(
+                title = { Text(exerciseName, fontSize = 18.sp) },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "返回")
+                    }
+                }
+            )
         }
     ) { padding ->
         Column(

@@ -1,12 +1,19 @@
 package com.fitness.ui.library
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -18,10 +25,6 @@ import coil.request.ImageRequest
 import com.fitness.data.ExerciseProvider
 import com.fitness.model.Exercise
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Cloud
-import androidx.compose.material.icons.filled.CloudDone
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseLibraryScreen(
@@ -31,70 +34,54 @@ fun ExerciseLibraryScreen(
 ) {
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text("健身动作库", fontWeight = FontWeight.Bold) },
+            TopAppBar(
+                title = { }, 
                 actions = {
                     IconButton(onClick = onConnectCloud) {
                         Icon(
                             imageVector = if (isCloudConnected) Icons.Default.CloudDone else Icons.Default.Cloud,
                             contentDescription = "连接云盘",
-                            tint = if (isCloudConnected) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onPrimaryContainer
+                            tint = if (isCloudConnected) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface
                         )
                     }
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
+                }
             )
         }
     ) { padding ->
-        LazyColumn(
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            contentPadding = PaddingValues(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(ExerciseProvider.exercises) { exercise ->
-                ExerciseItem(exercise, onExerciseClick)
+                ExerciseGridItem(exercise, onExerciseClick)
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExerciseItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
+fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
     Card(
-        onClick = { onExerciseClick(exercise) },
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(0.8f)
+            .clickable { onExerciseClick(exercise) },
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(
-            modifier = Modifier.padding(16.dp)
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(4.dp)
         ) {
-            Text(
-                text = exercise.name,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            Text(
-                text = "目标肌群: ${exercise.targetMuscle}",
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
-
-            // 使用 Coil 加载 GIF
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp)
-                    .padding(vertical = 8.dp),
-                contentAlignment = androidx.compose.ui.Alignment.Center
+                    .weight(1f),
+                contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
                     model = ImageRequest.Builder(LocalContext.current)
@@ -106,16 +93,20 @@ fun ExerciseItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
                                 GifDecoder.Factory()
                             }
                         )
+                        .crossfade(true)
                         .build(),
                     contentDescription = exercise.name,
+                    contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize()
                 )
             }
-
+            
             Text(
-                text = exercise.description,
-                fontSize = 15.sp,
-                lineHeight = 22.sp
+                text = exercise.name,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }

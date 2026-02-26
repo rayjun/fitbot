@@ -62,9 +62,6 @@ class MainActivity : ComponentActivity() {
             when (val screen = currentScreen) {
                 is Screen.Library -> {
                     ExerciseLibraryScreen(
-                        onExerciseClick = { exercise ->
-                            currentScreen = Screen.Workout(exercise)
-                        },
                         isCloudConnected = lastAccount != null,
                         onConnectCloud = {
                             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -73,6 +70,9 @@ class MainActivity : ComponentActivity() {
                                 .build()
                             val client = GoogleSignIn.getClient(this, gso)
                             googleSignInLauncher.launch(client.signInIntent)
+                        },
+                        onExerciseClick = { exercise ->
+                            currentScreen = Screen.Workout(exercise)
                         }
                     )
                 }
@@ -80,6 +80,9 @@ class MainActivity : ComponentActivity() {
                     WorkoutRecordingScreen(
                         exerciseName = screen.exercise.name,
                         viewModel = workoutViewModel,
+                        onBack = {
+                            currentScreen = Screen.Library
+                        },
                         onFinished = {
                             currentScreen = Screen.Library
                         }
