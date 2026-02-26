@@ -15,7 +15,7 @@ import com.fitness.model.Exercise
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExerciseLibraryScreen() {
+fun ExerciseLibraryScreen(onExerciseClick: (Exercise) -> Unit) {
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -34,15 +34,17 @@ fun ExerciseLibraryScreen() {
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(ExerciseProvider.exercises) { exercise ->
-                ExerciseItem(exercise)
+                ExerciseItem(exercise, onExerciseClick)
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExerciseItem(exercise: Exercise) {
+fun ExerciseItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
     Card(
+        onClick = { onExerciseClick(exercise) },
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
