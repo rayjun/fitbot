@@ -11,6 +11,13 @@ import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
+import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.gson.GsonFactory
+import com.google.api.services.drive.Drive
+import com.google.api.services.drive.DriveScopes
+
 class SyncWorker(
     context: Context,
     workerParams: WorkerParameters
@@ -19,25 +26,36 @@ class SyncWorker(
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val date = inputData.getString("SYNC_DATE") ?: return@withContext Result.failure()
         
-        // 1. 获取数据库实例 (实际开发中应使用 DI 注入)
-        val db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "fitness-db"
-        ).build()
+        // 1. 获取已登录的 Google 账户
+        val account = GoogleSignIn.getLastSignedInAccount(applicationContext)
+            ?: return@withContext Result.failure() // 未登录则同步失败
+
+        // 2. 初始化 Drive 服务
+        val credential = GoogleAccountCredential.usingOAuth2(
+            applicationContext, listOf(DriveScopes.DRIVE_FILE)
+        ).apply {
+            selectedAccount = account.account
+        }
+
+        val driveService = Drive.Builder(
+            NetHttpTransport(),
+            GsonFactory(),
+            credential
+        ).setApplicationName("Fitness Tracker").build()
+
+        val helper = DriveServiceHelper(driveService)
+        val db = AppDatabase.getInstance(applicationContext)
         
         try {
-            // 2. 获取当天所有记录
             val sets = db.exerciseDao().getSetsByDate(date)
             if (sets.isEmpty()) return@withContext Result.success()
 
-            // 3. 转换为层级 JSON
             val trainingDay = transformToTrainingDay(date, sets)
             val jsonString = Gson().toJson(trainingDay)
 
-            // 4. 同步到 Google Drive
-            // 注意: 这里需要一个已认证的 DriveServiceHelper 实例
-            // 为了演示，我们打印 JSON 字符串，实际应用中调用 helper.uploadOrUpdateFile(...)
-            println("Syncing to Google Drive: $jsonString")
+            // 3. 执行真实上传
+            val folderId = helper.getOrCreateFolder("MyFitnessData")
+            helper.uploadOrUpdateFile(folderId, "$date.json", jsonString)
             
             Result.success()
         } catch (e: Exception) {
