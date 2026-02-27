@@ -13,6 +13,9 @@ interface ExerciseDao {
     @Query("SELECT * FROM exercise_sets WHERE date = :date ORDER BY timestamp ASC")
     suspend fun getSetsByDate(date: String): List<SetEntity>
 
+    @Query("SELECT * FROM exercise_sets WHERE date >= :date ORDER BY date ASC")
+    suspend fun getSetsSinceDate(date: String): List<SetEntity>
+
     @Query("DELETE FROM exercise_sets WHERE id = :id")
     suspend fun deleteSet(id: Long)
 }

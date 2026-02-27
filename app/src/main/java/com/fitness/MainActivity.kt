@@ -26,6 +26,8 @@ import com.fitness.ui.library.ExerciseLibraryScreen
 import com.fitness.ui.navigation.Screen
 import com.fitness.ui.plans.PlanViewModel
 import com.fitness.ui.plans.PlansScreen
+import com.fitness.ui.profile.ProfileViewModel
+import com.fitness.ui.profile.ProfileScreen
 import com.fitness.ui.profile.ProfileScreen
 import com.fitness.ui.workout.WorkoutRecordingScreen
 import com.fitness.ui.workout.WorkoutViewModel
@@ -71,6 +73,14 @@ class MainActivity : ComponentActivity() {
                 factory = object : ViewModelProvider.Factory {
                     override fun <T : ViewModel> create(modelClass: Class<T>): T {
                         return PlanViewModel(applicationContext) as T
+                    }
+                }
+            )
+
+            val profileViewModel: ProfileViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                        return ProfileViewModel(applicationContext) as T
                     }
                 }
             )
@@ -132,7 +142,16 @@ class MainActivity : ComponentActivity() {
                         PlansScreen(planViewModel)
                     }
                     composable(Screen.Profile.route) {
-                        ProfileScreen()
+                        ProfileScreen(
+                            viewModel = profileViewModel,
+                            onLogout = {
+                                val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
+                                GoogleSignIn.getClient(this@MainActivity, gso).signOut().addOnCompleteListener {
+                                    lastAccount = null
+                                    Toast.makeText(context, "已退出登录", Toast.LENGTH_SHORT).show()
+                                }
+                            }
+                        )
                     }
                     composable(
                         route = Screen.Workout.route,
