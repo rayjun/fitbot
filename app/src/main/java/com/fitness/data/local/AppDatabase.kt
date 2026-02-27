@@ -5,9 +5,10 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [SetEntity::class], version = 1, exportSchema = false)
+@Database(entities = [SetEntity::class, PlanEntity::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun exerciseDao(): ExerciseDao
+    abstract fun planDao(): PlanDao
 
     companion object {
         @Volatile
@@ -19,7 +20,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "fitness-db"
-                ).build()
+                )
+                .fallbackToDestructiveMigration() // 开发阶段允许销毁重建
+                .build()
                 INSTANCE = instance
                 instance
             }

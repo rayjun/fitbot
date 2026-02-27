@@ -24,6 +24,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.fitness.ui.library.ExerciseLibraryScreen
 import com.fitness.ui.navigation.Screen
+import com.fitness.ui.plans.PlanViewModel
 import com.fitness.ui.plans.PlansScreen
 import com.fitness.ui.profile.ProfileScreen
 import com.fitness.ui.workout.WorkoutRecordingScreen
@@ -62,6 +63,14 @@ class MainActivity : ComponentActivity() {
                 factory = object : ViewModelProvider.Factory {
                     override fun <T : ViewModel> create(modelClass: Class<T>): T {
                         return WorkoutViewModel(applicationContext) as T
+                    }
+                }
+            )
+
+            val planViewModel: PlanViewModel = viewModel(
+                factory = object : ViewModelProvider.Factory {
+                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                        return PlanViewModel(applicationContext) as T
                     }
                 }
             )
@@ -120,7 +129,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     composable(Screen.Plans.route) {
-                        PlansScreen()
+                        PlansScreen(planViewModel)
                     }
                     composable(Screen.Profile.route) {
                         ProfileScreen()
