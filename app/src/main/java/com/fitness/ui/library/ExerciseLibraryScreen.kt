@@ -9,7 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +32,14 @@ fun ExerciseLibraryScreen(
     onConnectCloud: () -> Unit,
     onExerciseClick: (Exercise) -> Unit
 ) {
+    var selectedCategory by remember { mutableStateOf("全部") }
+    
+    val filteredExercises = if (selectedCategory == "全部") {
+        ExerciseProvider.exercises
+    } else {
+        ExerciseProvider.exercises.filter { it.category == selectedCategory }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -48,17 +56,40 @@ fun ExerciseLibraryScreen(
             )
         }
     ) { padding ->
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(ExerciseProvider.exercises) { exercise ->
-                ExerciseGridItem(exercise, onExerciseClick)
+        Column(modifier = Modifier.padding(padding)) {
+            // 顶部部位筛选 Tab
+            ScrollableTabRow(
+                selectedTabIndex = ExerciseProvider.categories.indexOf(selectedCategory),
+                edgePadding = 16.dp,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.primary,
+                divider = {}
+            ) {
+                ExerciseProvider.categories.forEachIndexed { index, category ->
+                    Tab(
+                        selected = selectedCategory == category,
+                        onClick = { selectedCategory = category },
+                        text = { 
+                            Text(
+                                text = category,
+                                style = MaterialTheme.typography.titleSmall
+                            ) 
+                        }
+                    )
+                }
+            }
+
+            // 动作网格
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(filteredExercises) { exercise ->
+                    ExerciseGridItem(exercise, onExerciseClick)
+                }
             }
         }
     }
