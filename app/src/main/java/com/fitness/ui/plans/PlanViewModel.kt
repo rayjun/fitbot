@@ -65,4 +65,15 @@ class PlanViewModel(context: Context) : ViewModel() {
             refresh()
         }
     }
+
+    fun updatePlanDay(dayOfWeek: Int, isRest: Boolean, exerciseIds: List<String>) {
+        val current = currentRoutine.value.toMutableList()
+        val index = current.indexOfFirst { it.dayOfWeek == dayOfWeek }
+        if (index != -1) {
+            current[index] = current[index].copy(isRest = isRest, exercises = exerciseIds)
+        } else {
+            current.add(RoutineDay(dayOfWeek, isRest, exerciseIds))
+        }
+        updatePlan(currentPlan.value?.name ?: "Weekly Routine", current)
+    }
 }

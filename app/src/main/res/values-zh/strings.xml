@@ -45,4 +45,27 @@
     <string name="dialog_cancel">取消</string>
     <string name="lang_zh">简体中文</string>
     <string name="lang_en">English</string>
+    
+    <!-- Weekly Routine -->
+    <string name="week_overview">本周安排总览</string>
+    <string name="today_task">今日任务</string>
+    <string name="rest_message">今天是休息日，好好放松一下吧！</string>
+    <string name="exercises_scheduled">已安排 %1$d 个训练动作。</string>
+    <string name="start_training">开始今日训练</string>
+    <string name="today_badge">今天</string>
+    <string name="rest_badge">休息</string>
+    <string name="exercises_count">动作数: %1$d</string>
+    <string name="day_mon">星期一</string>
+    <string name="day_tue">星期二</string>
+    <string name="day_wed">星期三</string>
+    <string name="day_thu">星期四</string>
+    <string name="day_fri">星期五</string>
+    <string name="day_sat">星期六</string>
+    <string name="day_sun">星期日</string>
+    <string name="day_unknown">未知</string>
+    <string name="create_routine">创建周训练计划</string>
+    <string name="edit_day">编辑单日安排</string>
+    <string name="is_rest_day">设为休息日？</string>
+    <string name="select_exercises">选择训练动作：</string>
+    <string name="save">保存</string>
 </resources>

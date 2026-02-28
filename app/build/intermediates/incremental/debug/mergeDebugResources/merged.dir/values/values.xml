@@ -353,17 +353,30 @@
     <string name="common_open_on_phone">Open on phone</string>
     <string name="common_signin_button_text">Sign in</string>
     <string name="common_signin_button_text_long">Sign in with Google</string>
+    <string name="create_routine">Create Weekly Routine</string>
     <string name="current_plan">Current Training Plan</string>
     <string name="current_tag">Current</string>
+    <string name="day_fri">Friday</string>
+    <string name="day_mon">Monday</string>
+    <string name="day_sat">Saturday</string>
+    <string name="day_sun">Sunday</string>
+    <string name="day_thu">Thursday</string>
+    <string name="day_tue">Tuesday</string>
+    <string name="day_unknown">Unknown</string>
+    <string name="day_wed">Wednesday</string>
     <string name="default_error_message">"Invalid input"</string>
     <string name="default_popup_window_title" ns2:ignore="ExtraTranslation">"Pop-Up Window"</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="dropdown_menu">"Dropdown menu"</string>
+    <string name="edit_day">Edit Day</string>
+    <string name="exercises_count">Exercises: %1$d</string>
+    <string name="exercises_scheduled">%1$d exercises scheduled.</string>
     <string name="finish_session">Finish Session</string>
     <string name="finish_workout">Finish workout and sync</string>
     <string name="heatmap_title">Workout Heatmap (90 days)</string>
     <string name="in_progress">In progress</string>
     <string name="indeterminate">Partially checked</string>
+    <string name="is_rest_day">Is Rest Day?</string>
     <string name="lang_en">English</string>
     <string name="lang_zh">简体中文</string>
     <string name="logout">Logout</string>
@@ -445,22 +458,30 @@
     <string name="range_end">"Range end"</string>
     <string name="range_start">"Range start"</string>
     <string name="reps">Reps</string>
+    <string name="rest_badge">Rest</string>
+    <string name="rest_message">Rest day today! Enjoy your recovery.</string>
+    <string name="save">Save</string>
     <string name="save_set">Save this set</string>
     <string name="search_menu_title">Search</string>
+    <string name="select_exercises">Select Exercises:</string>
     <string name="selected">Selected</string>
     <string name="session_history">Current Session History:</string>
     <string name="session_progress">Session Progress:</string>
     <string name="settings_dark_mode">Dark Mode</string>
     <string name="settings_general">General Settings</string>
     <string name="settings_language">Language</string>
+    <string name="start_training">Start Training</string>
     <string name="status_bar_notification_info_overflow">999+</string>
     <string name="switch_role">Switch</string>
     <string name="tab">Tab</string>
     <string name="template_percent"><ns1:g id="percentage">%1$d</ns1:g> percent.</string>
+    <string name="today_badge">Today</string>
+    <string name="today_task">Today\'s Task</string>
     <string name="tooltip_description">tooltip</string>
     <string name="tooltip_label">show tooltip</string>
     <string name="training_session">Training Session</string>
     <string name="update_plan">Update Plan</string>
+    <string name="week_overview">This Week\'s Overview</string>
     <string name="weight_kg">Weight (kg)</string>
     <style name="AlertDialog.AppCompat" parent="Base.AlertDialog.AppCompat"/>
     <style name="AlertDialog.AppCompat.Light" parent="Base.AlertDialog.AppCompat.Light"/>
