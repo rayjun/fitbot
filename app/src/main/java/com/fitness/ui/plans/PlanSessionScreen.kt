@@ -24,13 +24,14 @@ import com.fitness.ui.workout.WorkoutViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanSessionScreen(
-    planId: Int,
+    dayOfWeek: Int,
     planViewModel: PlanViewModel,
     workoutViewModel: WorkoutViewModel,
     onExerciseClick: (Exercise) -> Unit,
     onBack: () -> Unit
 ) {
     val currentPlan by planViewModel.currentPlan.collectAsStateWithLifecycle()
+    val currentRoutine by planViewModel.currentRoutine.collectAsStateWithLifecycle()
     val completedExercises by workoutViewModel.completedExercises.collectAsStateWithLifecycle(emptyList())
     
     // 进入此页面自动启动新训练会话
@@ -43,8 +44,9 @@ fun PlanSessionScreen(
         workoutViewModel.refreshSets()
     }
 
-    val exercises = remember(currentPlan) {
-        val ids = currentPlan?.exercisesJson?.split(",") ?: emptyList()
+    val exercises = remember(currentRoutine, dayOfWeek) {
+        val todayRoutine = currentRoutine.find { it.dayOfWeek == dayOfWeek }
+        val ids = todayRoutine?.exercises ?: emptyList()
         ids.mapNotNull { id -> ExerciseProvider.exercises.find { it.id == id.trim() } }
     }
 

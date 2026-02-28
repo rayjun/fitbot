@@ -13,7 +13,7 @@ sealed class Screen(val route: String, val title: String? = null, val icon: Imag
     object Workout : Screen("workout/{exerciseName}") {
         fun createRoute(exerciseName: String) = "workout/$exerciseName"
     }
-    object PlanSession : Screen("plan_session/{planId}") {
-        fun createRoute(planId: Int) = "plan_session/$planId"
+    object PlanSession : Screen("plan_session/{dayOfWeek}") {
+        fun createRoute(dayOfWeek: Int) = "plan_session/$dayOfWeek"
     }
 }

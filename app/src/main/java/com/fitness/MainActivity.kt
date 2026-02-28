@@ -162,18 +162,19 @@ class MainActivity : AppCompatActivity() {
                         composable(Screen.Plans.route) {
                             PlansScreen(
                                 viewModel = planViewModel,
-                                onStartPlan = { planId ->
-                                    navController.navigate(Screen.PlanSession.createRoute(planId))
+                                workoutViewModel = workoutViewModel,
+                                onStartPlan = { dayOfWeek ->
+                                    navController.navigate(Screen.PlanSession.createRoute(dayOfWeek))
                                 }
                             )
                         }
                         composable(
                             route = Screen.PlanSession.route,
-                            arguments = listOf(navArgument("planId") { type = NavType.IntType })
+                            arguments = listOf(navArgument("dayOfWeek") { type = NavType.IntType })
                         ) { backStackEntry ->
-                            val planId = backStackEntry.arguments?.getInt("planId") ?: 0
+                            val dayOfWeek = backStackEntry.arguments?.getInt("dayOfWeek") ?: 0
                             PlanSessionScreen(
-                                planId = planId,
+                                dayOfWeek = dayOfWeek,
                                 planViewModel = planViewModel,
                                 workoutViewModel = workoutViewModel,
                                 onExerciseClick = { exercise ->
