@@ -121,7 +121,7 @@ fun ProfileScreen(
             text = {
                 Column {
                     ListItem(
-                        headlineContent = { Text("简体中文") },
+                        headlineContent = { Text(stringResource(R.string.lang_zh)) },
                         modifier = Modifier.clickable {
                             settingsViewModel.setLanguage("zh")
                             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("zh"))
@@ -129,7 +129,7 @@ fun ProfileScreen(
                         }
                     )
                     ListItem(
-                        headlineContent = { Text("English") },
+                        headlineContent = { Text(stringResource(R.string.lang_en)) },
                         modifier = Modifier.clickable {
                             settingsViewModel.setLanguage("en")
                             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"))
@@ -140,7 +140,7 @@ fun ProfileScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showLanguageDialog = false }) {
-                    Text("取消")
+                    Text(stringResource(R.string.dialog_cancel))
                 }
             }
         )

@@ -26,12 +26,13 @@
         android:debuggable="true"
         android:extractNativeLibs="false"
         android:label="Fitness Tracker"
+        android:localeConfig="@xml/locales_config"
         android:supportsRtl="true"
-        android:theme="@android:style/Theme.Material.Light.NoActionBar" >
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
         <activity
             android:name="com.fitness.MainActivity"
             android:exported="true"
-            android:theme="@android:style/Theme.Material.Light.NoActionBar" >
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

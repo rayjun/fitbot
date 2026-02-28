@@ -37,4 +37,12 @@
     <string name="save_set">Save this set</string>
     <string name="session_history">Current Session History:</string>
     <string name="finish_workout">Finish workout and sync</string>
+    
+    <!-- Added Strings -->
+    <string name="session_progress">Session Progress:</string>
+    <string name="finish_session">Finish Session</string>
+    <string name="training_session">Training Session</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="lang_zh">简体中文</string>
+    <string name="lang_en">English</string>
 </resources>

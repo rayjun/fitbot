@@ -52,7 +52,7 @@ fun PlansScreen(viewModel: PlanViewModel, onStartPlan: (Int) -> Unit) {
                     }
                     ExtendedFloatingActionButton(
                         onClick = { 
-                            viewModel.updatePlan("Full Body", listOf("benchpress", "squat", "plank", "pushup"))
+                            viewModel.updatePlan("Full Body Plan", listOf("benchpress", "squat", "plank", "pushup"))
                         },
                         icon = { Icon(Icons.Default.Add, null) },
                         text = { Text(stringResource(R.string.update_plan)) }

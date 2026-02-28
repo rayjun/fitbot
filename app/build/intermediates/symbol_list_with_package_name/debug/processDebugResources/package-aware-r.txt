@@ -1022,11 +1022,15 @@ string current_plan
 string current_tag
 string default_error_message
 string default_popup_window_title
+string dialog_cancel
 string dropdown_menu
+string finish_session
 string finish_workout
 string heatmap_title
 string in_progress
 string indeterminate
+string lang_en
+string lang_zh
 string logout
 string logout_success
 string m3c_bottom_sheet_collapse_description
@@ -1106,6 +1110,7 @@ string save_set
 string search_menu_title
 string selected
 string session_history
+string session_progress
 string settings_dark_mode
 string settings_general
 string settings_language
@@ -1115,6 +1120,7 @@ string tab
 string template_percent
 string tooltip_description
 string tooltip_label
+string training_session
 string update_plan
 string weight_kg
 style AlertDialog_AppCompat
@@ -1527,3 +1533,4 @@ styleable Toolbar android_gravity android_minHeight buttonGravity collapseConten
 styleable View android_theme android_focusable paddingEnd paddingStart theme
 styleable ViewBackgroundHelper android_background backgroundTint backgroundTintMode
 styleable ViewStubCompat android_id android_layout android_inflatedId
+xml locales_config
