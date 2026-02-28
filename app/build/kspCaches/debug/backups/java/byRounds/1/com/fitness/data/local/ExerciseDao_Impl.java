@@ -162,6 +162,59 @@ public final class ExerciseDao_Impl implements ExerciseDao {
     }, $completion);
   }
 
+  @Override
+  public Object getSetsSinceDate(final String date,
+      final Continuation<? super List<SetEntity>> $completion) {
+    final String _sql = "SELECT * FROM exercise_sets WHERE date >= ? ORDER BY date ASC";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
+    int _argIndex = 1;
+    _statement.bindString(_argIndex, date);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<SetEntity>>() {
+      @Override
+      @NonNull
+      public List<SetEntity> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfDate = CursorUtil.getColumnIndexOrThrow(_cursor, "date");
+          final int _cursorIndexOfSessionId = CursorUtil.getColumnIndexOrThrow(_cursor, "sessionId");
+          final int _cursorIndexOfExerciseName = CursorUtil.getColumnIndexOrThrow(_cursor, "exerciseName");
+          final int _cursorIndexOfReps = CursorUtil.getColumnIndexOrThrow(_cursor, "reps");
+          final int _cursorIndexOfWeight = CursorUtil.getColumnIndexOrThrow(_cursor, "weight");
+          final int _cursorIndexOfTimestamp = CursorUtil.getColumnIndexOrThrow(_cursor, "timestamp");
+          final int _cursorIndexOfTimeStr = CursorUtil.getColumnIndexOrThrow(_cursor, "timeStr");
+          final List<SetEntity> _result = new ArrayList<SetEntity>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final SetEntity _item;
+            final long _tmpId;
+            _tmpId = _cursor.getLong(_cursorIndexOfId);
+            final String _tmpDate;
+            _tmpDate = _cursor.getString(_cursorIndexOfDate);
+            final String _tmpSessionId;
+            _tmpSessionId = _cursor.getString(_cursorIndexOfSessionId);
+            final String _tmpExerciseName;
+            _tmpExerciseName = _cursor.getString(_cursorIndexOfExerciseName);
+            final int _tmpReps;
+            _tmpReps = _cursor.getInt(_cursorIndexOfReps);
+            final double _tmpWeight;
+            _tmpWeight = _cursor.getDouble(_cursorIndexOfWeight);
+            final long _tmpTimestamp;
+            _tmpTimestamp = _cursor.getLong(_cursorIndexOfTimestamp);
+            final String _tmpTimeStr;
+            _tmpTimeStr = _cursor.getString(_cursorIndexOfTimeStr);
+            _item = new SetEntity(_tmpId,_tmpDate,_tmpSessionId,_tmpExerciseName,_tmpReps,_tmpWeight,_tmpTimestamp,_tmpTimeStr);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
   @NonNull
   public static List<Class<?>> getRequiredConverters() {
     return Collections.emptyList();

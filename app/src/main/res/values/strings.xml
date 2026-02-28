@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">Fitness App</string>
+    <string name="nav_library">Library</string>
+    <string name="nav_plans">Plans</string>
+    <string name="nav_profile">Profile</string>
+    
+    <!-- Library Screen -->
+    <string name="cloud_connect">Connect Cloud</string>
+    <string name="cloud_connected">Cloud Connected</string>
+    <string name="cloud_failed">Connection Failed: %1$s</string>
+    <string name="category_all">All</string>
+    
+    <!-- Plans Screen -->
+    <string name="current_plan">Current Training Plan</string>
+    <string name="plan_history">Plan History Backup</string>
+    <string name="no_plan">No plan yet, click below to create</string>
+    <string name="update_plan">Update Plan</string>
+    <string name="plan_version">Version: v%1$d</string>
+    <string name="plan_exercises">Exercises: %1$s</string>
+    <string name="plan_created_at">Created at: %1$s</string>
+    <string name="current_tag">Current</string>
+    
+    <!-- Profile Screen -->
+    <string name="profile_title">Profile</string>
+    <string name="quote">Keep going!</string>
+    <string name="heatmap_title">Workout Heatmap (90 days)</string>
+    <string name="settings_general">General Settings</string>
+    <string name="settings_dark_mode">Dark Mode</string>
+    <string name="settings_language">Language</string>
+    <string name="logout">Logout</string>
+    <string name="logout_success">Logged out</string>
+    <string name="cloud_success">Cloud connected</string>
+    
+    <!-- Workout Screen -->
+    <string name="weight_kg">Weight (kg)</string>
+    <string name="reps">Reps</string>
+    <string name="save_set">Save this set</string>
+    <string name="session_history">Current Session History:</string>
+    <string name="finish_workout">Finish workout and sync</string>
+</resources>

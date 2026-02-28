@@ -1,2 +1,32 @@
 R_DEF: Internal format may change without notice
 local
+string app_name
+string category_all
+string cloud_connect
+string cloud_connected
+string cloud_failed
+string cloud_success
+string current_plan
+string current_tag
+string finish_workout
+string heatmap_title
+string logout
+string logout_success
+string nav_library
+string nav_plans
+string nav_profile
+string no_plan
+string plan_created_at
+string plan_exercises
+string plan_history
+string plan_version
+string profile_title
+string quote
+string reps
+string save_set
+string session_history
+string settings_dark_mode
+string settings_general
+string settings_language
+string update_plan
+string weight_kg

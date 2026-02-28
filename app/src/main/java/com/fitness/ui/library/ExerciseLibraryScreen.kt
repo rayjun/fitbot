@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,6 +23,7 @@ import coil.compose.AsyncImage
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.request.ImageRequest
+import com.fitness.R
 import com.fitness.data.ExerciseProvider
 import com.fitness.model.Exercise
 
@@ -32,9 +34,15 @@ fun ExerciseLibraryScreen(
     onConnectCloud: () -> Unit,
     onExerciseClick: (Exercise) -> Unit
 ) {
-    var selectedCategory by remember { mutableStateOf("全部") }
+    val allLabel = stringResource(R.string.category_all)
+    var selectedCategory by remember { mutableStateOf(allLabel) }
     
-    val filteredExercises = if (selectedCategory == "全部") {
+    // 监听语言变化，重置 selectedCategory 为正确的 "全部" 翻译
+    LaunchedEffect(allLabel) {
+        selectedCategory = allLabel
+    }
+
+    val filteredExercises = if (selectedCategory == allLabel) {
         ExerciseProvider.exercises
     } else {
         ExerciseProvider.exercises.filter { it.category == selectedCategory }
@@ -43,12 +51,12 @@ fun ExerciseLibraryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { }, 
+                title = { Text(stringResource(R.string.nav_library)) }, 
                 actions = {
                     IconButton(onClick = onConnectCloud) {
                         Icon(
                             imageVector = if (isCloudConnected) Icons.Default.CloudDone else Icons.Default.Cloud,
-                            contentDescription = "连接云盘",
+                            contentDescription = stringResource(R.string.cloud_connect),
                             tint = if (isCloudConnected) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface
                         )
                     }
@@ -57,15 +65,17 @@ fun ExerciseLibraryScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
+            val categories = listOf(allLabel) + ExerciseProvider.exercises.map { it.category }.distinct()
+
             // 顶部部位筛选 Tab
             ScrollableTabRow(
-                selectedTabIndex = ExerciseProvider.categories.indexOf(selectedCategory),
+                selectedTabIndex = categories.indexOf(selectedCategory).coerceAtLeast(0),
                 edgePadding = 16.dp,
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.primary,
                 divider = {}
             ) {
-                ExerciseProvider.categories.forEachIndexed { index, category ->
+                categories.forEach { category ->
                     Tab(
                         selected = selectedCategory == category,
                         onClick = { selectedCategory = category },

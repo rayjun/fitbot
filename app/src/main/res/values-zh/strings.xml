@@ -1,0 +1,40 @@
+<resources>
+    <string name="app_name">健身达人</string>
+    <string name="nav_library">动作库</string>
+    <string name="nav_plans">训练计划</string>
+    <string name="nav_profile">个人中心</string>
+    
+    <!-- Library Screen -->
+    <string name="cloud_connect">连接云盘</string>
+    <string name="cloud_connected">云盘已连接</string>
+    <string name="cloud_failed">连接失败: %1$s</string>
+    <string name="category_all">全部</string>
+    
+    <!-- Plans Screen -->
+    <string name="current_plan">当前训练计划</string>
+    <string name="plan_history">计划历史备份</string>
+    <string name="no_plan">暂无计划，请点击下方按钮创建</string>
+    <string name="update_plan">更新计划</string>
+    <string name="plan_version">版本: v%1$d</string>
+    <string name="plan_exercises">包含动作: %1$s</string>
+    <string name="plan_created_at">创建于: %1$s</string>
+    <string name="current_tag">当前</string>
+    
+    <!-- Profile Screen -->
+    <string name="profile_title">个人中心</string>
+    <string name="quote">坚持就是胜利</string>
+    <string name="heatmap_title">训练热力图 (近 90 天)</string>
+    <string name="settings_general">通用设置</string>
+    <string name="settings_dark_mode">深色模式</string>
+    <string name="settings_language">语言 (Language)</string>
+    <string name="logout">退出登录</string>
+    <string name="logout_success">已退出登录</string>
+    <string name="cloud_success">云盘连接成功</string>
+    
+    <!-- Workout Screen -->
+    <string name="weight_kg">重量 (kg)</string>
+    <string name="reps">次数</string>
+    <string name="save_set">保存此组记录</string>
+    <string name="session_history">当前动作组数记录:</string>
+    <string name="finish_workout">完成训练并同步</string>
+</resources>
