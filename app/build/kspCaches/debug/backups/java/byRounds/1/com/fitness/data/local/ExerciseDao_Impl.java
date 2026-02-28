@@ -40,7 +40,7 @@ public final class ExerciseDao_Impl implements ExerciseDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR REPLACE INTO `exercise_sets` (`id`,`date`,`sessionId`,`exerciseName`,`reps`,`weight`,`timestamp`,`timeStr`) VALUES (nullif(?, 0),?,?,?,?,?,?,?)";
+        return "INSERT OR REPLACE INTO `exercise_sets` (`id`,`date`,`sessionId`,`exerciseName`,`reps`,`weight`,`timestamp`,`timeStr`,`remoteId`) VALUES (nullif(?, 0),?,?,?,?,?,?,?,?)";
       }
 
       @Override
@@ -54,6 +54,7 @@ public final class ExerciseDao_Impl implements ExerciseDao {
         statement.bindDouble(6, entity.getWeight());
         statement.bindLong(7, entity.getTimestamp());
         statement.bindString(8, entity.getTimeStr());
+        statement.bindString(9, entity.getRemoteId());
       }
     };
     this.__preparedStmtOfDeleteSet = new SharedSQLiteStatement(__db) {
@@ -131,6 +132,7 @@ public final class ExerciseDao_Impl implements ExerciseDao {
           final int _cursorIndexOfWeight = CursorUtil.getColumnIndexOrThrow(_cursor, "weight");
           final int _cursorIndexOfTimestamp = CursorUtil.getColumnIndexOrThrow(_cursor, "timestamp");
           final int _cursorIndexOfTimeStr = CursorUtil.getColumnIndexOrThrow(_cursor, "timeStr");
+          final int _cursorIndexOfRemoteId = CursorUtil.getColumnIndexOrThrow(_cursor, "remoteId");
           final List<SetEntity> _result = new ArrayList<SetEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final SetEntity _item;
@@ -150,7 +152,9 @@ public final class ExerciseDao_Impl implements ExerciseDao {
             _tmpTimestamp = _cursor.getLong(_cursorIndexOfTimestamp);
             final String _tmpTimeStr;
             _tmpTimeStr = _cursor.getString(_cursorIndexOfTimeStr);
-            _item = new SetEntity(_tmpId,_tmpDate,_tmpSessionId,_tmpExerciseName,_tmpReps,_tmpWeight,_tmpTimestamp,_tmpTimeStr);
+            final String _tmpRemoteId;
+            _tmpRemoteId = _cursor.getString(_cursorIndexOfRemoteId);
+            _item = new SetEntity(_tmpId,_tmpDate,_tmpSessionId,_tmpExerciseName,_tmpReps,_tmpWeight,_tmpTimestamp,_tmpTimeStr,_tmpRemoteId);
             _result.add(_item);
           }
           return _result;
@@ -184,6 +188,7 @@ public final class ExerciseDao_Impl implements ExerciseDao {
           final int _cursorIndexOfWeight = CursorUtil.getColumnIndexOrThrow(_cursor, "weight");
           final int _cursorIndexOfTimestamp = CursorUtil.getColumnIndexOrThrow(_cursor, "timestamp");
           final int _cursorIndexOfTimeStr = CursorUtil.getColumnIndexOrThrow(_cursor, "timeStr");
+          final int _cursorIndexOfRemoteId = CursorUtil.getColumnIndexOrThrow(_cursor, "remoteId");
           final List<SetEntity> _result = new ArrayList<SetEntity>(_cursor.getCount());
           while (_cursor.moveToNext()) {
             final SetEntity _item;
@@ -203,7 +208,35 @@ public final class ExerciseDao_Impl implements ExerciseDao {
             _tmpTimestamp = _cursor.getLong(_cursorIndexOfTimestamp);
             final String _tmpTimeStr;
             _tmpTimeStr = _cursor.getString(_cursorIndexOfTimeStr);
-            _item = new SetEntity(_tmpId,_tmpDate,_tmpSessionId,_tmpExerciseName,_tmpReps,_tmpWeight,_tmpTimestamp,_tmpTimeStr);
+            final String _tmpRemoteId;
+            _tmpRemoteId = _cursor.getString(_cursorIndexOfRemoteId);
+            _item = new SetEntity(_tmpId,_tmpDate,_tmpSessionId,_tmpExerciseName,_tmpReps,_tmpWeight,_tmpTimestamp,_tmpTimeStr,_tmpRemoteId);
+            _result.add(_item);
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object getAllRemoteIds(final Continuation<? super List<String>> $completion) {
+    final String _sql = "SELECT remoteId FROM exercise_sets";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<List<String>>() {
+      @Override
+      @NonNull
+      public List<String> call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final List<String> _result = new ArrayList<String>(_cursor.getCount());
+          while (_cursor.moveToNext()) {
+            final String _item;
+            _item = _cursor.getString(0);
             _result.add(_item);
           }
           return _result;

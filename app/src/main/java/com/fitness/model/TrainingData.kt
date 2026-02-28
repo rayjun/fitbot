@@ -25,5 +25,6 @@ data class ExerciseRecord(
 data class SetRecord(
     @SerializedName("reps") val reps: Int,
     @SerializedName("weight") val weight: Double,
-    @SerializedName("time") val time: String
+    @SerializedName("time") val time: String,
+    @SerializedName("remoteId") val remoteId: String
 )

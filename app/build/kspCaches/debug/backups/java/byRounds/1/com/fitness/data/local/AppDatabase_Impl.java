@@ -33,13 +33,13 @@ public final class AppDatabase_Impl extends AppDatabase {
   @Override
   @NonNull
   protected SupportSQLiteOpenHelper createOpenHelper(@NonNull final DatabaseConfiguration config) {
-    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(2) {
+    final SupportSQLiteOpenHelper.Callback _openCallback = new RoomOpenHelper(config, new RoomOpenHelper.Delegate(3) {
       @Override
       public void createAllTables(@NonNull final SupportSQLiteDatabase db) {
-        db.execSQL("CREATE TABLE IF NOT EXISTS `exercise_sets` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `sessionId` TEXT NOT NULL, `exerciseName` TEXT NOT NULL, `reps` INTEGER NOT NULL, `weight` REAL NOT NULL, `timestamp` INTEGER NOT NULL, `timeStr` TEXT NOT NULL)");
+        db.execSQL("CREATE TABLE IF NOT EXISTS `exercise_sets` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `sessionId` TEXT NOT NULL, `exerciseName` TEXT NOT NULL, `reps` INTEGER NOT NULL, `weight` REAL NOT NULL, `timestamp` INTEGER NOT NULL, `timeStr` TEXT NOT NULL, `remoteId` TEXT NOT NULL)");
         db.execSQL("CREATE TABLE IF NOT EXISTS `training_plans` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `exercisesJson` TEXT NOT NULL, `isCurrent` INTEGER NOT NULL, `version` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL)");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0c4bf72b762ec1a0e9106f92fb878d52')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '582bdc8ee970998d6abaa5e510f68e63')");
       }
 
       @Override
@@ -89,7 +89,7 @@ public final class AppDatabase_Impl extends AppDatabase {
       @NonNull
       public RoomOpenHelper.ValidationResult onValidateSchema(
           @NonNull final SupportSQLiteDatabase db) {
-        final HashMap<String, TableInfo.Column> _columnsExerciseSets = new HashMap<String, TableInfo.Column>(8);
+        final HashMap<String, TableInfo.Column> _columnsExerciseSets = new HashMap<String, TableInfo.Column>(9);
         _columnsExerciseSets.put("id", new TableInfo.Column("id", "INTEGER", true, 1, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsExerciseSets.put("date", new TableInfo.Column("date", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsExerciseSets.put("sessionId", new TableInfo.Column("sessionId", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
@@ -98,6 +98,7 @@ public final class AppDatabase_Impl extends AppDatabase {
         _columnsExerciseSets.put("weight", new TableInfo.Column("weight", "REAL", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsExerciseSets.put("timestamp", new TableInfo.Column("timestamp", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsExerciseSets.put("timeStr", new TableInfo.Column("timeStr", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
+        _columnsExerciseSets.put("remoteId", new TableInfo.Column("remoteId", "TEXT", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysExerciseSets = new HashSet<TableInfo.ForeignKey>(0);
         final HashSet<TableInfo.Index> _indicesExerciseSets = new HashSet<TableInfo.Index>(0);
         final TableInfo _infoExerciseSets = new TableInfo("exercise_sets", _columnsExerciseSets, _foreignKeysExerciseSets, _indicesExerciseSets);
@@ -125,7 +126,7 @@ public final class AppDatabase_Impl extends AppDatabase {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "0c4bf72b762ec1a0e9106f92fb878d52", "3b84175c1df6e9391545218c33715805");
+    }, "582bdc8ee970998d6abaa5e510f68e63", "49570a51ea01c0029ff0909b6477e3db");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;

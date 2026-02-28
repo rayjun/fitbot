@@ -3,11 +3,11 @@ package com.fitness.sync
 import com.google.api.client.http.ByteArrayContent
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.model.File
+import java.io.ByteArrayOutputStream
 import java.io.IOException
 
 /**
  * 封装 Google Drive REST API 操作。
- * 假设 driveService 已经过认证。
  */
 class DriveServiceHelper(private val driveService: Drive) {
 
@@ -37,6 +37,24 @@ class DriveServiceHelper(private val driveService: Drive) {
             .setFields("id")
             .execute()
         return newFolder.id
+    }
+
+    /**
+     * 下载文件内容
+     */
+    @Throws(IOException::class)
+    fun downloadFile(folderId: String, fileName: String): String? {
+        val query = "name = '$fileName' and '$folderId' in parents and trashed = false"
+        val result = driveService.files().list()
+            .setQ(query)
+            .setSpaces("drive")
+            .setFields("files(id, name)")
+            .execute()
+
+        val file = result.files.firstOrNull() ?: return null
+        val outputStream = ByteArrayOutputStream()
+        driveService.files().get(file.id).executeMediaAndDownloadTo(outputStream)
+        return outputStream.toString()
     }
 
     /**
