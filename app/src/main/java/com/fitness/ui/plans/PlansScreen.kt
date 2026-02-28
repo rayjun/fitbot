@@ -34,7 +34,6 @@ fun PlansScreen(
     workoutViewModel: WorkoutViewModel,
     onStartPlan: (Int) -> Unit
 ) {
-    val currentPlan by viewModel.currentPlan.collectAsStateWithLifecycle()
     val currentRoutine by viewModel.currentRoutine.collectAsStateWithLifecycle()
     val allPlans by viewModel.allPlans.collectAsStateWithLifecycle()
     var showHistory by remember { mutableStateOf(false) }
