@@ -11,6 +11,7 @@ import com.fitness.data.local.SetEntity
 import com.fitness.sync.SyncWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -20,12 +21,26 @@ class WorkoutViewModel(private val context: Context) : ViewModel() {
     private val db = AppDatabase.getInstance(context)
     private val dao = db.exerciseDao()
 
-    private val _currentSessionId = "Session_${System.currentTimeMillis()}"
+    private var _currentSessionId = "Session_${System.currentTimeMillis()}"
     private val _setsInSession = MutableStateFlow<List<SetEntity>>(emptyList())
     val setsInSession: StateFlow<List<SetEntity>> = _setsInSession
 
+    // 被完成的动作名称集合
+    val completedExercises = _setsInSession.map { sets ->
+        sets.map { it.exerciseName }.distinct()
+    }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), emptyList())
+
     private val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     private val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+
+    init {
+        refreshSets()
+    }
+
+    fun startNewSession() {
+        _currentSessionId = "Session_${System.currentTimeMillis()}"
+        _setsInSession.value = emptyList()
+    }
 
     fun addSet(exerciseName: String, weight: Double, reps: Int) {
         val now = System.currentTimeMillis()
@@ -45,7 +60,7 @@ class WorkoutViewModel(private val context: Context) : ViewModel() {
         }
     }
 
-    private fun refreshSets() {
+    fun refreshSets() {
         viewModelScope.launch {
             _setsInSession.value = dao.getSetsByDate(dateFormatter.format(Date()))
                 .filter { it.sessionId == _currentSessionId }
@@ -58,7 +73,6 @@ class WorkoutViewModel(private val context: Context) : ViewModel() {
             .setInputData(Data.Builder().putString("SYNC_DATE", dateFormatter.format(Date())).build())
             .build()
         WorkManager.getInstance(context).enqueue(syncRequest)
+        // 完成后不一定重置，让 UI 处理跳转
     }
 }
-
-// 修改数据库单例以支持这种访问方式

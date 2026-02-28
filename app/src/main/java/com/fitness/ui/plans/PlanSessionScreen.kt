@@ -18,17 +18,30 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fitness.data.ExerciseProvider
 import com.fitness.model.Exercise
+import com.fitness.ui.workout.WorkoutViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlanSessionScreen(
     planId: Int,
-    viewModel: PlanViewModel,
+    planViewModel: PlanViewModel,
+    workoutViewModel: WorkoutViewModel,
     onExerciseClick: (Exercise) -> Unit,
     onBack: () -> Unit
 ) {
-    val currentPlan by viewModel.currentPlan.collectAsStateWithLifecycle()
+    val currentPlan by planViewModel.currentPlan.collectAsStateWithLifecycle()
+    val completedExercises by workoutViewModel.completedExercises.collectAsStateWithLifecycle(emptyList())
     
+    // 进入此页面自动启动新训练会话
+    LaunchedEffect(Unit) {
+        workoutViewModel.startNewSession()
+    }
+
+    // 每次从 Workout 界面返回，都刷新一下 session 数据
+    LaunchedEffect(Unit) {
+        workoutViewModel.refreshSets()
+    }
+
     val exercises = remember(currentPlan) {
         val ids = currentPlan?.exercisesJson?.split(",") ?: emptyList()
         ids.mapNotNull { id -> ExerciseProvider.exercises.find { it.id == id.trim() } }
@@ -37,7 +50,7 @@ fun PlanSessionScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(currentPlan?.name ?: "Loading...") },
+                title = { Text(currentPlan?.name ?: "Training Session") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
@@ -52,23 +65,32 @@ fun PlanSessionScreen(
             
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(exercises) { exercise ->
+                    val isCompleted = completedExercises.contains(exercise.name)
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
                             .clickable { onExerciseClick(exercise) },
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                            containerColor = if (isCompleted) 
+                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) 
+                                else MaterialTheme.colorScheme.surfaceVariant
                         )
                     ) {
                         ListItem(
-                            headlineContent = { Text(exercise.name, fontWeight = FontWeight.Bold) },
+                            headlineContent = { 
+                                Text(
+                                    exercise.name, 
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                ) 
+                            },
                             supportingContent = { Text(exercise.targetMuscle) },
                             trailingContent = {
                                 Icon(
                                     Icons.Default.CheckCircle, 
                                     contentDescription = null,
-                                    tint = Color.Gray.copy(alpha = 0.3f) // TODO: track completion
+                                    tint = if (isCompleted) MaterialTheme.colorScheme.primary else Color.Gray.copy(alpha = 0.3f)
                                 )
                             }
                         )
@@ -77,7 +99,10 @@ fun PlanSessionScreen(
             }
             
             Button(
-                onClick = onBack,
+                onClick = {
+                    workoutViewModel.finishWorkout()
+                    onBack()
+                },
                 modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
             ) {
                 Text("Finish Session")

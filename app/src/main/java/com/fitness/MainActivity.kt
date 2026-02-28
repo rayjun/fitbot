@@ -174,7 +174,8 @@ class MainActivity : ComponentActivity() {
                             val planId = backStackEntry.arguments?.getInt("planId") ?: 0
                             PlanSessionScreen(
                                 planId = planId,
-                                viewModel = planViewModel,
+                                planViewModel = planViewModel,
+                                workoutViewModel = workoutViewModel,
                                 onExerciseClick = { exercise ->
                                     navController.navigate(Screen.Workout.createRoute(exercise.name))
                                 },
