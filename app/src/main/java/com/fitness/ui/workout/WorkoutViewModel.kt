@@ -76,4 +76,8 @@ class WorkoutViewModel(private val context: Context) : ViewModel() {
         WorkManager.getInstance(context).enqueue(syncRequest)
         // 完成后不一定重置，让 UI 处理跳转
     }
+
+    suspend fun hasCompletedExercisesOnDate(dateStr: String): Boolean {
+        return dao.getSetsByDate(dateStr).isNotEmpty()
+    }
 }
