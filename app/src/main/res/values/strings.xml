@@ -23,7 +23,7 @@
     <!-- Profile Screen -->
     <string name="profile_title">Profile</string>
     <string name="quote">Keep going!</string>
-    <string name="heatmap_title">Workout Heatmap (90 days)</string>
+    <string name="heatmap_title">Workout Heatmap</string>
     <string name="settings_general">General Settings</string>
     <string name="settings_dark_mode">Dark Mode</string>
     <string name="settings_language">Language</string>

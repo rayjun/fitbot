@@ -23,7 +23,7 @@
     <!-- Profile Screen -->
     <string name="profile_title">个人中心</string>
     <string name="quote">坚持就是胜利</string>
-    <string name="heatmap_title">训练热力图 (近 90 天)</string>
+    <string name="heatmap_title">训练热力图</string>
     <string name="settings_general">通用设置</string>
     <string name="settings_dark_mode">深色模式</string>
     <string name="settings_language">语言 (Language)</string>

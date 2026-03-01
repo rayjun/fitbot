@@ -397,7 +397,7 @@
     <string name="exercises_scheduled">%1$d exercises scheduled.</string>
     <string name="finish_session">Finish Session</string>
     <string name="finish_workout">Finish workout and sync</string>
-    <string name="heatmap_title">Workout Heatmap (90 days)</string>
+    <string name="heatmap_title">Workout Heatmap</string>
     <string name="in_progress">In progress</string>
     <string name="indeterminate">Partially checked</string>
     <string name="is_rest_day">Is Rest Day?</string>
