@@ -1,5 +1,7 @@
 package com.fitness.ui.library
 
+import androidx.compose.animation.core.*
+import androidx.compose.ui.draw.rotate
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -8,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,6 +34,7 @@ import com.fitness.model.Exercise
 @Composable
 fun ExerciseLibraryScreen(
     isCloudConnected: Boolean,
+    isSyncing: Boolean,
     onConnectCloud: () -> Unit,
     onExerciseClick: (Exercise) -> Unit
 ) {
@@ -48,17 +52,37 @@ fun ExerciseLibraryScreen(
         ExerciseProvider.exercises.filter { it.category == selectedCategory }
     }
 
+    val infiniteTransition = rememberInfiniteTransition(label = "sync")
+    val rotation by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "rotation"
+    )
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.nav_library)) }, 
                 actions = {
                     IconButton(onClick = onConnectCloud) {
-                        Icon(
-                            imageVector = if (isCloudConnected) Icons.Default.CloudDone else Icons.Default.Cloud,
-                            contentDescription = stringResource(R.string.cloud_connect),
-                            tint = if (isCloudConnected) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface
-                        )
+                        if (isSyncing) {
+                            Icon(
+                                imageVector = Icons.Default.Sync,
+                                contentDescription = "Syncing",
+                                tint = Color(0xFFFFA000), // Orange
+                                modifier = Modifier.rotate(rotation)
+                            )
+                        } else {
+                            Icon(
+                                imageVector = if (isCloudConnected) Icons.Default.CloudDone else Icons.Default.Cloud,
+                                contentDescription = stringResource(R.string.cloud_connect),
+                                tint = if (isCloudConnected) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
                 }
             )

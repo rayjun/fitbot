@@ -23,6 +23,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.ExistingWorkPolicy
+import androidx.compose.runtime.livedata.observeAsState
 import com.fitness.ui.library.ExerciseLibraryScreen
 import com.fitness.ui.navigation.Screen
 import com.fitness.ui.plans.PlanViewModel
@@ -62,6 +67,11 @@ class MainActivity : AppCompatActivity() {
             FitnessTheme(darkTheme = isDark) {
                 val navController = rememberNavController()
                 val context = LocalContext.current
+                
+                // WorkManager Sync State
+                val workManager = remember { WorkManager.getInstance(context) }
+                val syncWorkInfos by workManager.getWorkInfosForUniqueWorkLiveData("FullSync").observeAsState()
+                val isSyncing = syncWorkInfos?.any { it.state == WorkInfo.State.RUNNING } == true
                 
                 // Google Login State
                 var lastAccount by remember { 
@@ -151,13 +161,21 @@ class MainActivity : AppCompatActivity() {
                         composable(Screen.Library.route) {
                             ExerciseLibraryScreen(
                                 isCloudConnected = lastAccount != null,
+                                isSyncing = isSyncing,
                                 onConnectCloud = {
-                                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                        .requestEmail()
-                                        .requestScopes(Scope(DriveScopes.DRIVE_FILE))
-                                        .build()
-                                    val client = GoogleSignIn.getClient(this@MainActivity, gso)
-                                    googleSignInLauncher.launch(client.signInIntent)
+                                    if (lastAccount == null) {
+                                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                            .requestEmail()
+                                            .requestScopes(Scope(DriveScopes.DRIVE_FILE))
+                                            .build()
+                                        val client = GoogleSignIn.getClient(this@MainActivity, gso)
+                                        googleSignInLauncher.launch(client.signInIntent)
+                                    } else {
+                                        // Manual trigger sync
+                                        val syncRequest = OneTimeWorkRequestBuilder<com.fitness.sync.SyncWorker>().build()
+                                        workManager.enqueueUniqueWork("FullSync", ExistingWorkPolicy.REPLACE, syncRequest)
+                                        Toast.makeText(context, "Sync Started", Toast.LENGTH_SHORT).show()
+                                    }
                                 },
                                 onExerciseClick = { exercise ->
                                     navController.navigate(Screen.Workout.createRoute(exercise.name))
