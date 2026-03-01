@@ -36,7 +36,11 @@ class SyncWorker(
         
         // 1. 获取已登录的 Google 账户
         val account = GoogleSignIn.getLastSignedInAccount(applicationContext)
-            ?: return@withContext Result.failure()
+        
+        // 如果未登录，直接返回 Success（本地数据已安全存在 Room 中），不触发同步
+        if (account == null) {
+            return@withContext Result.success()
+        }
 
         // 2. 初始化 Drive 服务
         val credential = GoogleAccountCredential.usingOAuth2(

@@ -11,6 +11,9 @@ interface ExerciseDao {
     suspend fun insertSet(set: SetEntity)
 
     @Query("SELECT * FROM exercise_sets WHERE date = :date ORDER BY timestamp ASC")
+    fun getSetsByDateFlow(date: String): kotlinx.coroutines.flow.Flow<List<SetEntity>>
+
+    @Query("SELECT * FROM exercise_sets WHERE date = :date ORDER BY timestamp ASC")
     suspend fun getSetsByDate(date: String): List<SetEntity>
 
     @Query("SELECT * FROM exercise_sets WHERE date >= :date ORDER BY date ASC")

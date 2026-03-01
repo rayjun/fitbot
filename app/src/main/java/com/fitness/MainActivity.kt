@@ -197,6 +197,7 @@ class MainActivity : AppCompatActivity() {
                                 viewModel = planViewModel,
                                 workoutViewModel = workoutViewModel,
                                 onStartPlan = { dayOfWeek ->
+                                    workoutViewModel.startNewSession()
                                     navController.navigate(Screen.PlanSession.createRoute(dayOfWeek))
                                 }
                             )

@@ -94,18 +94,6 @@ fun WorkoutRecordingScreen(
                     )
                 }
             }
-
-            // 完成按钮
-            Button(
-                onClick = {
-                    viewModel.finishWorkout()
-                    onFinished()
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
-            ) {
-                Text(stringResource(R.string.finish_workout))
-            }
         }
     }
 }

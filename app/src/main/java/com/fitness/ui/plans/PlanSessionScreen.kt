@@ -34,16 +34,6 @@ fun PlanSessionScreen(
     val currentRoutine by planViewModel.currentRoutine.collectAsStateWithLifecycle()
     val setsInSession by workoutViewModel.setsInSession.collectAsStateWithLifecycle()
     
-    // 进入此页面自动启动新训练会话
-    LaunchedEffect(Unit) {
-        workoutViewModel.startNewSession()
-    }
-
-    // 每次从 Workout 界面返回，都刷新一下 session 数据
-    LaunchedEffect(Unit) {
-        workoutViewModel.refreshSets()
-    }
-
     val plannedExercises = remember(currentRoutine, dayOfWeek) {
         currentRoutine.find { it.dayOfWeek == dayOfWeek }?.exercises ?: emptyList()
     }
@@ -104,16 +94,6 @@ fun PlanSessionScreen(
                         }
                     }
                 }
-            }
-            
-            Button(
-                onClick = {
-                    workoutViewModel.finishWorkout()
-                    onBack()
-                },
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
-            ) {
-                Text(stringResource(com.fitness.R.string.finish_session))
             }
         }
     }

@@ -9,10 +9,7 @@ import androidx.work.WorkManager
 import com.fitness.data.local.AppDatabase
 import com.fitness.data.local.SetEntity
 import com.fitness.sync.SyncWorker
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -23,32 +20,31 @@ class WorkoutViewModel(private val context: Context) : ViewModel() {
     private val dao = db.exerciseDao()
 
     private var _currentSessionId = "Session_${System.currentTimeMillis()}"
-    private val _setsInSession = MutableStateFlow<List<SetEntity>>(emptyList())
-    val setsInSession: StateFlow<List<SetEntity>> = _setsInSession
-
-    // 被完成的动作名称集合
-    val completedExercises = _setsInSession.map { sets ->
-        sets.map { it.exerciseName }.distinct()
-    }.stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), emptyList())
-
+    
     private val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
     private val timeFormatter = SimpleDateFormat("HH:mm", Locale.getDefault())
 
-    init {
-        refreshSets()
-    }
+    // 使用 FlatMapLatest 动态观察当前日期的数据库流，并按会话 ID 过滤
+    val setsInSession: StateFlow<List<SetEntity>> = dao.getSetsByDateFlow(dateFormatter.format(Date()))
+        .map { list -> list.filter { it.sessionId == _currentSessionId } }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // 衍生状态：已完成的动作 ID 集合
+    val completedExercises: StateFlow<List<String>> = setsInSession.map { sets ->
+        sets.map { it.exerciseName }.distinct()
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun startNewSession() {
         _currentSessionId = "Session_${System.currentTimeMillis()}"
-        _setsInSession.value = emptyList()
+        // Flow 会自动刷新，无需手动清空 _setsInSession.value
     }
 
-    fun addSet(exerciseName: String, weight: Double, reps: Int) {
+    fun addSet(exerciseId: String, weight: Double, reps: Int) {
         val now = System.currentTimeMillis()
         val set = SetEntity(
             date = dateFormatter.format(Date(now)),
             sessionId = _currentSessionId,
-            exerciseName = exerciseName,
+            exerciseName = exerciseId, // 存储 ID
             reps = reps,
             weight = weight,
             timestamp = now,
@@ -56,25 +52,19 @@ class WorkoutViewModel(private val context: Context) : ViewModel() {
         )
 
         viewModelScope.launch {
+            // 1. 立即保存到本地数据库
             dao.insertSet(set)
-            refreshSets()
+            
+            // 2. 自动触发后台同步任务（WorkManager 会自动处理合并与网络检查）
+            val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
+                .setInputData(Data.Builder().putString("SYNC_DATE", dateFormatter.format(Date(now))).build())
+                .build()
+            WorkManager.getInstance(context).enqueue(syncRequest)
         }
     }
 
     fun refreshSets() {
-        viewModelScope.launch {
-            _setsInSession.value = dao.getSetsByDate(dateFormatter.format(Date()))
-                .filter { it.sessionId == _currentSessionId }
-        }
-    }
-
-    fun finishWorkout() {
-        // 触发同步任务
-        val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
-            .setInputData(Data.Builder().putString("SYNC_DATE", dateFormatter.format(Date())).build())
-            .build()
-        WorkManager.getInstance(context).enqueue(syncRequest)
-        // 完成后不一定重置，让 UI 处理跳转
+        // 由于使用了 Flow，不需要手动 refresh
     }
 
     suspend fun hasCompletedExercisesOnDate(dateStr: String): Boolean {
