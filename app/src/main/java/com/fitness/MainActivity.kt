@@ -178,7 +178,7 @@ class MainActivity : AppCompatActivity() {
                                     }
                                 },
                                 onExerciseClick = { exercise ->
-                                    navController.navigate(Screen.Workout.createRoute(exercise.name))
+                                    navController.navigate(Screen.Workout.createRoute(exercise.id))
                                 }
                             )
                         }
@@ -201,7 +201,7 @@ class MainActivity : AppCompatActivity() {
                                 planViewModel = planViewModel,
                                 workoutViewModel = workoutViewModel,
                                 onExerciseClick = { exercise ->
-                                    navController.navigate(Screen.Workout.createRoute(exercise.name))
+                                    navController.navigate(Screen.Workout.createRoute(exercise.id))
                                 },
                                 onBack = { navController.popBackStack() }
                             )
@@ -230,11 +230,11 @@ class MainActivity : AppCompatActivity() {
                         }
                         composable(
                             route = Screen.Workout.route,
-                            arguments = listOf(navArgument("exerciseName") { type = NavType.StringType })
+                            arguments = listOf(navArgument("exerciseId") { type = NavType.StringType })
                         ) { backStackEntry ->
-                            val exerciseName = backStackEntry.arguments?.getString("exerciseName") ?: ""
+                            val exerciseId = backStackEntry.arguments?.getString("exerciseId") ?: ""
                             WorkoutRecordingScreen(
-                                exerciseName = exerciseName,
+                                exerciseId = exerciseId,
                                 viewModel = workoutViewModel,
                                 onBack = { navController.popBackStack() },
                                 onFinished = { navController.popBackStack() }

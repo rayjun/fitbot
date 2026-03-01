@@ -38,18 +38,13 @@ fun ExerciseLibraryScreen(
     onConnectCloud: () -> Unit,
     onExerciseClick: (Exercise) -> Unit
 ) {
-    val allLabel = stringResource(R.string.category_all)
-    var selectedCategory by remember { mutableStateOf(allLabel) }
-    
-    // 监听语言变化，重置 selectedCategory 为正确的 "全部" 翻译
-    LaunchedEffect(allLabel) {
-        selectedCategory = allLabel
-    }
+    val allLabelRes = R.string.category_all
+    var selectedCategoryRes by remember { mutableIntStateOf(allLabelRes) }
 
-    val filteredExercises = if (selectedCategory == allLabel) {
+    val filteredExercises = if (selectedCategoryRes == allLabelRes) {
         ExerciseProvider.exercises
     } else {
-        ExerciseProvider.exercises.filter { it.category == selectedCategory }
+        ExerciseProvider.exercises.filter { it.categoryRes == selectedCategoryRes }
     }
 
     val infiniteTransition = rememberInfiniteTransition(label = "sync")
@@ -89,23 +84,23 @@ fun ExerciseLibraryScreen(
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            val categories = listOf(allLabel) + ExerciseProvider.exercises.map { it.category }.distinct()
+            val categories = ExerciseProvider.categories
 
             // 顶部部位筛选 Tab
             ScrollableTabRow(
-                selectedTabIndex = categories.indexOf(selectedCategory).coerceAtLeast(0),
+                selectedTabIndex = categories.indexOf(selectedCategoryRes).coerceAtLeast(0),
                 edgePadding = 16.dp,
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.primary,
                 divider = {}
             ) {
-                categories.forEach { category ->
+                categories.forEach { categoryRes ->
                     Tab(
-                        selected = selectedCategory == category,
-                        onClick = { selectedCategory = category },
+                        selected = selectedCategoryRes == categoryRes,
+                        onClick = { selectedCategoryRes = categoryRes },
                         text = { 
                             Text(
-                                text = category,
+                                text = stringResource(categoryRes),
                                 style = MaterialTheme.typography.titleSmall
                             ) 
                         }
@@ -160,14 +155,14 @@ fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
                         )
                         .crossfade(true)
                         .build(),
-                    contentDescription = exercise.name,
+                    contentDescription = stringResource(exercise.nameRes),
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize()
                 )
             }
             
             Text(
-                text = exercise.name,
+                text = stringResource(exercise.nameRes),
                 fontSize = 12.sp,
                 fontWeight = FontWeight.Medium,
                 maxLines = 1,

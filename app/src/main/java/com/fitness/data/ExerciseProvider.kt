@@ -1,82 +1,83 @@
 package com.fitness.data
 
+import com.fitness.R
 import com.fitness.model.Exercise
 
 object ExerciseProvider {
     val exercises = listOf(
         Exercise(
             id = "benchpress",
-            name = "杠铃卧推",
+            nameRes = R.string.ex_benchpress_name,
             gifResPath = "exercises/benchpress.gif",
-            description = "仰卧在凳子上，垂直推起杠铃。",
-            targetMuscle = "胸大肌",
-            category = "胸部"
+            descriptionRes = R.string.ex_benchpress_desc,
+            targetMuscleRes = R.string.muscle_chest,
+            categoryRes = R.string.cat_chest
         ),
         Exercise(
             id = "pushup",
-            name = "俯卧撑",
+            nameRes = R.string.ex_pushup_name,
             gifResPath = "exercises/pushup.gif",
-            description = "标准的自重胸部训练。",
-            targetMuscle = "胸大肌",
-            category = "胸部"
+            descriptionRes = R.string.ex_pushup_desc,
+            targetMuscleRes = R.string.muscle_chest,
+            categoryRes = R.string.cat_chest
         ),
         Exercise(
             id = "incline_press",
-            name = "上斜卧推",
+            nameRes = R.string.ex_incline_press_name,
             gifResPath = "exercises/benchpress.gif",
-            description = "侧重胸肌上部。",
-            targetMuscle = "胸大肌上束",
-            category = "胸部"
+            descriptionRes = R.string.ex_incline_press_desc,
+            targetMuscleRes = R.string.muscle_upper_chest,
+            categoryRes = R.string.cat_chest
         ),
         Exercise(
             id = "pullup_v2",
-            name = "引体向上",
+            nameRes = R.string.ex_pullup_name,
             gifResPath = "exercises/pushup.gif", // 临时使用 pushup 占位
-            description = "背部王牌动作。",
-            targetMuscle = "背阔肌",
-            category = "背部"
+            descriptionRes = R.string.ex_pullup_desc,
+            targetMuscleRes = R.string.muscle_lats,
+            categoryRes = R.string.cat_back
         ),
         Exercise(
             id = "row",
-            name = "划船",
+            nameRes = R.string.ex_row_name,
             gifResPath = "exercises/benchpress.gif",
-            description = "增加背部厚度。",
-            targetMuscle = "中背部",
-            category = "背部"
+            descriptionRes = R.string.ex_row_desc,
+            targetMuscleRes = R.string.muscle_mid_back,
+            categoryRes = R.string.cat_back
         ),
         Exercise(
             id = "squat",
-            name = "深蹲",
+            nameRes = R.string.ex_squat_name,
             gifResPath = "exercises/squat.gif",
-            description = "全能练腿动作。",
-            targetMuscle = "股四头肌",
-            category = "腿部"
+            descriptionRes = R.string.ex_squat_desc,
+            targetMuscleRes = R.string.muscle_quads,
+            categoryRes = R.string.cat_legs
         ),
         Exercise(
             id = "lunge",
-            name = "箭步蹲",
+            nameRes = R.string.ex_lunge_name,
             gifResPath = "exercises/squat.gif",
-            description = "单腿力量训练。",
-            targetMuscle = "臀腿部",
-            category = "腿部"
+            descriptionRes = R.string.ex_lunge_desc,
+            targetMuscleRes = R.string.muscle_glutes_legs,
+            categoryRes = R.string.cat_legs
         ),
         Exercise(
             id = "plank",
-            name = "平板支撑",
+            nameRes = R.string.ex_plank_name,
             gifResPath = "exercises/squat.gif",
-            description = "核心稳定性训练。",
-            targetMuscle = "腹横肌",
-            category = "核心"
+            descriptionRes = R.string.ex_plank_desc,
+            targetMuscleRes = R.string.muscle_abs,
+            categoryRes = R.string.cat_core
         ),
         Exercise(
             id = "burpee",
-            name = "波比跳",
+            nameRes = R.string.ex_burpee_name,
             gifResPath = "exercises/pushup.gif",
-            description = "高强度全身训练。",
-            targetMuscle = "全身",
-            category = "全身"
+            descriptionRes = R.string.ex_burpee_desc,
+            targetMuscleRes = R.string.muscle_full_body,
+            categoryRes = R.string.cat_full_body
         )
     )
     
-    val categories = listOf("全部") + exercises.map { it.category }.distinct()
+    val categories = listOf(R.string.category_all) + exercises.map { it.categoryRes }.distinct()
 }

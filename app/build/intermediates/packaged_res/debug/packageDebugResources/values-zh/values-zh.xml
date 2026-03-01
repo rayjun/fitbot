@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">健身达人</string>
+    <string name="cat_back">背部</string>
+    <string name="cat_chest">胸部</string>
+    <string name="cat_core">核心</string>
+    <string name="cat_full_body">全身</string>
+    <string name="cat_legs">腿部</string>
     <string name="category_all">全部</string>
     <string name="cloud_connect">连接云盘</string>
     <string name="cloud_connected">云盘已连接</string>
@@ -20,6 +25,24 @@
     <string name="dialog_cancel">取消</string>
     <string name="edit_day">编辑单日安排</string>
     <string name="edit_quote">编辑座右铭</string>
+    <string name="ex_benchpress_desc">仰卧在凳子上，垂直推起杠铃。</string>
+    <string name="ex_benchpress_name">杠铃卧推</string>
+    <string name="ex_burpee_desc">高强度全身训练。</string>
+    <string name="ex_burpee_name">波比跳</string>
+    <string name="ex_incline_press_desc">侧重胸肌上部。</string>
+    <string name="ex_incline_press_name">上斜卧推</string>
+    <string name="ex_lunge_desc">单腿力量训练。</string>
+    <string name="ex_lunge_name">箭步蹲</string>
+    <string name="ex_plank_desc">核心稳定性训练。</string>
+    <string name="ex_plank_name">平板支撑</string>
+    <string name="ex_pullup_desc">背部王牌动作。</string>
+    <string name="ex_pullup_name">引体向上</string>
+    <string name="ex_pushup_desc">标准的自重胸部训练。</string>
+    <string name="ex_pushup_name">俯卧撑</string>
+    <string name="ex_row_desc">增加背部厚度。</string>
+    <string name="ex_row_name">划船</string>
+    <string name="ex_squat_desc">全能练腿动作。</string>
+    <string name="ex_squat_name">深蹲</string>
     <string name="exercises_count">动作数: %1$d</string>
     <string name="exercises_scheduled">已安排 %1$d 个训练动作。</string>
     <string name="finish_session">结束会话</string>
@@ -31,6 +54,14 @@
     <string name="login_drive">登录 Google Drive</string>
     <string name="logout">退出登录</string>
     <string name="logout_success">已退出登录</string>
+    <string name="muscle_abs">腹横肌</string>
+    <string name="muscle_chest">胸大肌</string>
+    <string name="muscle_full_body">全身</string>
+    <string name="muscle_glutes_legs">臀腿部</string>
+    <string name="muscle_lats">背阔肌</string>
+    <string name="muscle_mid_back">中背部</string>
+    <string name="muscle_quads">股四头肌</string>
+    <string name="muscle_upper_chest">胸大肌上束</string>
     <string name="nav_library">动作库</string>
     <string name="nav_plans">训练计划</string>
     <string name="nav_profile">个人中心</string>

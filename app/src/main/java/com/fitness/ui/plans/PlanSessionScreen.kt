@@ -68,7 +68,7 @@ fun PlanSessionScreen(
             
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(exercises) { exercise ->
-                    val isCompleted = completedExercises.contains(exercise.name)
+                    val isCompleted = completedExercises.contains(exercise.id)
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -83,12 +83,12 @@ fun PlanSessionScreen(
                         ListItem(
                             headlineContent = { 
                                 Text(
-                                    exercise.name, 
+                                    stringResource(exercise.nameRes), 
                                     fontWeight = FontWeight.Bold,
                                     color = if (isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                 ) 
                             },
-                            supportingContent = { Text(exercise.targetMuscle) },
+                            supportingContent = { Text(stringResource(exercise.targetMuscleRes)) },
                             trailingContent = {
                                 Icon(
                                     Icons.Default.CheckCircle, 

@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Fitness App</string>
+    <string name="cat_back">Back</string>
+    <string name="cat_chest">Chest</string>
+    <string name="cat_core">Core</string>
+    <string name="cat_full_body">Full Body</string>
+    <string name="cat_legs">Legs</string>
     <string name="category_all">All</string>
     <string name="cloud_connect">Connect Cloud</string>
     <string name="cloud_connected">Cloud Connected</string>
@@ -20,6 +25,24 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="edit_day">Edit Day</string>
     <string name="edit_quote">Edit Quote</string>
+    <string name="ex_benchpress_desc">Lie on a bench and press the barbell vertically.</string>
+    <string name="ex_benchpress_name">Bench Press</string>
+    <string name="ex_burpee_desc">High-intensity full-body exercise.</string>
+    <string name="ex_burpee_name">Burpee</string>
+    <string name="ex_incline_press_desc">Focuses on the upper chest.</string>
+    <string name="ex_incline_press_name">Incline Bench Press</string>
+    <string name="ex_lunge_desc">Unilateral leg strength training.</string>
+    <string name="ex_lunge_name">Lunge</string>
+    <string name="ex_plank_desc">Core stability training.</string>
+    <string name="ex_plank_name">Plank</string>
+    <string name="ex_pullup_desc">The king of back exercises.</string>
+    <string name="ex_pullup_name">Pull-up</string>
+    <string name="ex_pushup_desc">Standard bodyweight chest exercise.</string>
+    <string name="ex_pushup_name">Push-up</string>
+    <string name="ex_row_desc">Increases back thickness.</string>
+    <string name="ex_row_name">Barbell Row</string>
+    <string name="ex_squat_desc">An all-around leg exercise.</string>
+    <string name="ex_squat_name">Squat</string>
     <string name="exercises_count">Exercises: %1$d</string>
     <string name="exercises_scheduled">%1$d exercises scheduled.</string>
     <string name="finish_session">Finish Session</string>
@@ -31,6 +54,14 @@
     <string name="login_drive">Login to Google Drive</string>
     <string name="logout">Logout</string>
     <string name="logout_success">Logged out</string>
+    <string name="muscle_abs">Transverse Abdominis</string>
+    <string name="muscle_chest">Pectorals</string>
+    <string name="muscle_full_body">Full Body</string>
+    <string name="muscle_glutes_legs">Glutes &amp; Legs</string>
+    <string name="muscle_lats">Latissimus Dorsi</string>
+    <string name="muscle_mid_back">Middle Back</string>
+    <string name="muscle_quads">Quadriceps</string>
+    <string name="muscle_upper_chest">Upper Pectorals</string>
     <string name="nav_library">Library</string>
     <string name="nav_plans">Plans</string>
     <string name="nav_profile">Profile</string>

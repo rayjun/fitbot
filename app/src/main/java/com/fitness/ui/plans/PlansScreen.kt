@@ -189,7 +189,7 @@ fun EditDayDialog(
                                     onCheckedChange = null
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text(exercise.name)
+                                Text(stringResource(exercise.nameRes))
                             }
                         }
                     }

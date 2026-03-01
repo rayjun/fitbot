@@ -76,4 +76,44 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="edit_quote">Edit Quote</string>
+
+    <!-- Exercises -->
+    <!-- Categories -->
+    <string name="cat_chest">Chest</string>
+    <string name="cat_back">Back</string>
+    <string name="cat_legs">Legs</string>
+    <string name="cat_core">Core</string>
+    <string name="cat_full_body">Full Body</string>
+
+    <!-- Muscle Groups -->
+    <string name="muscle_chest">Pectorals</string>
+    <string name="muscle_upper_chest">Upper Pectorals</string>
+    <string name="muscle_lats">Latissimus Dorsi</string>
+    <string name="muscle_mid_back">Middle Back</string>
+    <string name="muscle_quads">Quadriceps</string>
+    <string name="muscle_glutes_legs">Glutes &amp; Legs</string>
+    <string name="muscle_abs">Transverse Abdominis</string>
+    <string name="muscle_full_body">Full Body</string>
+
+    <!-- Exercise Names -->
+    <string name="ex_benchpress_name">Bench Press</string>
+    <string name="ex_pushup_name">Push-up</string>
+    <string name="ex_incline_press_name">Incline Bench Press</string>
+    <string name="ex_pullup_name">Pull-up</string>
+    <string name="ex_row_name">Barbell Row</string>
+    <string name="ex_squat_name">Squat</string>
+    <string name="ex_lunge_name">Lunge</string>
+    <string name="ex_plank_name">Plank</string>
+    <string name="ex_burpee_name">Burpee</string>
+
+    <!-- Exercise Descriptions -->
+    <string name="ex_benchpress_desc">Lie on a bench and press the barbell vertically.</string>
+    <string name="ex_pushup_desc">Standard bodyweight chest exercise.</string>
+    <string name="ex_incline_press_desc">Focuses on the upper chest.</string>
+    <string name="ex_pullup_desc">The king of back exercises.</string>
+    <string name="ex_row_desc">Increases back thickness.</string>
+    <string name="ex_squat_desc">An all-around leg exercise.</string>
+    <string name="ex_lunge_desc">Unilateral leg strength training.</string>
+    <string name="ex_plank_desc">Core stability training.</string>
+    <string name="ex_burpee_desc">High-intensity full-body exercise.</string>
 </resources>

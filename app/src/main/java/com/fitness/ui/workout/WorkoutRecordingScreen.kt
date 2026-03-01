@@ -17,15 +17,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import com.fitness.R
+import com.fitness.data.ExerciseProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkoutRecordingScreen(
-    exerciseName: String,
+    exerciseId: String,
     viewModel: WorkoutViewModel,
     onBack: () -> Unit,
     onFinished: () -> Unit
 ) {
+    val exercise = remember(exerciseId) { ExerciseProvider.exercises.find { it.id == exerciseId } }
+    val localizedName = exercise?.let { stringResource(it.nameRes) } ?: exerciseId
+
     var weightInput by remember { mutableStateOf("0") }
     var repsInput by remember { mutableStateOf("12") }
     val sets by viewModel.setsInSession.collectAsStateWithLifecycle()
@@ -33,7 +37,7 @@ fun WorkoutRecordingScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(exerciseName, fontSize = 18.sp) },
+                title = { Text(localizedName, fontSize = 18.sp) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -70,7 +74,7 @@ fun WorkoutRecordingScreen(
 
             Button(
                 onClick = {
-                    viewModel.addSet(exerciseName, weightInput.toDoubleOrNull() ?: 0.0, repsInput.toIntOrNull() ?: 0)
+                    viewModel.addSet(exerciseId, weightInput.toDoubleOrNull() ?: 0.0, repsInput.toIntOrNull() ?: 0)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -83,7 +87,7 @@ fun WorkoutRecordingScreen(
 
             // 已保存组数列表
             LazyColumn(modifier = Modifier.weight(1f)) {
-                items(sets.filter { it.exerciseName == exerciseName }) { set ->
+                items(sets.filter { it.exerciseName == exerciseId }) { set ->
                     ListItem(
                         headlineContent = { Text("${set.weight} kg x ${set.reps}") },
                         trailingContent = { Text(set.timeStr) }
