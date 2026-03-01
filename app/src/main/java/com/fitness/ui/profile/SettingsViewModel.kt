@@ -1,7 +1,6 @@
 package com.fitness.ui.profile
 
 import android.content.Context
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -15,26 +14,37 @@ import kotlinx.coroutines.launch
 private val Context.dataStore by preferencesDataStore(name = "settings")
 
 class SettingsViewModel(private val context: Context) : ViewModel() {
-    private val DARK_MODE_KEY = booleanPreferencesKey("dark_mode")
+    private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
     private val LANGUAGE_KEY = stringPreferencesKey("language")
+    private val USER_QUOTE_KEY = stringPreferencesKey("user_quote")
 
-    val isDarkMode = context.dataStore.data
-        .map { preferences -> preferences[DARK_MODE_KEY] ?: false }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+    val themeMode = context.dataStore.data
+        .map { preferences -> preferences[THEME_MODE_KEY] ?: "system" }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "system")
 
     val language = context.dataStore.data
         .map { preferences -> preferences[LANGUAGE_KEY] ?: "zh" }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "zh")
 
-    fun toggleDarkMode(enabled: Boolean) {
+    val userQuote = context.dataStore.data
+        .map { preferences -> preferences[USER_QUOTE_KEY] ?: "坚持就是胜利" }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "坚持就是胜利")
+
+    fun setThemeMode(mode: String) {
         viewModelScope.launch {
-            context.dataStore.edit { it[DARK_MODE_KEY] = enabled }
+            context.dataStore.edit { it[THEME_MODE_KEY] = mode }
         }
     }
 
     fun setLanguage(lang: String) {
         viewModelScope.launch {
             context.dataStore.edit { it[LANGUAGE_KEY] = lang }
+        }
+    }
+    
+    fun setUserQuote(quote: String) {
+        viewModelScope.launch {
+            context.dataStore.edit { it[USER_QUOTE_KEY] = quote }
         }
     }
 }

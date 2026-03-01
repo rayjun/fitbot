@@ -52,9 +52,14 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             )
-            val isDarkMode by settingsViewModel.isDarkMode.collectAsStateWithLifecycle()
+            val themeMode by settingsViewModel.themeMode.collectAsStateWithLifecycle()
+            val isDark = when (themeMode) {
+                "dark" -> true
+                "light" -> false
+                else -> androidx.compose.foundation.isSystemInDarkTheme()
+            }
 
-            FitnessTheme(darkTheme = isDarkMode) {
+            FitnessTheme(darkTheme = isDark) {
                 val navController = rememberNavController()
                 val context = LocalContext.current
                 
