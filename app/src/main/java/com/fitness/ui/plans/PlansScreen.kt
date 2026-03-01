@@ -256,23 +256,27 @@ fun WeeklyProgressBar(routine: List<RoutineDay>, workoutViewModel: WorkoutViewMo
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         routine.sortedBy { it.dayOfWeek }.forEach { day ->
-            var isCompleted by remember { mutableStateOf(false) }
+            var isFullyCompleted by remember { mutableStateOf(false) }
             
-            val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
             
-            LaunchedEffect(day) {
-                if (!day.isRest) {
-                    val diff = day.dayOfWeek - todayOfWeek
-                    val cal = Calendar.getInstance()
-                    cal.add(Calendar.DAY_OF_YEAR, diff)
-                    val dateStr = dateFormatter.format(cal.time)
-                    isCompleted = workoutViewModel.hasCompletedExercisesOnDate(dateStr)
+            LaunchedEffect(day, routine) {
+                val diff = day.dayOfWeek - todayOfWeek
+                val cal = Calendar.getInstance()
+                cal.add(Calendar.DAY_OF_YEAR, diff)
+                val dateStr = dateFormatter.format(cal.time)
+                
+                isFullyCompleted = if (day.isRest) {
+                    true // 休息日默认视为“任务已完成”
+                } else {
+                    workoutViewModel.isDayFullyCompleted(dateStr, day.exercises)
                 }
             }
 
             val color = when {
                 day.isRest -> Color.Transparent
-                isCompleted || day.dayOfWeek == todayOfWeek -> MaterialTheme.colorScheme.primary
+                isFullyCompleted -> MaterialTheme.colorScheme.primary
+                day.dayOfWeek == todayOfWeek -> MaterialTheme.colorScheme.primary.copy(alpha = 0.3f) // 今天正在进行中，显示浅橙
                 else -> MaterialTheme.colorScheme.surfaceVariant
             }
             val borderColor = if (day.isRest) MaterialTheme.colorScheme.outline else Color.Transparent
@@ -287,7 +291,7 @@ fun WeeklyProgressBar(routine: List<RoutineDay>, workoutViewModel: WorkoutViewMo
             ) {
                 Text(
                     text = days[day.dayOfWeek - 1],
-                    color = if (color == MaterialTheme.colorScheme.primary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                    color = if (isFullyCompleted && !day.isRest) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
             }

@@ -37,7 +37,12 @@ class WorkoutViewModel(private val context: Context) : ViewModel() {
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    val completedExercises: StateFlow<List<String>> = setsInSession.map { sets ->
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val setsToday: StateFlow<List<SetEntity>> = _currentDate
+        .flatMapLatest { date -> dao.getSetsByDateFlow(date) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    val completedExercises: StateFlow<List<String>> = setsToday.map { sets ->
         sets.map { it.exerciseName }.distinct()
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
@@ -78,5 +83,17 @@ class WorkoutViewModel(private val context: Context) : ViewModel() {
 
     suspend fun hasCompletedExercisesOnDate(dateStr: String): Boolean {
         return dao.getSetsByDate(dateStr).isNotEmpty()
+    }
+
+    /**
+     * 检查某一天是否完成了计划中的所有动作及其目标组数
+     */
+    suspend fun isDayFullyCompleted(dateStr: String, routine: List<com.fitness.model.PlannedExercise>): Boolean {
+        if (routine.isEmpty()) return false
+        val setsOnDate = dao.getSetsByDate(dateStr)
+        return routine.all { planned ->
+            val completedCount = setsOnDate.count { it.exerciseName == planned.id }
+            completedCount >= planned.targetSets
+        }
     }
 }

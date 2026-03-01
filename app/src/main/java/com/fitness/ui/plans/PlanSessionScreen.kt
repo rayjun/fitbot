@@ -32,7 +32,7 @@ fun PlanSessionScreen(
 ) {
     val currentPlan by planViewModel.currentPlan.collectAsStateWithLifecycle()
     val currentRoutine by planViewModel.currentRoutine.collectAsStateWithLifecycle()
-    val setsInSession by workoutViewModel.setsInSession.collectAsStateWithLifecycle()
+    val setsToday by workoutViewModel.setsToday.collectAsStateWithLifecycle()
     
     val plannedExercises = remember(currentRoutine, dayOfWeek) {
         currentRoutine.find { it.dayOfWeek == dayOfWeek }?.exercises ?: emptyList()
@@ -58,7 +58,7 @@ fun PlanSessionScreen(
                 items(plannedExercises) { planned ->
                     val exercise = ExerciseProvider.exercises.find { it.id == planned.id }
                     if (exercise != null) {
-                        val completedCount = setsInSession.count { it.exerciseName == exercise.id }
+                        val completedCount = setsToday.count { it.exerciseName == exercise.id }
                         val isFinished = completedCount >= planned.targetSets
                         
                         Card(
