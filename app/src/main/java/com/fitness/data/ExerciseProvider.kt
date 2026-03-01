@@ -5,6 +5,7 @@ import com.fitness.model.Exercise
 
 object ExerciseProvider {
     val exercises = listOf(
+        // 胸部 (Chest)
         Exercise(
             id = "benchpress",
             nameRes = R.string.ex_benchpress_name,
@@ -29,6 +30,26 @@ object ExerciseProvider {
             targetMuscleRes = R.string.muscle_upper_chest,
             categoryRes = R.string.cat_chest
         ),
+        
+        // 肩部 (Shoulders)
+        Exercise(
+            id = "overhead_press",
+            nameRes = R.string.ex_overhead_press_name,
+            gifResPath = "exercises/overhead_press.gif",
+            descriptionRes = R.string.ex_overhead_press_desc,
+            targetMuscleRes = R.string.muscle_shoulders,
+            categoryRes = R.string.cat_shoulders
+        ),
+        Exercise(
+            id = "lateral_raise",
+            nameRes = R.string.ex_lateral_raise_name,
+            gifResPath = "exercises/lateral_raise.gif",
+            descriptionRes = R.string.ex_lateral_raise_desc,
+            targetMuscleRes = R.string.muscle_shoulders,
+            categoryRes = R.string.cat_shoulders
+        ),
+
+        // 背部 (Back)
         Exercise(
             id = "pullup_v2",
             nameRes = R.string.ex_pullup_name,
@@ -46,6 +67,34 @@ object ExerciseProvider {
             categoryRes = R.string.cat_back
         ),
         Exercise(
+            id = "deadlift",
+            nameRes = R.string.ex_deadlift_name,
+            gifResPath = "exercises/deadlift.gif",
+            descriptionRes = R.string.ex_deadlift_desc,
+            targetMuscleRes = R.string.muscle_lower_back,
+            categoryRes = R.string.cat_back
+        ),
+
+        // 手臂 (Arms)
+        Exercise(
+            id = "bicep_curl",
+            nameRes = R.string.ex_bicep_curl_name,
+            gifResPath = "exercises/bicep_curl.gif",
+            descriptionRes = R.string.ex_bicep_curl_desc,
+            targetMuscleRes = R.string.muscle_biceps,
+            categoryRes = R.string.cat_arms
+        ),
+        Exercise(
+            id = "tricep_dips",
+            nameRes = R.string.ex_tricep_dips_name,
+            gifResPath = "exercises/tricep_dips.gif",
+            descriptionRes = R.string.ex_tricep_dips_desc,
+            targetMuscleRes = R.string.muscle_triceps,
+            categoryRes = R.string.cat_arms
+        ),
+
+        // 腿部 (Legs)
+        Exercise(
             id = "squat",
             nameRes = R.string.ex_squat_name,
             gifResPath = "exercises/squat.gif",
@@ -62,6 +111,40 @@ object ExerciseProvider {
             categoryRes = R.string.cat_legs
         ),
         Exercise(
+            id = "calf_raise",
+            nameRes = R.string.ex_calf_raise_name,
+            gifResPath = "exercises/calf_raise.gif",
+            descriptionRes = R.string.ex_calf_raise_desc,
+            targetMuscleRes = R.string.muscle_calves,
+            categoryRes = R.string.cat_legs
+        ),
+
+        // 核心 (Core)
+        Exercise(
+            id = "situp",
+            nameRes = R.string.ex_situp_name,
+            gifResPath = "exercises/situp.gif",
+            descriptionRes = R.string.ex_situp_desc,
+            targetMuscleRes = R.string.muscle_abs,
+            categoryRes = R.string.cat_core
+        ),
+        Exercise(
+            id = "crunches",
+            nameRes = R.string.ex_crunches_name,
+            gifResPath = "exercises/crunches.gif",
+            descriptionRes = R.string.ex_crunches_desc,
+            targetMuscleRes = R.string.muscle_abs,
+            categoryRes = R.string.cat_core
+        ),
+        Exercise(
+            id = "russian_twist",
+            nameRes = R.string.ex_russian_twist_name,
+            gifResPath = "exercises/russian_twist.gif",
+            descriptionRes = R.string.ex_russian_twist_desc,
+            targetMuscleRes = R.string.muscle_abs,
+            categoryRes = R.string.cat_core
+        ),
+        Exercise(
             id = "plank",
             nameRes = R.string.ex_plank_name,
             gifResPath = "exercises/plank.gif",
@@ -69,6 +152,8 @@ object ExerciseProvider {
             targetMuscleRes = R.string.muscle_abs,
             categoryRes = R.string.cat_core
         ),
+
+        // 全身 (Full Body)
         Exercise(
             id = "burpee",
             nameRes = R.string.ex_burpee_name,

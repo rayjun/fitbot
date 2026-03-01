@@ -85,6 +85,8 @@
     <string name="cat_chest">Chest</string>
     <string name="cat_back">Back</string>
     <string name="cat_legs">Legs</string>
+    <string name="cat_shoulders">Shoulders</string>
+    <string name="cat_arms">Arms</string>
     <string name="cat_core">Core</string>
     <string name="cat_full_body">Full Body</string>
 
@@ -93,9 +95,14 @@
     <string name="muscle_upper_chest">Upper Pectorals</string>
     <string name="muscle_lats">Latissimus Dorsi</string>
     <string name="muscle_mid_back">Middle Back</string>
+    <string name="muscle_lower_back">Lower Back</string>
     <string name="muscle_quads">Quadriceps</string>
     <string name="muscle_glutes_legs">Glutes &amp; Legs</string>
-    <string name="muscle_abs">Transverse Abdominis</string>
+    <string name="muscle_calves">Calves</string>
+    <string name="muscle_shoulders">Deltoids</string>
+    <string name="muscle_biceps">Biceps</string>
+    <string name="muscle_triceps">Triceps</string>
+    <string name="muscle_abs">Abdominals</string>
     <string name="muscle_full_body">Full Body</string>
 
     <!-- Exercise Names -->
@@ -104,8 +111,17 @@
     <string name="ex_incline_press_name">Incline Bench Press</string>
     <string name="ex_pullup_name">Pull-up</string>
     <string name="ex_row_name">Barbell Row</string>
+    <string name="ex_deadlift_name">Deadlift</string>
     <string name="ex_squat_name">Squat</string>
     <string name="ex_lunge_name">Lunge</string>
+    <string name="ex_calf_raise_name">Calf Raise</string>
+    <string name="ex_overhead_press_name">Overhead Press</string>
+    <string name="ex_lateral_raise_name">Lateral Raise</string>
+    <string name="ex_bicep_curl_name">Bicep Curl</string>
+    <string name="ex_tricep_dips_name">Tricep Dips</string>
+    <string name="ex_situp_name">Sit-up</string>
+    <string name="ex_crunches_name">Crunches</string>
+    <string name="ex_russian_twist_name">Russian Twist</string>
     <string name="ex_plank_name">Plank</string>
     <string name="ex_burpee_name">Burpee</string>
 
@@ -115,8 +131,17 @@
     <string name="ex_incline_press_desc">Focuses on the upper chest.</string>
     <string name="ex_pullup_desc">The king of back exercises.</string>
     <string name="ex_row_desc">Increases back thickness.</string>
+    <string name="ex_deadlift_desc">Fundamental powerlifting movement for the whole posterior chain.</string>
     <string name="ex_squat_desc">An all-around leg exercise.</string>
     <string name="ex_lunge_desc">Unilateral leg strength training.</string>
+    <string name="ex_calf_raise_desc">Isolates and strengthens the calf muscles.</string>
+    <string name="ex_overhead_press_desc">Primary movement for building strong shoulders.</string>
+    <string name="ex_lateral_raise_desc">Isolates the side deltoids for shoulder width.</string>
+    <string name="ex_bicep_curl_desc">Classic arm isolation for the biceps.</string>
+    <string name="ex_tricep_dips_desc">Bodyweight or weighted exercise for triceps and chest.</string>
+    <string name="ex_situp_desc">Classic core exercise for abdominal strength.</string>
+    <string name="ex_crunches_desc">Targeted upper abdominal isolation.</string>
+    <string name="ex_russian_twist_desc">Rotational core exercise for the obliques.</string>
     <string name="ex_plank_desc">Core stability training.</string>
     <string name="ex_burpee_desc">High-intensity full-body exercise.</string>
 </resources>
