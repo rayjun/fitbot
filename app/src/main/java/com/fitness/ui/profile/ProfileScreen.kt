@@ -251,40 +251,47 @@ fun ProfileScreen(
 
 @Composable
 fun WorkoutHeatMap(data: Map<String, Int>) {
-    val days = remember {
-        val list = mutableListOf<Date>()
-        val cal = Calendar.getInstance()
-        for (i in 0..89) {
-            list.add(cal.time)
-            cal.add(Calendar.DAY_OF_YEAR, -1)
-        }
-        list.reversed()
-    }
-    
-    val df = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+        val cellSpacing = 4.dp
+        val cellSize = 13.dp
+        val columnWidth = cellSize + cellSpacing
+        val columns = (maxWidth / columnWidth).toInt()
+        val totalDays = columns * 7
 
-    LazyRow(
-        modifier = Modifier.fillMaxWidth().height(120.dp),
-        contentPadding = PaddingValues(4.dp),
-        horizontalArrangement = Arrangement.End
-    ) {
-        val chunks = days.chunked(7)
-        items(chunks) { week ->
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                week.forEach { day ->
-                    val dateStr = df.format(day)
-                    val count = data[dateStr] ?: 0
-                    val color = when {
-                        count == 0 -> Color.LightGray.copy(alpha = 0.3f)
-                        count < 5 -> Color(0xFFC6E48B)
-                        count < 15 -> Color(0xFF7BC96F)
-                        else -> Color(0xFF239A3B)
+        val days = remember(totalDays) {
+            val list = mutableListOf<Date>()
+            val cal = Calendar.getInstance()
+            for (i in 0 until totalDays) {
+                list.add(cal.time)
+                cal.add(Calendar.DAY_OF_YEAR, -1)
+            }
+            list.reversed()
+        }
+        
+        val df = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            val chunks = days.chunked(7)
+            chunks.forEach { week ->
+                Column(verticalArrangement = Arrangement.spacedBy(cellSpacing)) {
+                    week.forEach { day ->
+                        val dateStr = df.format(day)
+                        val count = data[dateStr] ?: 0
+                        val color = when {
+                            count == 0 -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
+                            count < 5 -> Color(0xFF9BE9A8)
+                            count < 15 -> Color(0xFF40C463)
+                            else -> Color(0xFF30A14E)
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(cellSize)
+                                .background(color, RoundedCornerShape(2.dp))
+                        )
                     }
-                    Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .background(color, RoundedCornerShape(2.dp))
-                    )
                 }
             }
         }
