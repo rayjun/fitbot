@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">健身达人</string>
+    <string name="app_name">FitBot</string>
     <string name="nav_library">动作库</string>
     <string name="nav_plans">训练计划</string>
     <string name="nav_profile">个人中心</string>

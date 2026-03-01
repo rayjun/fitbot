@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">健身达人</string>
+    <string name="app_name">FitBot</string>
     <string name="cat_arms">手臂</string>
     <string name="cat_back">背部</string>
     <string name="cat_chest">胸部</string>

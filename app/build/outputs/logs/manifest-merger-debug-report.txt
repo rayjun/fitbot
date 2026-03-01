@@ -1,9 +1,9 @@
 -- Merging decision tree log ---
 manifest
-ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:2:1-25:12
-INJECTED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:2:1-25:12
-INJECTED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:2:1-25:12
-INJECTED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:2:1-25:12
+ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:2:1-26:12
+INJECTED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:2:1-26:12
+INJECTED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:2:1-26:12
+INJECTED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:2:1-26:12
 MERGED from [io.coil-kt:coil-gif:2.6.0] /Users/ray/.gradle/caches/transforms-3/3a4f72958d0460c3372ef9c72507186a/transformed/jetified-coil-gif-2.6.0/AndroidManifest.xml:2:1-7:12
 MERGED from [io.coil-kt:coil-compose:2.6.0] /Users/ray/.gradle/caches/transforms-3/176f8be22f115484d9c298fba6462c74/transformed/jetified-coil-compose-2.6.0/AndroidManifest.xml:2:1-7:12
 MERGED from [io.coil-kt:coil-compose-base:2.6.0] /Users/ray/.gradle/caches/transforms-3/51a05dedc0eb43f7796a773dc0be3e08/transformed/jetified-coil-compose-base-2.6.0/AndroidManifest.xml:2:1-7:12
@@ -112,8 +112,8 @@ MERGED from [androidx.work:work-runtime:2.9.0] /Users/ray/.gradle/caches/transfo
 	android:name
 		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:5:22-76
 application
-ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:7:5-23:19
-INJECTED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:7:5-23:19
+ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:7:5-24:19
+INJECTED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:7:5-24:19
 MERGED from [androidx.compose.ui:ui-test-manifest:1.6.1] /Users/ray/.gradle/caches/transforms-3/c17d09f7ebf52d371e61cff5cf9c3dae/transformed/jetified-ui-test-manifest-1.6.1/AndroidManifest.xml:22:5-26:19
 MERGED from [androidx.compose.ui:ui-test-manifest:1.6.1] /Users/ray/.gradle/caches/transforms-3/c17d09f7ebf52d371e61cff5cf9c3dae/transformed/jetified-ui-test-manifest-1.6.1/AndroidManifest.xml:22:5-26:19
 MERGED from [androidx.compose.ui:ui-tooling-android:1.6.1] /Users/ray/.gradle/caches/transforms-3/7944c4866ca405d61cc0545b7911131e/transformed/jetified-ui-tooling-release/AndroidManifest.xml:22:5-26:19
@@ -147,35 +147,37 @@ MERGED from [androidx.startup:startup-runtime:1.1.1] /Users/ray/.gradle/caches/t
 	android:extractNativeLibs
 		INJECTED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml
 	android:localeConfig
-		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:10:9-51
+		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:11:9-51
 	android:appComponentFactory
 		ADDED from [androidx.core:core:1.12.0] /Users/ray/.gradle/caches/transforms-3/748cf68807ae79ea25612ffdcc6e0b2f/transformed/core-1.12.0/AndroidManifest.xml:28:18-86
 	android:supportsRtl
-		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:11:9-35
+		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:12:9-35
 	android:label
-		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:9:9-40
+		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:10:9-41
+	android:icon
+		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:9:9-43
 	android:allowBackup
 		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:8:9-35
 	android:theme
-		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:12:9-65
+		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:13:9-65
 activity#com.fitness.MainActivity
-ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:14:9-22:20
+ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:15:9-23:20
 	android:exported
-		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:16:13-36
+		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:17:13-36
 	android:theme
-		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:17:13-69
+		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:18:13-69
 	android:name
-		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:15:13-41
+		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:16:13-41
 intent-filter#action:name:android.intent.action.MAIN+category:name:android.intent.category.LAUNCHER
-ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:18:13-21:29
+ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:19:13-22:29
 action#android.intent.action.MAIN
-ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:19:17-69
+ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:20:17-69
 	android:name
-		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:19:25-66
+		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:20:25-66
 category#android.intent.category.LAUNCHER
-ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:20:17-77
+ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:21:17-77
 	android:name
-		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:20:27-74
+		ADDED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml:21:27-74
 uses-sdk
 INJECTED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml reason: use-sdk injection requested
 INJECTED from /Users/ray/workspace/solo_dev/exercise/app/src/main/AndroidManifest.xml

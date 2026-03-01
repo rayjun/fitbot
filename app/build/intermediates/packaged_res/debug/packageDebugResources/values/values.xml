@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Fitness App</string>
+    <string name="app_name">FitBot</string>
     <string name="cat_arms">Arms</string>
     <string name="cat_back">Back</string>
     <string name="cat_chest">Chest</string>
