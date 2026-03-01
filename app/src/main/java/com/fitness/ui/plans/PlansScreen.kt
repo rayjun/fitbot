@@ -234,16 +234,17 @@ fun WeeklyProgressBar(routine: List<RoutineDay>, workoutViewModel: WorkoutViewMo
             val color = when {
                 day.isRest -> Color.Transparent
                 isCompleted || day.dayOfWeek == todayOfWeek -> MaterialTheme.colorScheme.primary
-                else -> Color.LightGray
+                else -> MaterialTheme.colorScheme.surfaceVariant
             }
-            val borderColor = if (day.isRest) Color.Green else Color.Transparent
+            val borderColor = if (day.isRest) MaterialTheme.colorScheme.outline else Color.Transparent
+            val borderWidth = if (day.isRest) 1.dp else 0.dp
 
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
                     .size(36.dp)
                     .background(color, CircleShape)
-                    .border(2.dp, borderColor, CircleShape)
+                    .border(borderWidth, borderColor, CircleShape)
             ) {
                 Text(
                     text = days[day.dayOfWeek - 1],
