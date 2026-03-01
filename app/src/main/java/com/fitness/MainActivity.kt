@@ -192,6 +192,15 @@ class MainActivity : AppCompatActivity() {
                             ProfileScreen(
                                 viewModel = profileViewModel,
                                 settingsViewModel = settingsViewModel,
+                                account = lastAccount,
+                                onLoginClick = {
+                                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                        .requestEmail()
+                                        .requestScopes(Scope(DriveScopes.DRIVE_FILE))
+                                        .build()
+                                    val client = GoogleSignIn.getClient(this@MainActivity, gso)
+                                    googleSignInLauncher.launch(client.signInIntent)
+                                },
                                 onLogout = {
                                     val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
                                     GoogleSignIn.getClient(this@MainActivity, gso).signOut().addOnCompleteListener {
