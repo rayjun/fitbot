@@ -24,7 +24,7 @@ object ExerciseProvider {
         Exercise(
             id = "incline_press",
             nameRes = R.string.ex_incline_press_name,
-            gifResPath = "exercises/benchpress.gif",
+            gifResPath = "exercises/incline_press.gif",
             descriptionRes = R.string.ex_incline_press_desc,
             targetMuscleRes = R.string.muscle_upper_chest,
             categoryRes = R.string.cat_chest
@@ -32,7 +32,7 @@ object ExerciseProvider {
         Exercise(
             id = "pullup_v2",
             nameRes = R.string.ex_pullup_name,
-            gifResPath = "exercises/pushup.gif", // 临时使用 pushup 占位
+            gifResPath = "exercises/pullup.gif",
             descriptionRes = R.string.ex_pullup_desc,
             targetMuscleRes = R.string.muscle_lats,
             categoryRes = R.string.cat_back
@@ -40,7 +40,7 @@ object ExerciseProvider {
         Exercise(
             id = "row",
             nameRes = R.string.ex_row_name,
-            gifResPath = "exercises/benchpress.gif",
+            gifResPath = "exercises/row.gif",
             descriptionRes = R.string.ex_row_desc,
             targetMuscleRes = R.string.muscle_mid_back,
             categoryRes = R.string.cat_back
@@ -56,7 +56,7 @@ object ExerciseProvider {
         Exercise(
             id = "lunge",
             nameRes = R.string.ex_lunge_name,
-            gifResPath = "exercises/squat.gif",
+            gifResPath = "exercises/lunge.gif",
             descriptionRes = R.string.ex_lunge_desc,
             targetMuscleRes = R.string.muscle_glutes_legs,
             categoryRes = R.string.cat_legs
@@ -64,7 +64,7 @@ object ExerciseProvider {
         Exercise(
             id = "plank",
             nameRes = R.string.ex_plank_name,
-            gifResPath = "exercises/squat.gif",
+            gifResPath = "exercises/plank.gif",
             descriptionRes = R.string.ex_plank_desc,
             targetMuscleRes = R.string.muscle_abs,
             categoryRes = R.string.cat_core
@@ -72,7 +72,7 @@ object ExerciseProvider {
         Exercise(
             id = "burpee",
             nameRes = R.string.ex_burpee_name,
-            gifResPath = "exercises/pushup.gif",
+            gifResPath = "exercises/burpee.gif",
             descriptionRes = R.string.ex_burpee_desc,
             targetMuscleRes = R.string.muscle_full_body,
             categoryRes = R.string.cat_full_body
