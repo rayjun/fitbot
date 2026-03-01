@@ -18,9 +18,9 @@ private val DarkColorScheme = darkColorScheme(
     primaryContainer = SportyOrangeDark,
     onPrimaryContainer = Color.White,
     
-    secondary = SportyTeal,
+    secondary = SportyOrangeLight,
     onSecondary = Color.Black,
-    secondaryContainer = Color(0xFF00B8D4),
+    secondaryContainer = MutedDarkOrange,
     
     background = CarbonBlack,
     surface = DarkSurface,
@@ -40,9 +40,9 @@ private val LightColorScheme = lightColorScheme(
     primaryContainer = SportyOrangeLight,
     onPrimaryContainer = Color.Black,
     
-    secondary = SportyBlue,
+    secondary = SportyOrange,
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFF82B1FF),
+    secondaryContainer = PaleOrange,
     
     background = OffWhite,
     surface = WhiteSurface,

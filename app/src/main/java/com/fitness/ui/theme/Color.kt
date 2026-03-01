@@ -6,6 +6,8 @@ import androidx.compose.ui.graphics.Color
 val SportyOrange = Color(0xFFFF5722)
 val SportyOrangeDark = Color(0xFFE64A19)
 val SportyOrangeLight = Color(0xFFFF8A65)
+val PaleOrange = Color(0xFFFFE0B2) // For light mode selected tab
+val MutedDarkOrange = Color(0xFF5D4037) // For dark mode selected tab
 
 // Energetic Blue / Teal
 val SportyBlue = Color(0xFF2962FF)
