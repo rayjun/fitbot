@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fitness.data.local.AppDatabase
 import com.fitness.data.local.PlanEntity
+import com.fitness.model.PlannedExercise
 import com.fitness.model.RoutineDay
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -66,13 +67,13 @@ class PlanViewModel(context: Context) : ViewModel() {
         }
     }
 
-    fun updatePlanDay(dayOfWeek: Int, isRest: Boolean, exerciseIds: List<String>) {
+    fun updatePlanDay(dayOfWeek: Int, isRest: Boolean, exercises: List<PlannedExercise>) {
         val current = currentRoutine.value.toMutableList()
         val index = current.indexOfFirst { it.dayOfWeek == dayOfWeek }
         if (index != -1) {
-            current[index] = current[index].copy(isRest = isRest, exercises = exerciseIds)
+            current[index] = current[index].copy(isRest = isRest, exercises = exercises)
         } else {
-            current.add(RoutineDay(dayOfWeek, isRest, exerciseIds))
+            current.add(RoutineDay(dayOfWeek, isRest, exercises))
         }
         updatePlan(currentPlan.value?.name ?: "Weekly Routine", current)
     }

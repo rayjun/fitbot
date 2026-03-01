@@ -13,6 +13,9 @@ sealed class Screen(val route: String, val title: String? = null, val icon: Imag
     object Workout : Screen("workout/{exerciseId}") {
         fun createRoute(exerciseId: String) = "workout/$exerciseId"
     }
+    object ExerciseDetail : Screen("exercise_detail/{exerciseId}") {
+        fun createRoute(exerciseId: String) = "exercise_detail/$exerciseId"
+    }
     object PlanSession : Screen("plan_session/{dayOfWeek}") {
         fun createRoute(dayOfWeek: Int) = "plan_session/$dayOfWeek"
     }

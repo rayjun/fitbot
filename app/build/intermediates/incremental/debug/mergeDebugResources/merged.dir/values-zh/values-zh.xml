@@ -22,6 +22,8 @@
     <string name="day_tue">星期二</string>
     <string name="day_unknown">未知</string>
     <string name="day_wed">星期三</string>
+    <string name="detail_instructions">动作要领</string>
+    <string name="detail_target_muscle">目标肌肉</string>
     <string name="dialog_cancel">取消</string>
     <string name="edit_day">编辑单日安排</string>
     <string name="edit_quote">编辑座右铭</string>

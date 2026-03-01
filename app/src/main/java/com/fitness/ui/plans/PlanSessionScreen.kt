@@ -32,7 +32,7 @@ fun PlanSessionScreen(
 ) {
     val currentPlan by planViewModel.currentPlan.collectAsStateWithLifecycle()
     val currentRoutine by planViewModel.currentRoutine.collectAsStateWithLifecycle()
-    val completedExercises by workoutViewModel.completedExercises.collectAsStateWithLifecycle(emptyList())
+    val setsInSession by workoutViewModel.setsInSession.collectAsStateWithLifecycle()
     
     // 进入此页面自动启动新训练会话
     LaunchedEffect(Unit) {
@@ -44,10 +44,8 @@ fun PlanSessionScreen(
         workoutViewModel.refreshSets()
     }
 
-    val exercises = remember(currentRoutine, dayOfWeek) {
-        val todayRoutine = currentRoutine.find { it.dayOfWeek == dayOfWeek }
-        val ids = todayRoutine?.exercises ?: emptyList()
-        ids.mapNotNull { id -> ExerciseProvider.exercises.find { it.id == id.trim() } }
+    val plannedExercises = remember(currentRoutine, dayOfWeek) {
+        currentRoutine.find { it.dayOfWeek == dayOfWeek }?.exercises ?: emptyList()
     }
 
     Scaffold(
@@ -67,36 +65,43 @@ fun PlanSessionScreen(
             Spacer(modifier = Modifier.height(16.dp))
             
             LazyColumn(modifier = Modifier.weight(1f)) {
-                items(exercises) { exercise ->
-                    val isCompleted = completedExercises.contains(exercise.id)
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .clickable { onExerciseClick(exercise) },
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (isCompleted) 
-                                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) 
-                                else MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    ) {
-                        ListItem(
-                            headlineContent = { 
-                                Text(
-                                    stringResource(exercise.nameRes), 
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isCompleted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
-                                ) 
-                            },
-                            supportingContent = { Text(stringResource(exercise.targetMuscleRes)) },
-                            trailingContent = {
-                                Icon(
-                                    Icons.Default.CheckCircle, 
-                                    contentDescription = null,
-                                    tint = if (isCompleted) MaterialTheme.colorScheme.primary else Color.Gray.copy(alpha = 0.3f)
-                                )
-                            }
-                        )
+                items(plannedExercises) { planned ->
+                    val exercise = ExerciseProvider.exercises.find { it.id == planned.id }
+                    if (exercise != null) {
+                        val completedCount = setsInSession.count { it.exerciseName == exercise.id }
+                        val isFinished = completedCount >= planned.targetSets
+                        
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 4.dp)
+                                .clickable { onExerciseClick(exercise) },
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (isFinished) 
+                                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f) 
+                                    else MaterialTheme.colorScheme.surfaceVariant
+                            )
+                        ) {
+                            ListItem(
+                                headlineContent = { 
+                                    Text(
+                                        stringResource(exercise.nameRes), 
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isFinished) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    ) 
+                                },
+                                supportingContent = { 
+                                    Text("${stringResource(exercise.targetMuscleRes)} • $completedCount / ${planned.targetSets}") 
+                                },
+                                trailingContent = {
+                                    Icon(
+                                        Icons.Default.CheckCircle, 
+                                        contentDescription = null,
+                                        tint = if (isFinished) MaterialTheme.colorScheme.primary else Color.Gray.copy(alpha = 0.3f)
+                                    )
+                                }
+                            )
+                        }
                     }
                 }
             }

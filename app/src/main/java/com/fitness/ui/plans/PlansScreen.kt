@@ -8,8 +8,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +24,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fitness.R
 import com.fitness.data.ExerciseProvider
+import com.fitness.model.PlannedExercise
 import com.fitness.model.RoutineDay
 import com.fitness.ui.workout.WorkoutViewModel
 import java.text.SimpleDateFormat
@@ -149,10 +152,15 @@ fun CurrentPlanView(
 fun EditDayDialog(
     day: RoutineDay,
     onDismiss: () -> Unit,
-    onSave: (Boolean, List<String>) -> Unit
+    onSave: (Boolean, List<PlannedExercise>) -> Unit
 ) {
     var isRest by remember { mutableStateOf(day.isRest) }
-    val selectedExercises = remember { mutableStateListOf(*day.exercises.toTypedArray()) }
+    // Map of exercise ID to targetSets
+    val selectedMap = remember { 
+        mutableStateMapOf<String, Int>().apply {
+            day.exercises.forEach { put(it.id, it.targetSets) }
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -171,25 +179,53 @@ fun EditDayDialog(
                     Text(stringResource(R.string.select_exercises), fontWeight = FontWeight.Bold)
                     LazyColumn(modifier = Modifier.weight(1f, fill = false)) {
                         items(ExerciseProvider.exercises) { exercise ->
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        if (selectedExercises.contains(exercise.id)) {
-                                            selectedExercises.remove(exercise.id)
-                                        } else {
-                                            selectedExercises.add(exercise.id)
+                            val currentSets = selectedMap[exercise.id]
+                            val isChecked = currentSets != null
+                            
+                            Column(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable {
+                                            if (isChecked) {
+                                                selectedMap.remove(exercise.id)
+                                            } else {
+                                                selectedMap[exercise.id] = 3
+                                            }
+                                        }
+                                ) {
+                                    Checkbox(
+                                        checked = isChecked,
+                                        onCheckedChange = null
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(stringResource(exercise.nameRes), modifier = Modifier.weight(1f))
+                                    
+                                    if (isChecked) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            IconButton(
+                                                onClick = { 
+                                                    val s = selectedMap[exercise.id] ?: 3
+                                                    if (s > 1) selectedMap[exercise.id] = s - 1
+                                                },
+                                                modifier = Modifier.size(32.dp)
+                                            ) {
+                                                Icon(Icons.Default.Remove, null, modifier = Modifier.size(16.dp))
+                                            }
+                                            Text(text = "${selectedMap[exercise.id]}", modifier = Modifier.padding(horizontal = 4.dp))
+                                            IconButton(
+                                                onClick = { 
+                                                    val s = selectedMap[exercise.id] ?: 3
+                                                    selectedMap[exercise.id] = s + 1
+                                                },
+                                                modifier = Modifier.size(32.dp)
+                                            ) {
+                                                Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp))
+                                            }
                                         }
                                     }
-                                    .padding(vertical = 8.dp)
-                            ) {
-                                Checkbox(
-                                    checked = selectedExercises.contains(exercise.id),
-                                    onCheckedChange = null
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(stringResource(exercise.nameRes))
+                                }
                             }
                         }
                     }
@@ -197,7 +233,10 @@ fun EditDayDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = { onSave(isRest, selectedExercises.toList()) }) {
+            TextButton(onClick = { 
+                val list = selectedMap.map { PlannedExercise(it.key, it.value) }
+                onSave(isRest, list) 
+            }) {
                 Text(stringResource(R.string.save))
             }
         },

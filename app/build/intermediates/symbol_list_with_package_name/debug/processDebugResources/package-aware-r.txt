@@ -1036,6 +1036,8 @@ string day_unknown
 string day_wed
 string default_error_message
 string default_popup_window_title
+string detail_instructions
+string detail_target_muscle
 string dialog_cancel
 string dropdown_menu
 string edit_day

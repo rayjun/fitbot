@@ -22,6 +22,8 @@
     <string name="day_tue">Tuesday</string>
     <string name="day_unknown">Unknown</string>
     <string name="day_wed">Wednesday</string>
+    <string name="detail_instructions">Instructions</string>
+    <string name="detail_target_muscle">Target Muscle</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="edit_day">Edit Day</string>
     <string name="edit_quote">Edit Quote</string>

@@ -178,8 +178,18 @@ class MainActivity : AppCompatActivity() {
                                     }
                                 },
                                 onExerciseClick = { exercise ->
-                                    navController.navigate(Screen.Workout.createRoute(exercise.id))
+                                    navController.navigate(Screen.ExerciseDetail.createRoute(exercise.id))
                                 }
+                            )
+                        }
+                        composable(
+                            route = Screen.ExerciseDetail.route,
+                            arguments = listOf(navArgument("exerciseId") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val exerciseId = backStackEntry.arguments?.getString("exerciseId") ?: ""
+                            com.fitness.ui.library.ExerciseDetailScreen(
+                                exerciseId = exerciseId,
+                                onBack = { navController.popBackStack() }
                             )
                         }
                         composable(Screen.Plans.route) {

@@ -77,6 +77,9 @@
     <string name="theme_dark">深色</string>
     <string name="edit_quote">编辑座右铭</string>
 
+    <string name="detail_target_muscle">目标肌肉</string>
+    <string name="detail_instructions">动作要领</string>
+
     <!-- Exercises -->
     <!-- Categories -->
     <string name="cat_chest">胸部</string>

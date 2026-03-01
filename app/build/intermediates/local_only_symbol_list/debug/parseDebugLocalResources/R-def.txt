@@ -22,6 +22,8 @@ string day_thu
 string day_tue
 string day_unknown
 string day_wed
+string detail_instructions
+string detail_target_muscle
 string dialog_cancel
 string edit_day
 string edit_quote

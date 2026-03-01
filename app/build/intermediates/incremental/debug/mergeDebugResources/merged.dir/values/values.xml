@@ -371,6 +371,8 @@
     <string name="day_wed">Wednesday</string>
     <string name="default_error_message">"Invalid input"</string>
     <string name="default_popup_window_title" ns2:ignore="ExtraTranslation">"Pop-Up Window"</string>
+    <string name="detail_instructions">Instructions</string>
+    <string name="detail_target_muscle">Target Muscle</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="dropdown_menu">"Dropdown menu"</string>
     <string name="edit_day">Edit Day</string>
