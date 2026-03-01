@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.fitness.app-mergeDebugResources-69:/values-bg/values-bg.xml",
+            "outputFile": "com.fitness.app-mergeDebugResources-70:/values-bg/values-bg.xml",
             "map": [
                 {
                     "source": "/Users/ray/.gradle/caches/transforms-3/52ce5e888cff8cecd7571222e3c2210a/transformed/jetified-play-services-basement-18.2.0/res/values-bg/values.xml",

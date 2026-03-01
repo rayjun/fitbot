@@ -69,7 +69,7 @@ fun ProfileScreen(
                         Icon(Icons.Default.AccountCircle, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color.Gray)
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(onClick = onLoginClick) {
-                            Text("Login to Google Drive")
+                            Text(stringResource(R.string.login_drive))
                         }
                     }
                 } else {
@@ -100,7 +100,7 @@ fun ProfileScreen(
                             ) {
                                 Text(userQuote, style = MaterialTheme.typography.bodyMedium)
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Icon(Icons.Default.Edit, contentDescription = "Edit Quote", modifier = Modifier.size(16.dp))
+                                Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_quote), modifier = Modifier.size(16.dp))
                             }
                         }
                     }
@@ -108,7 +108,7 @@ fun ProfileScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            Text("Workout Heatmap (90 days)", fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.heatmap_title), fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
 
             // Heatmap Component (Filled width layout)
@@ -117,16 +117,16 @@ fun ProfileScreen(
             }
 
             Spacer(modifier = Modifier.height(32.dp))
-            Text("General Settings", fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.settings_general), fontWeight = FontWeight.Bold)
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             SettingsItem(
                 icon = Icons.Default.Settings, 
-                title = "Theme Mode", 
+                title = stringResource(R.string.settings_theme), 
                 supportingText = when (themeMode) {
-                    "dark" -> "Dark"
-                    "light" -> "Light"
-                    else -> "System Default"
+                    "dark" -> stringResource(R.string.theme_dark)
+                    "light" -> stringResource(R.string.theme_light)
+                    else -> stringResource(R.string.theme_system)
                 }
             ) {
                 showThemeDialog = true
@@ -134,8 +134,8 @@ fun ProfileScreen(
 
             SettingsItem(
                 icon = Icons.Default.Language, 
-                title = "Language", 
-                supportingText = if (language == "zh") "简体中文" else "English"
+                title = stringResource(R.string.settings_language), 
+                supportingText = if (language == "zh") stringResource(R.string.lang_zh) else stringResource(R.string.lang_en)
             ) {
                 showLanguageDialog = true
             }
@@ -153,7 +153,7 @@ fun ProfileScreen(
                 ) {
                     Icon(Icons.AutoMirrored.Filled.Logout, null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Logout")
+                    Text(stringResource(R.string.logout))
                 }
             }
         }
@@ -162,11 +162,11 @@ fun ProfileScreen(
     if (showLanguageDialog) {
         AlertDialog(
             onDismissRequest = { showLanguageDialog = false },
-            title = { Text("Language") },
+            title = { Text(stringResource(R.string.settings_language)) },
             text = {
                 Column {
                     ListItem(
-                        headlineContent = { Text("简体中文") },
+                        headlineContent = { Text(stringResource(R.string.lang_zh)) },
                         modifier = Modifier.clickable {
                             settingsViewModel.setLanguage("zh")
                             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("zh"))
@@ -174,7 +174,7 @@ fun ProfileScreen(
                         }
                     )
                     ListItem(
-                        headlineContent = { Text("English") },
+                        headlineContent = { Text(stringResource(R.string.lang_en)) },
                         modifier = Modifier.clickable {
                             settingsViewModel.setLanguage("en")
                             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"))
@@ -184,7 +184,7 @@ fun ProfileScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showLanguageDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showLanguageDialog = false }) { Text(stringResource(R.string.dialog_cancel)) }
             }
         )
     }
@@ -192,25 +192,25 @@ fun ProfileScreen(
     if (showThemeDialog) {
         AlertDialog(
             onDismissRequest = { showThemeDialog = false },
-            title = { Text("Theme Mode") },
+            title = { Text(stringResource(R.string.settings_theme)) },
             text = {
                 Column {
                     ListItem(
-                        headlineContent = { Text("System Default") },
+                        headlineContent = { Text(stringResource(R.string.theme_system)) },
                         modifier = Modifier.clickable {
                             settingsViewModel.setThemeMode("system")
                             showThemeDialog = false
                         }
                     )
                     ListItem(
-                        headlineContent = { Text("Light") },
+                        headlineContent = { Text(stringResource(R.string.theme_light)) },
                         modifier = Modifier.clickable {
                             settingsViewModel.setThemeMode("light")
                             showThemeDialog = false
                         }
                     )
                     ListItem(
-                        headlineContent = { Text("Dark") },
+                        headlineContent = { Text(stringResource(R.string.theme_dark)) },
                         modifier = Modifier.clickable {
                             settingsViewModel.setThemeMode("dark")
                             showThemeDialog = false
@@ -219,7 +219,7 @@ fun ProfileScreen(
                 }
             },
             confirmButton = {
-                TextButton(onClick = { showThemeDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showThemeDialog = false }) { Text(stringResource(R.string.dialog_cancel)) }
             }
         )
     }
@@ -228,7 +228,7 @@ fun ProfileScreen(
         var tempQuote by remember { mutableStateOf(userQuote) }
         AlertDialog(
             onDismissRequest = { showQuoteDialog = false },
-            title = { Text("Edit Quote") },
+            title = { Text(stringResource(R.string.edit_quote)) },
             text = {
                 OutlinedTextField(
                     value = tempQuote,
@@ -240,10 +240,10 @@ fun ProfileScreen(
                 TextButton(onClick = { 
                     settingsViewModel.setUserQuote(tempQuote)
                     showQuoteDialog = false 
-                }) { Text("Save") }
+                }) { Text(stringResource(R.string.save)) }
             },
             dismissButton = {
-                TextButton(onClick = { showQuoteDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showQuoteDialog = false }) { Text(stringResource(R.string.dialog_cancel)) }
             }
         )
     }

@@ -1034,6 +1034,7 @@ string default_popup_window_title
 string dialog_cancel
 string dropdown_menu
 string edit_day
+string edit_quote
 string exercises_count
 string exercises_scheduled
 string finish_session
@@ -1044,6 +1045,7 @@ string indeterminate
 string is_rest_day
 string lang_en
 string lang_zh
+string login_drive
 string logout
 string logout_success
 string m3c_bottom_sheet_collapse_description
@@ -1131,11 +1133,15 @@ string session_progress
 string settings_dark_mode
 string settings_general
 string settings_language
+string settings_theme
 string start_training
 string status_bar_notification_info_overflow
 string switch_role
 string tab
 string template_percent
+string theme_dark
+string theme_light
+string theme_system
 string today_badge
 string today_task
 string tooltip_description

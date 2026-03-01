@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.fitness.app-mergeDebugResources-69:/values-zh-rHK/values-zh-rHK.xml",
+            "outputFile": "com.fitness.app-mergeDebugResources-70:/values-zh-rHK/values-zh-rHK.xml",
             "map": [
                 {
                     "source": "/Users/ray/.gradle/caches/transforms-3/4ab0a472ee88a329489ac2385f6f5ba2/transformed/jetified-foundation-release/res/values-zh-rHK/values-zh-rHK.xml",

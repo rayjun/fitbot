@@ -369,6 +369,7 @@
     <string name="dialog_cancel">Cancel</string>
     <string name="dropdown_menu">"Dropdown menu"</string>
     <string name="edit_day">Edit Day</string>
+    <string name="edit_quote">Edit Quote</string>
     <string name="exercises_count">Exercises: %1$d</string>
     <string name="exercises_scheduled">%1$d exercises scheduled.</string>
     <string name="finish_session">Finish Session</string>
@@ -379,6 +380,7 @@
     <string name="is_rest_day">Is Rest Day?</string>
     <string name="lang_en">English</string>
     <string name="lang_zh">简体中文</string>
+    <string name="login_drive">Login to Google Drive</string>
     <string name="logout">Logout</string>
     <string name="logout_success">Logged out</string>
     <string name="m3c_bottom_sheet_collapse_description">Collapse bottom sheet</string>
@@ -470,11 +472,15 @@
     <string name="settings_dark_mode">Dark Mode</string>
     <string name="settings_general">General Settings</string>
     <string name="settings_language">Language</string>
+    <string name="settings_theme">Theme Mode</string>
     <string name="start_training">Start Training</string>
     <string name="status_bar_notification_info_overflow">999+</string>
     <string name="switch_role">Switch</string>
     <string name="tab">Tab</string>
     <string name="template_percent"><ns1:g id="percentage">%1$d</ns1:g> percent.</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_system">System Default</string>
     <string name="today_badge">Today</string>
     <string name="today_task">Today\'s Task</string>
     <string name="tooltip_description">tooltip</string>

@@ -19,6 +19,7 @@ string day_unknown
 string day_wed
 string dialog_cancel
 string edit_day
+string edit_quote
 string exercises_count
 string exercises_scheduled
 string finish_session
@@ -27,6 +28,7 @@ string heatmap_title
 string is_rest_day
 string lang_en
 string lang_zh
+string login_drive
 string logout
 string logout_success
 string nav_library
@@ -50,7 +52,11 @@ string session_progress
 string settings_dark_mode
 string settings_general
 string settings_language
+string settings_theme
 string start_training
+string theme_dark
+string theme_light
+string theme_system
 string today_badge
 string today_task
 string training_session

@@ -19,6 +19,7 @@
     <string name="day_wed">星期三</string>
     <string name="dialog_cancel">取消</string>
     <string name="edit_day">编辑单日安排</string>
+    <string name="edit_quote">编辑座右铭</string>
     <string name="exercises_count">动作数: %1$d</string>
     <string name="exercises_scheduled">已安排 %1$d 个训练动作。</string>
     <string name="finish_session">结束会话</string>
@@ -27,6 +28,7 @@
     <string name="is_rest_day">设为休息日？</string>
     <string name="lang_en">English</string>
     <string name="lang_zh">简体中文</string>
+    <string name="login_drive">登录 Google Drive</string>
     <string name="logout">退出登录</string>
     <string name="logout_success">已退出登录</string>
     <string name="nav_library">动作库</string>
@@ -50,7 +52,11 @@
     <string name="settings_dark_mode">深色模式</string>
     <string name="settings_general">通用设置</string>
     <string name="settings_language">语言 (Language)</string>
+    <string name="settings_theme">主题模式</string>
     <string name="start_training">开始今日训练</string>
+    <string name="theme_dark">深色</string>
+    <string name="theme_light">浅色</string>
+    <string name="theme_system">跟随系统</string>
     <string name="today_badge">今天</string>
     <string name="today_task">今日任务</string>
     <string name="training_session">训练会话</string>

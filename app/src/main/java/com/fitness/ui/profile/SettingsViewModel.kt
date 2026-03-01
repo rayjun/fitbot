@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-private val Context.dataStore by preferencesDataStore(name = "settings")
+val Context.dataStore by preferencesDataStore(name = "settings")
 
 class SettingsViewModel(private val context: Context) : ViewModel() {
     private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")

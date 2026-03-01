@@ -19,6 +19,7 @@
     <string name="day_wed">Wednesday</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="edit_day">Edit Day</string>
+    <string name="edit_quote">Edit Quote</string>
     <string name="exercises_count">Exercises: %1$d</string>
     <string name="exercises_scheduled">%1$d exercises scheduled.</string>
     <string name="finish_session">Finish Session</string>
@@ -27,6 +28,7 @@
     <string name="is_rest_day">Is Rest Day?</string>
     <string name="lang_en">English</string>
     <string name="lang_zh">简体中文</string>
+    <string name="login_drive">Login to Google Drive</string>
     <string name="logout">Logout</string>
     <string name="logout_success">Logged out</string>
     <string name="nav_library">Library</string>
@@ -50,7 +52,11 @@
     <string name="settings_dark_mode">Dark Mode</string>
     <string name="settings_general">General Settings</string>
     <string name="settings_language">Language</string>
+    <string name="settings_theme">Theme Mode</string>
     <string name="start_training">Start Training</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_system">System Default</string>
     <string name="today_badge">Today</string>
     <string name="today_task">Today\'s Task</string>
     <string name="training_session">Training Session</string>

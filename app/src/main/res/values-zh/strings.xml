@@ -68,4 +68,12 @@
     <string name="is_rest_day">设为休息日？</string>
     <string name="select_exercises">选择训练动作：</string>
     <string name="save">保存</string>
+    
+    <!-- Profile Sync -->
+    <string name="login_drive">登录 Google Drive</string>
+    <string name="settings_theme">主题模式</string>
+    <string name="theme_system">跟随系统</string>
+    <string name="theme_light">浅色</string>
+    <string name="theme_dark">深色</string>
+    <string name="edit_quote">编辑座右铭</string>
 </resources>
