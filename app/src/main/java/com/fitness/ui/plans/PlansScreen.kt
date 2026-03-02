@@ -40,7 +40,7 @@ fun PlansScreen(
     onStartPlan: (Int) -> Unit
 ) {
     val currentRoutine by viewModel.currentRoutine.collectAsStateWithLifecycle()
-    val allPlans by viewModel.allPlans.collectAsStateWithLifecycle()
+    val allHistorySets by workoutViewModel.allHistorySets.collectAsStateWithLifecycle()
     var showHistory by remember { mutableStateOf(false) }
 
     val todayOfWeek = LocalDate.now().dayOfWeek.value // 1 (Mon) - 7 (Sun)
@@ -48,17 +48,21 @@ fun PlansScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(if (showHistory) R.string.plan_history else R.string.current_plan)) },
+                title = { Text(stringResource(if (showHistory) R.string.history_title else R.string.current_plan)) },
                 actions = {
                     IconButton(onClick = { showHistory = !showHistory }) {
-                        Icon(Icons.Default.History, contentDescription = stringResource(R.string.plan_history))
+                        Icon(
+                            imageVector = Icons.Default.History, 
+                            contentDescription = stringResource(R.string.history_title),
+                            tint = if (showHistory) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                        )
                     }
                 }
             )
         }
     ) { padding ->
         if (showHistory) {
-            HistoryList(allPlans, padding)
+            WorkoutHistoryList(allHistorySets, padding)
         } else {
             CurrentPlanView(
                 routine = currentRoutine, 
@@ -68,6 +72,56 @@ fun PlansScreen(
                 workoutViewModel = workoutViewModel,
                 onStartPlan = onStartPlan
             )
+        }
+    }
+}
+
+@Composable
+fun WorkoutHistoryList(allSets: List<com.fitness.data.local.SetEntity>, padding: PaddingValues) {
+    if (allSets.isEmpty()) {
+        Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text(stringResource(R.string.history_empty), color = Color.Gray)
+        }
+    } else {
+        val grouped = allSets.groupBy { it.date }
+        LazyColumn(
+            modifier = Modifier.padding(padding).fillMaxSize(),
+            contentPadding = PaddingValues(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            grouped.forEach { (date, dailySets) ->
+                item {
+                    Text(
+                        text = date,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+                
+                val exercisesInDay = dailySets.groupBy { it.exerciseName }
+                items(exercisesInDay.toList()) { (exerciseId, exerciseSets) ->
+                    val exercise = ExerciseProvider.exercises.find { it.id == exerciseId }
+                    val name = exercise?.let { stringResource(it.nameRes) } ?: exerciseId
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    ) {
+                        ListItem(
+                            headlineContent = { Text(name, fontWeight = FontWeight.Medium) },
+                            supportingContent = {
+                                Text(exerciseSets.joinToString(" | ") { "${it.weight}kg x ${it.reps}" })
+                            },
+                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                        )
+                    }
+                }
+                item {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    HorizontalDivider()
+                }
+            }
         }
     }
 }
@@ -355,20 +409,6 @@ fun TodayTaskCard(
                     Text(stringResource(R.string.start_training))
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun HistoryList(plans: List<com.fitness.data.local.PlanEntity>, padding: PaddingValues) {
-    val df = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-    LazyColumn(modifier = Modifier.padding(padding).fillMaxSize()) {
-        items(plans) { plan ->
-            ListItem(
-                headlineContent = { Text(plan.name) },
-                supportingContent = { Text(stringResource(R.string.plan_created_at, df.format(Date(plan.createdAt)))) }
-            )
-            HorizontalDivider()
         }
     }
 }

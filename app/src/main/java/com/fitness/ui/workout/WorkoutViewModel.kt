@@ -42,6 +42,9 @@ class WorkoutViewModel(private val context: Context) : ViewModel() {
         .flatMapLatest { date -> dao.getSetsByDateFlow(date) }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
+    val allHistorySets: StateFlow<List<SetEntity>> = dao.getAllSetsFlow()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     val completedExercises: StateFlow<List<String>> = setsToday.map { sets ->
         sets.map { it.exerciseName }.distinct()
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
