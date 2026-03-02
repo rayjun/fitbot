@@ -88,6 +88,10 @@ class WorkoutViewModel(private val context: Context) : ViewModel() {
         return dao.getSetsByDate(dateStr).isNotEmpty()
     }
 
+    suspend fun getSetsByDate(dateStr: String): List<SetEntity> {
+        return dao.getSetsByDate(dateStr)
+    }
+
     /**
      * 检查某一天是否完成了计划中的所有动作及其目标组数
      */
