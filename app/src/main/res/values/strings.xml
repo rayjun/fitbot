@@ -64,6 +64,7 @@
     <string name="day_sat">Saturday</string>
     <string name="day_sun">Sunday</string>
     <string name="day_unknown">Unknown</string>
+    <string name="weekly_routine_name">Weekly Routine</string>
     <string name="create_routine">Create Weekly Routine</string>
     <string name="edit_day">Edit Day</string>
     <string name="is_rest_day">Is Rest Day?</string>

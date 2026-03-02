@@ -1210,7 +1210,8 @@ int string training_completed 0x7f0d00f9
 int string training_session 0x7f0d00fa
 int string update_plan 0x7f0d00fb
 int string week_overview 0x7f0d00fc
-int string weight_kg 0x7f0d00fd
+int string weekly_routine_name 0x7f0d00fd
+int string weight_kg 0x7f0d00fe
 int style AlertDialog_AppCompat 0x7f0e0000
 int style AlertDialog_AppCompat_Light 0x7f0e0001
 int style Animation_AppCompat_Dialog 0x7f0e0002

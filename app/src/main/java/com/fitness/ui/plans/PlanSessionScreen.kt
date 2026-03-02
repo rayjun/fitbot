@@ -41,8 +41,13 @@ fun PlanSessionScreen(
 
     Scaffold(
         topBar = {
+            val titleText = when (currentPlan?.name) {
+                "Weekly Routine" -> stringResource(com.fitness.R.string.weekly_routine_name)
+                null -> stringResource(com.fitness.R.string.training_session)
+                else -> currentPlan!!.name
+            }
             TopAppBar(
-                title = { Text(currentPlan?.name ?: stringResource(com.fitness.R.string.training_session)) },
+                title = { Text(titleText) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")

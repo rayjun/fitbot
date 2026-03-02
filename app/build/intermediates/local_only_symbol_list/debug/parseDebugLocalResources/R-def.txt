@@ -124,5 +124,6 @@ string training_completed
 string training_session
 string update_plan
 string week_overview
+string weekly_routine_name
 string weight_kg
 xml locales_config

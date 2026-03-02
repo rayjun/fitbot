@@ -131,11 +131,12 @@ fun CurrentPlanView(
             Spacer(modifier = Modifier.weight(1f))
             Text(stringResource(R.string.no_plan), color = MaterialTheme.colorScheme.outline)
             Spacer(modifier = Modifier.height(16.dp))
+            val routineName = stringResource(R.string.weekly_routine_name)
             Button(onClick = {
                 val defaultRoutine = (1..7).map { day ->
                     RoutineDay(day, isRest = (day == 3 || day == 7), exercises = emptyList())
                 }
-                viewModel.updatePlan("Weekly Routine", defaultRoutine)
+                viewModel.updatePlan(routineName, defaultRoutine)
             }) {
                 Text(stringResource(R.string.create_routine))
             }

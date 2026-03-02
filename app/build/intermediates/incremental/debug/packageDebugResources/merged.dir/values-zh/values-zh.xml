@@ -123,5 +123,6 @@
     <string name="training_session">训练会话</string>
     <string name="update_plan">更新计划</string>
     <string name="week_overview">本周安排总览</string>
+    <string name="weekly_routine_name">周训练计划</string>
     <string name="weight_kg">重量 (kg)</string>
 </resources>
