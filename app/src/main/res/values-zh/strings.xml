@@ -64,7 +64,7 @@
     <string name="day_sat">星期六</string>
     <string name="day_sun">星期日</string>
     <string name="day_unknown">未知</string>
-    <string name="weekly_routine_name">周训练计划</string>
+    <string name="weekly_routine_name">日训练计划</string>
     <string name="create_routine">创建周训练计划</string>
     <string name="edit_day">编辑单日安排</string>
     <string name="is_rest_day">设为休息日？</string>
