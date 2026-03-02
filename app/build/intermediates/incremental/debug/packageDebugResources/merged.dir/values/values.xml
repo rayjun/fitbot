@@ -70,6 +70,8 @@
     <string name="finish_session">Finish Session</string>
     <string name="finish_workout">Finish workout and sync</string>
     <string name="heatmap_title">Workout Heatmap</string>
+    <string name="history_empty">No records yet. Start training!</string>
+    <string name="history_title">Training History</string>
     <string name="is_rest_day">Is Rest Day?</string>
     <string name="lang_en">English</string>
     <string name="lang_zh">简体中文</string>

@@ -77,6 +77,9 @@
     <string name="theme_dark">Dark</string>
     <string name="edit_quote">Edit Quote</string>
     
+    <string name="history_title">Training History</string>
+    <string name="history_empty">No records yet. Start training!</string>
+    
     <string name="detail_target_muscle">Target Muscle</string>
     <string name="detail_instructions">Instructions</string>
 

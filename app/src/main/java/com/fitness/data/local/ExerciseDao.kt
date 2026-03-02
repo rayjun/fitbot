@@ -22,6 +22,9 @@ interface ExerciseDao {
     @Query("DELETE FROM exercise_sets WHERE id = :id")
     suspend fun deleteSet(id: Long)
 
+    @Query("SELECT * FROM exercise_sets ORDER BY timestamp DESC")
+    fun getAllSetsFlow(): kotlinx.coroutines.flow.Flow<List<SetEntity>>
+
     @Query("SELECT remoteId FROM exercise_sets")
     suspend fun getAllRemoteIds(): List<String>
 }

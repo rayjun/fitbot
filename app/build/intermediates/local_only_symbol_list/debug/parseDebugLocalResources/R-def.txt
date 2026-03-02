@@ -71,6 +71,8 @@ string exercises_scheduled
 string finish_session
 string finish_workout
 string heatmap_title
+string history_empty
+string history_title
 string is_rest_day
 string lang_en
 string lang_zh
