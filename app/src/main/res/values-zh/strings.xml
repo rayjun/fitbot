@@ -39,7 +39,7 @@
     <string name="finish_workout">完成训练并同步</string>
     
     <!-- Added Strings -->
-    <string name="session_progress">当前会话进度:</string>
+    <string name="session_progress">训练进度:</string>
     <string name="finish_session">结束会话</string>
     <string name="training_session">训练会话</string>
     <string name="dialog_cancel">取消</string>

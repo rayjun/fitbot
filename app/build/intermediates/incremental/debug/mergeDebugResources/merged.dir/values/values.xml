@@ -528,7 +528,7 @@
     <string name="select_exercises">Select Exercises:</string>
     <string name="selected">Selected</string>
     <string name="session_history">Current Session History:</string>
-    <string name="session_progress">Session Progress:</string>
+    <string name="session_progress">Training Progress:</string>
     <string name="settings_dark_mode">Dark Mode</string>
     <string name="settings_general">General Settings</string>
     <string name="settings_language">Language</string>

@@ -39,7 +39,7 @@
     <string name="finish_workout">Finish workout and sync</string>
     
     <!-- Added Strings -->
-    <string name="session_progress">Session Progress:</string>
+    <string name="session_progress">Training Progress:</string>
     <string name="finish_session">Finish Session</string>
     <string name="training_session">Training Session</string>
     <string name="dialog_cancel">Cancel</string>

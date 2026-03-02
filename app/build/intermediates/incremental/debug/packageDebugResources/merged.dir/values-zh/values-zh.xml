@@ -108,7 +108,7 @@
     <string name="save_set">保存此组记录</string>
     <string name="select_exercises">选择训练动作：</string>
     <string name="session_history">当前动作组数记录:</string>
-    <string name="session_progress">当前会话进度:</string>
+    <string name="session_progress">训练进度:</string>
     <string name="settings_dark_mode">深色模式</string>
     <string name="settings_general">通用设置</string>
     <string name="settings_language">语言 (Language)</string>
