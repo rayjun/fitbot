@@ -39,19 +39,25 @@ fun ProfileScreen(
     settingsViewModel: SettingsViewModel,
     account: GoogleSignInAccount?,
     onLoginClick: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     val heatmapData by viewModel.heatmapData.collectAsStateWithLifecycle()
-    val themeMode by settingsViewModel.themeMode.collectAsStateWithLifecycle()
-    val language by settingsViewModel.language.collectAsStateWithLifecycle()
     val userQuote by settingsViewModel.userQuote.collectAsStateWithLifecycle()
     
-    var showLanguageDialog by remember { mutableStateOf(false) }
-    var showThemeDialog by remember { mutableStateOf(false) }
     var showQuoteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.nav_profile)) }) }
+        topBar = { 
+            TopAppBar(
+                title = { Text(stringResource(R.string.nav_profile)) },
+                actions = {
+                    IconButton(onClick = onSettingsClick) {
+                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                    }
+                }
+            ) 
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -116,30 +122,6 @@ fun ProfileScreen(
                 WorkoutHeatMap(heatmapData)
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-            Text(stringResource(R.string.settings_general), fontWeight = FontWeight.Bold)
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-            SettingsItem(
-                icon = Icons.Default.Settings, 
-                title = stringResource(R.string.settings_theme), 
-                supportingText = when (themeMode) {
-                    "dark" -> stringResource(R.string.theme_dark)
-                    "light" -> stringResource(R.string.theme_light)
-                    else -> stringResource(R.string.theme_system)
-                }
-            ) {
-                showThemeDialog = true
-            }
-
-            SettingsItem(
-                icon = Icons.Default.Language, 
-                title = stringResource(R.string.settings_language), 
-                supportingText = if (language == "zh") stringResource(R.string.lang_zh) else stringResource(R.string.lang_en)
-            ) {
-                showLanguageDialog = true
-            }
-            
             Spacer(modifier = Modifier.weight(1f))
             
             if (account != null) {
@@ -157,71 +139,6 @@ fun ProfileScreen(
                 }
             }
         }
-    }
-
-    if (showLanguageDialog) {
-        AlertDialog(
-            onDismissRequest = { showLanguageDialog = false },
-            title = { Text(stringResource(R.string.settings_language)) },
-            text = {
-                Column {
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.lang_zh)) },
-                        modifier = Modifier.clickable {
-                            settingsViewModel.setLanguage("zh")
-                            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("zh"))
-                            showLanguageDialog = false
-                        }
-                    )
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.lang_en)) },
-                        modifier = Modifier.clickable {
-                            settingsViewModel.setLanguage("en")
-                            AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"))
-                            showLanguageDialog = false
-                        }
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showLanguageDialog = false }) { Text(stringResource(R.string.dialog_cancel)) }
-            }
-        )
-    }
-
-    if (showThemeDialog) {
-        AlertDialog(
-            onDismissRequest = { showThemeDialog = false },
-            title = { Text(stringResource(R.string.settings_theme)) },
-            text = {
-                Column {
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.theme_system)) },
-                        modifier = Modifier.clickable {
-                            settingsViewModel.setThemeMode("system")
-                            showThemeDialog = false
-                        }
-                    )
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.theme_light)) },
-                        modifier = Modifier.clickable {
-                            settingsViewModel.setThemeMode("light")
-                            showThemeDialog = false
-                        }
-                    )
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.theme_dark)) },
-                        modifier = Modifier.clickable {
-                            settingsViewModel.setThemeMode("dark")
-                            showThemeDialog = false
-                        }
-                    )
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = { showThemeDialog = false }) { Text(stringResource(R.string.dialog_cancel)) }
-            }
-        )
     }
 
     if (showQuoteDialog) {

@@ -37,6 +37,7 @@ import com.fitness.ui.plans.DayDetailsScreen
 import com.fitness.ui.profile.ProfileViewModel
 import com.fitness.ui.profile.ProfileScreen
 import com.fitness.ui.profile.SettingsViewModel
+import com.fitness.ui.profile.SettingsScreen
 import com.fitness.ui.theme.FitnessTheme
 import com.fitness.ui.workout.WorkoutRecordingScreen
 import com.fitness.ui.workout.WorkoutViewModel
@@ -251,7 +252,16 @@ class MainActivity : AppCompatActivity() {
                                         lastAccount = null
                                         Toast.makeText(context, context.getString(R.string.logout_success), Toast.LENGTH_SHORT).show()
                                     }
+                                },
+                                onSettingsClick = {
+                                    navController.navigate(Screen.Settings.route)
                                 }
+                            )
+                        }
+                        composable(Screen.Settings.route) {
+                            SettingsScreen(
+                                settingsViewModel = settingsViewModel,
+                                onBack = { navController.popBackStack() }
                             )
                         }
                         composable(
