@@ -19,4 +19,7 @@ sealed class Screen(val route: String, val title: String? = null, val icon: Imag
     object PlanSession : Screen("plan_session/{dayOfWeek}") {
         fun createRoute(dayOfWeek: Int) = "plan_session/$dayOfWeek"
     }
+    object DayDetails : Screen("day_details/{date}") {
+        fun createRoute(date: String) = "day_details/$date"
+    }
 }

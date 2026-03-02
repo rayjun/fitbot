@@ -33,6 +33,7 @@ import com.fitness.ui.navigation.Screen
 import com.fitness.ui.plans.PlanViewModel
 import com.fitness.ui.plans.PlansScreen
 import com.fitness.ui.plans.PlanSessionScreen
+import com.fitness.ui.plans.DayDetailsScreen
 import com.fitness.ui.profile.ProfileViewModel
 import com.fitness.ui.profile.ProfileScreen
 import com.fitness.ui.profile.SettingsViewModel
@@ -199,7 +200,21 @@ class MainActivity : AppCompatActivity() {
                                 onStartPlan = { dayOfWeek ->
                                     workoutViewModel.startNewSession()
                                     navController.navigate(Screen.PlanSession.createRoute(dayOfWeek))
+                                },
+                                onDayClick = { date ->
+                                    navController.navigate(Screen.DayDetails.createRoute(date))
                                 }
+                            )
+                        }
+                        composable(
+                            route = Screen.DayDetails.route,
+                            arguments = listOf(navArgument("date") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val date = backStackEntry.arguments?.getString("date") ?: ""
+                            DayDetailsScreen(
+                                date = date,
+                                viewModel = workoutViewModel,
+                                onBack = { navController.popBackStack() }
                             )
                         }
                         composable(
