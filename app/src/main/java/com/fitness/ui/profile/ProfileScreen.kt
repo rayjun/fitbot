@@ -268,7 +268,8 @@ fun WorkoutHeatMap(data: Map<String, Int>) {
             list.reversed()
         }
         
-        val df = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        // 强制使用 Locale.US 确保与数据库中的日期字符串格式 (yyyy-MM-dd) 完全匹配
+        val df = remember { SimpleDateFormat("yyyy-MM-dd", Locale.US) }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -282,9 +283,9 @@ fun WorkoutHeatMap(data: Map<String, Int>) {
                         val count = data[dateStr] ?: 0
                         val color = when {
                             count == 0 -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
-                            count < 5 -> Color(0xFF9BE9A8)
-                            count < 15 -> Color(0xFF40C463)
-                            else -> Color(0xFF30A14E)
+                            count < 5 -> Color(0xFF40C463) // 只要有健身，就直接使用明显的绿色
+                            count < 15 -> Color(0xFF30A14E)
+                            else -> Color(0xFF216E39) // 极高强度使用深绿色
                         }
                         Box(
                             modifier = Modifier
