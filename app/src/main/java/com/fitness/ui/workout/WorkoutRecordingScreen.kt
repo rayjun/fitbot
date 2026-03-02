@@ -32,7 +32,7 @@ fun WorkoutRecordingScreen(
 
     var weightInput by remember { mutableStateOf("0") }
     var repsInput by remember { mutableStateOf("12") }
-    val sets by viewModel.setsInSession.collectAsStateWithLifecycle()
+    val sets by viewModel.setsToday.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {

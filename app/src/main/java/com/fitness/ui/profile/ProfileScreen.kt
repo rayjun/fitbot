@@ -4,7 +4,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,7 +12,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
@@ -29,8 +28,6 @@ import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.fitness.R
-import com.fitness.data.ExerciseProvider
-import com.fitness.data.local.SetEntity
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import java.text.SimpleDateFormat
 import java.util.*
@@ -45,7 +42,6 @@ fun ProfileScreen(
     onLogout: () -> Unit
 ) {
     val heatmapData by viewModel.heatmapData.collectAsStateWithLifecycle()
-    val allHistorySets by viewModel.allHistorySets.collectAsStateWithLifecycle()
     val themeMode by settingsViewModel.themeMode.collectAsStateWithLifecycle()
     val language by settingsViewModel.language.collectAsStateWithLifecycle()
     val userQuote by settingsViewModel.userQuote.collectAsStateWithLifecycle()
@@ -57,159 +53,112 @@ fun ProfileScreen(
     Scaffold(
         topBar = { TopAppBar(title = { Text(stringResource(R.string.nav_profile)) }) }
     ) { padding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(vertical = 16.dp)
+                .padding(16.dp)
         ) {
             // User Info Card
-            item {
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    if (account == null) {
-                        Column(
-                            modifier = Modifier.padding(16.dp).fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(Icons.Default.AccountCircle, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color.Gray)
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Button(onClick = onLoginClick) {
-                                Text(stringResource(R.string.login_drive))
+            Card(modifier = Modifier.fillMaxWidth()) {
+                if (account == null) {
+                    Column(
+                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(Icons.Default.AccountCircle, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color.Gray)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = onLoginClick) {
+                            Text(stringResource(R.string.login_drive))
+                        }
+                    }
+                } else {
+                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        if (account.photoUrl != null) {
+                            AsyncImage(
+                                model = account.photoUrl,
+                                contentDescription = "Profile Picture",
+                                modifier = Modifier.size(64.dp).clip(CircleShape)
+                            )
+                        } else {
+                            Surface(
+                                modifier = Modifier.size(64.dp),
+                                shape = CircleShape,
+                                color = MaterialTheme.colorScheme.secondaryContainer
+                            ) {
+                                Box(contentAlignment = Alignment.Center) {
+                                    Text(account.displayName?.firstOrNull()?.toString() ?: "U", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                                }
                             }
                         }
-                    } else {
-                        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            if (account.photoUrl != null) {
-                                AsyncImage(
-                                    model = account.photoUrl,
-                                    contentDescription = "Profile Picture",
-                                    modifier = Modifier.size(64.dp).clip(CircleShape)
-                                )
-                            } else {
-                                Surface(
-                                    modifier = Modifier.size(64.dp),
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.secondaryContainer
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Text(account.displayName?.firstOrNull()?.toString() ?: "U", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Column(modifier = Modifier.weight(1f)) {
-                                Text(account.displayName ?: "User", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier = Modifier.clickable { showQuoteDialog = true }.padding(top = 4.dp)
-                                ) {
-                                    Text(userQuote, style = MaterialTheme.typography.bodyMedium)
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_quote), modifier = Modifier.size(16.dp))
-                                }
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(account.displayName ?: "User", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.clickable { showQuoteDialog = true }.padding(top = 4.dp)
+                            ) {
+                                Text(userQuote, style = MaterialTheme.typography.bodyMedium)
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_quote), modifier = Modifier.size(16.dp))
                             }
                         }
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(stringResource(R.string.heatmap_title), fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Heatmap
-            item {
-                Text(stringResource(R.string.heatmap_title), fontWeight = FontWeight.Bold)
-                Spacer(modifier = Modifier.height(8.dp))
-                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-                    WorkoutHeatMap(heatmapData)
-                }
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+                WorkoutHeatMap(heatmapData)
             }
 
-            // Settings
-            item {
-                Text(stringResource(R.string.settings_general), fontWeight = FontWeight.Bold)
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(stringResource(R.string.settings_general), fontWeight = FontWeight.Bold)
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                SettingsItem(
-                    icon = Icons.Default.Settings, 
-                    title = stringResource(R.string.settings_theme), 
-                    supportingText = when (themeMode) {
-                        "dark" -> stringResource(R.string.theme_dark)
-                        "light" -> stringResource(R.string.theme_light)
-                        else -> stringResource(R.string.theme_system)
-                    }
-                ) {
-                    showThemeDialog = true
+            SettingsItem(
+                icon = Icons.Default.Settings, 
+                title = stringResource(R.string.settings_theme), 
+                supportingText = when (themeMode) {
+                    "dark" -> stringResource(R.string.theme_dark)
+                    "light" -> stringResource(R.string.theme_light)
+                    else -> stringResource(R.string.theme_system)
                 }
-
-                SettingsItem(
-                    icon = Icons.Default.Language, 
-                    title = stringResource(R.string.settings_language), 
-                    supportingText = if (language == "zh") stringResource(R.string.lang_zh) else stringResource(R.string.lang_en)
-                ) {
-                    showLanguageDialog = true
-                }
+            ) {
+                showThemeDialog = true
             }
 
-            // History Section
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.History, null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.history_title), fontWeight = FontWeight.Bold)
-                }
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            SettingsItem(
+                icon = Icons.Default.Language, 
+                title = stringResource(R.string.settings_language), 
+                supportingText = if (language == "zh") stringResource(R.string.lang_zh) else stringResource(R.string.lang_en)
+            ) {
+                showLanguageDialog = true
             }
-
-            if (allHistorySets.isEmpty()) {
-                item {
-                    Text(stringResource(R.string.history_empty), style = MaterialTheme.typography.bodyMedium, color = Color.Gray)
-                }
-            } else {
-                val grouped = allHistorySets.groupBy { it.date }
-                grouped.forEach { (date, dailySets) ->
-                    item {
-                        Text(date, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-                    }
-                    val exercisesInDay = dailySets.groupBy { it.exerciseName }
-                    items(exercisesInDay.toList()) { (exerciseId, exerciseSets) ->
-                        val exercise = ExerciseProvider.exercises.find { it.id == exerciseId }
-                        val name = exercise?.let { stringResource(it.nameRes) } ?: exerciseId
-                        ListItem(
-                            headlineContent = { Text(name, fontWeight = FontWeight.Medium) },
-                            supportingContent = {
-                                Text(exerciseSets.joinToString(" | ") { "${it.weight}kg x ${it.reps}" })
-                            },
-                            colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                        )
-                    }
-                    item {
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                }
-            }
-
-            // Logout
+            
+            Spacer(modifier = Modifier.weight(1f))
+            
             if (account != null) {
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Button(
-                        onClick = onLogout,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer, 
-                            contentColor = MaterialTheme.colorScheme.onErrorContainer
-                        )
-                    ) {
-                        Icon(Icons.AutoMirrored.Filled.Logout, null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.logout))
-                    }
+                Button(
+                    onClick = onLogout,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer, 
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.Logout, null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.logout))
                 }
             }
         }
     }
 
-    // Dialogs ... (keep existing)
     if (showLanguageDialog) {
         AlertDialog(
             onDismissRequest = { showLanguageDialog = false },
@@ -360,7 +309,6 @@ fun SettingsItem(
         headlineContent = { Text(title) },
         supportingContent = supportingText?.let { { Text(it) } },
         leadingContent = { Icon(icon, null) },
-        modifier = Modifier.clickable { onClick() },
-        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+        modifier = Modifier.clickable { onClick() }
     )
 }

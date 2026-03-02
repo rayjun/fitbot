@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
@@ -81,7 +82,29 @@ fun PlanSessionScreen(
                                     ) 
                                 },
                                 supportingContent = { 
-                                    Text("${stringResource(exercise.targetMuscleRes)} • $completedCount / ${planned.targetSets}") 
+                                    Column {
+                                        Text("${stringResource(exercise.targetMuscleRes)} • $completedCount / ${planned.targetSets}") 
+                                        if (completedCount > 0) {
+                                            val dailySets = setsToday.filter { it.exerciseName == exercise.id }
+                                            Row(
+                                                modifier = Modifier.padding(top = 8.dp).fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                dailySets.forEach { set ->
+                                                    Surface(
+                                                        shape = RoundedCornerShape(4.dp),
+                                                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                                                    ) {
+                                                        Text(
+                                                            text = "${set.weight}x${set.reps}",
+                                                            style = MaterialTheme.typography.labelSmall,
+                                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 },
                                 trailingContent = {
                                     Icon(

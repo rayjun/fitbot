@@ -16,12 +16,11 @@ class ProfileViewModel(context: Context) : ViewModel() {
     private val db = AppDatabase.getInstance(context)
     private val dao = db.exerciseDao()
 
-    // 暴露所有的历史锻炼记录，按时间倒序
-    val allHistorySets: StateFlow<List<SetEntity>> = dao.getAllSetsFlow()
+    private val allSets: StateFlow<List<SetEntity>> = dao.getAllSetsFlow()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    // 响应式的热力图数据，当数据库变化时自动更新
-    val heatmapData: StateFlow<Map<String, Int>> = allHistorySets.map { sets ->
+    // 响应式的热力图数据
+    val heatmapData: StateFlow<Map<String, Int>> = allSets.map { sets ->
         sets.groupBy { it.date }.mapValues { it.value.size }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 }
