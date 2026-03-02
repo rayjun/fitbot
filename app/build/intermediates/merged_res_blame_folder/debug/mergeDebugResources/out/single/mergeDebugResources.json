@@ -6,5 +6,9 @@
     {
         "merged": "com.fitness.app-debug-72:/mipmap-xxxhdpi_ic_launcher.png.flat",
         "source": "com.fitness.app-main-74:/mipmap-xxxhdpi/ic_launcher.png"
+    },
+    {
+        "merged": "/Users/ray/.gradle/daemon/8.4/com.fitness.app-debug-72:/mipmap-xxxhdpi_ic_launcher.png.flat",
+        "source": "/Users/ray/.gradle/daemon/8.4/com.fitness.app-main-74:/mipmap-xxxhdpi/ic_launcher.png"
     }
 ]
