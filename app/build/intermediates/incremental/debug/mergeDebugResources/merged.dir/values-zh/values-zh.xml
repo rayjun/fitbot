@@ -119,6 +119,7 @@
     <string name="theme_system">跟随系统</string>
     <string name="today_badge">今天</string>
     <string name="today_task">今日任务</string>
+    <string name="training_completed">今天的训练已完成！干得漂亮！</string>
     <string name="training_session">训练会话</string>
     <string name="update_plan">更新计划</string>
     <string name="week_overview">本周安排总览</string>

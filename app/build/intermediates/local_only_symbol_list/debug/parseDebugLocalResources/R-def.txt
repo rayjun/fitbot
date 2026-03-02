@@ -120,6 +120,7 @@ string theme_light
 string theme_system
 string today_badge
 string today_task
+string training_completed
 string training_session
 string update_plan
 string week_overview

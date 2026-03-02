@@ -545,6 +545,7 @@
     <string name="today_task">Today\'s Task</string>
     <string name="tooltip_description">tooltip</string>
     <string name="tooltip_label">show tooltip</string>
+    <string name="training_completed">Today\'s training is completed! Well done!</string>
     <string name="training_session">Training Session</string>
     <string name="update_plan">Update Plan</string>
     <string name="week_overview">This Week\'s Overview</string>

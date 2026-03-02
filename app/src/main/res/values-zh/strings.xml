@@ -50,6 +50,7 @@
     <string name="week_overview">本周安排总览</string>
     <string name="today_task">今日任务</string>
     <string name="rest_message">今天是休息日，好好放松一下吧！</string>
+    <string name="training_completed">今天的训练已完成！干得漂亮！</string>
     <string name="exercises_scheduled">已安排 %1$d 个训练动作。</string>
     <string name="start_training">开始今日训练</string>
     <string name="today_badge">今天</string>

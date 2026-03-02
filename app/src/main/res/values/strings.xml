@@ -50,6 +50,7 @@
     <string name="week_overview">This Week\'s Overview</string>
     <string name="today_task">Today\'s Task</string>
     <string name="rest_message">Rest day today! Enjoy your recovery.</string>
+    <string name="training_completed">Today\'s training is completed! Well done!</string>
     <string name="exercises_scheduled">%1$d exercises scheduled.</string>
     <string name="start_training">Start Training</string>
     <string name="today_badge">Today</string>

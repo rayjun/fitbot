@@ -1207,6 +1207,7 @@ string today_badge
 string today_task
 string tooltip_description
 string tooltip_label
+string training_completed
 string training_session
 string update_plan
 string week_overview

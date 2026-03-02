@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Remove
@@ -81,6 +82,7 @@ fun CurrentPlanView(
     onStartPlan: (Int) -> Unit
 ) {
     var editingDay by remember { mutableStateOf<RoutineDay?>(null) }
+    val setsToday by workoutViewModel.setsToday.collectAsStateWithLifecycle()
 
     Column(
         modifier = Modifier
@@ -109,7 +111,15 @@ fun CurrentPlanView(
             
             // Today's Task
             val todayRoutine = routine.find { it.dayOfWeek == todayOfWeek }
-            TodayTaskCard(todayRoutine, todayOfWeek, onStartPlan)
+            val isCompleted = remember(setsToday, todayRoutine) {
+                if (todayRoutine == null || todayRoutine.isRest) false
+                else todayRoutine.exercises.isNotEmpty() && todayRoutine.exercises.all { planned ->
+                    val count = setsToday.count { it.exerciseName == planned.id }
+                    count >= planned.targetSets
+                }
+            }
+
+            TodayTaskCard(todayRoutine, todayOfWeek, isCompleted, onStartPlan)
             
             Spacer(modifier = Modifier.height(24.dp))
             Text(stringResource(R.string.week_overview), fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.Start))
@@ -300,16 +310,39 @@ fun WeeklyProgressBar(routine: List<RoutineDay>, workoutViewModel: WorkoutViewMo
 }
 
 @Composable
-fun TodayTaskCard(todayRoutine: RoutineDay?, todayOfWeek: Int, onStartPlan: (Int) -> Unit) {
+fun TodayTaskCard(
+    todayRoutine: RoutineDay?, 
+    todayOfWeek: Int, 
+    isCompleted: Boolean,
+    onStartPlan: (Int) -> Unit
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+        colors = CardDefaults.cardColors(
+            containerColor = if (isCompleted) Color(0xFF4CAF50).copy(alpha = 0.1f) else MaterialTheme.colorScheme.primaryContainer
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(stringResource(R.string.today_task), fontSize = 20.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
+            
             if (todayRoutine == null || todayRoutine.isRest) {
                 Text(stringResource(R.string.rest_message), style = MaterialTheme.typography.bodyLarge)
+            } else if (isCompleted) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF4CAF50), modifier = Modifier.size(24.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        stringResource(R.string.training_completed), 
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2E7D32)
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                TextButton(onClick = { onStartPlan(todayOfWeek) }) {
+                    Text("继续训练 (Continue)")
+                }
             } else {
                 Text(stringResource(R.string.exercises_scheduled, todayRoutine.exercises.size), style = MaterialTheme.typography.bodyLarge)
                 Spacer(modifier = Modifier.height(16.dp))

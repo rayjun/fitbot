@@ -119,6 +119,7 @@
     <string name="theme_system">System Default</string>
     <string name="today_badge">Today</string>
     <string name="today_task">Today\'s Task</string>
+    <string name="training_completed">Today\'s training is completed! Well done!</string>
     <string name="training_session">Training Session</string>
     <string name="update_plan">Update Plan</string>
     <string name="week_overview">This Week\'s Overview</string>
