@@ -29,6 +29,7 @@ fun WorkoutRecordingScreen(
 ) {
     val exercise = remember(exerciseId) { ExerciseProvider.exercises.find { it.id == exerciseId } }
     val localizedName = exercise?.let { stringResource(it.nameRes) } ?: exerciseId
+    val isBodyweight = exercise?.isBodyweight ?: false
 
     var weightInput by remember { mutableStateOf("0") }
     var repsInput by remember { mutableStateOf("12") }
@@ -54,13 +55,15 @@ fun WorkoutRecordingScreen(
         ) {
             // 输入区域
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = weightInput,
-                    onValueChange = { weightInput = it },
-                    label = { Text(stringResource(R.string.weight_kg)) },
-                    modifier = Modifier.weight(1f),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
+                if (!isBodyweight) {
+                    OutlinedTextField(
+                        value = weightInput,
+                        onValueChange = { weightInput = it },
+                        label = { Text(stringResource(R.string.weight_kg)) },
+                        modifier = Modifier.weight(1f),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+                    )
+                }
                 OutlinedTextField(
                     value = repsInput,
                     onValueChange = { repsInput = it },
@@ -74,7 +77,8 @@ fun WorkoutRecordingScreen(
 
             Button(
                 onClick = {
-                    viewModel.addSet(exerciseId, weightInput.toDoubleOrNull() ?: 0.0, repsInput.toIntOrNull() ?: 0)
+                    val weight = if (isBodyweight) 0.0 else (weightInput.toDoubleOrNull() ?: 0.0)
+                    viewModel.addSet(exerciseId, weight, repsInput.toIntOrNull() ?: 0)
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -89,7 +93,14 @@ fun WorkoutRecordingScreen(
             LazyColumn(modifier = Modifier.weight(1f)) {
                 items(sets.filter { it.exerciseName == exerciseId }) { set ->
                     ListItem(
-                        headlineContent = { Text("${set.weight} kg x ${set.reps}") },
+                        headlineContent = { 
+                            val text = if (isBodyweight) {
+                                "${set.reps} ${stringResource(R.string.reps)}"
+                            } else {
+                                "${set.weight} kg x ${set.reps}"
+                            }
+                            Text(text) 
+                        },
                         trailingContent = { Text(set.timeStr) }
                     )
                 }

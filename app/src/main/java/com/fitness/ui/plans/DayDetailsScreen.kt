@@ -61,6 +61,7 @@ fun DayDetailsScreen(
                 items(groupedByExercise.toList()) { (exerciseId, exerciseSets) ->
                     val exercise = ExerciseProvider.exercises.find { it.id == exerciseId }
                     val name = exercise?.let { stringResource(it.nameRes) } ?: exerciseId
+                    val isBodyweight = exercise?.isBodyweight ?: false
                     
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -89,8 +90,13 @@ fun DayDetailsScreen(
                                     modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
+                                    val text = if (isBodyweight) {
+                                        "${set.reps} ${stringResource(R.string.reps)}"
+                                    } else {
+                                        "${set.weight} kg  x  ${set.reps}"
+                                    }
                                     Text(
-                                        text = "${set.weight} kg  x  ${set.reps}",
+                                        text = text,
                                         style = MaterialTheme.typography.bodyMedium
                                     )
                                     Text(

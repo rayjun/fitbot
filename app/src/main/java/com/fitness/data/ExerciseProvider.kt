@@ -12,7 +12,8 @@ object ExerciseProvider {
             gifResPath = "exercises/benchpress.gif",
             descriptionRes = R.string.ex_benchpress_desc,
             targetMuscleRes = R.string.muscle_chest,
-            categoryRes = R.string.cat_chest
+            categoryRes = R.string.cat_chest,
+            isBodyweight = false
         ),
         Exercise(
             id = "pushup",
@@ -20,7 +21,8 @@ object ExerciseProvider {
             gifResPath = "exercises/pushup.gif",
             descriptionRes = R.string.ex_pushup_desc,
             targetMuscleRes = R.string.muscle_chest,
-            categoryRes = R.string.cat_chest
+            categoryRes = R.string.cat_chest,
+            isBodyweight = true
         ),
         Exercise(
             id = "incline_press",
@@ -28,7 +30,8 @@ object ExerciseProvider {
             gifResPath = "exercises/incline_press.gif",
             descriptionRes = R.string.ex_incline_press_desc,
             targetMuscleRes = R.string.muscle_upper_chest,
-            categoryRes = R.string.cat_chest
+            categoryRes = R.string.cat_chest,
+            isBodyweight = false
         ),
         
         // 肩部 (Shoulders)
@@ -38,7 +41,8 @@ object ExerciseProvider {
             gifResPath = "exercises/overhead_press.gif",
             descriptionRes = R.string.ex_overhead_press_desc,
             targetMuscleRes = R.string.muscle_shoulders,
-            categoryRes = R.string.cat_shoulders
+            categoryRes = R.string.cat_shoulders,
+            isBodyweight = false
         ),
         Exercise(
             id = "lateral_raise",
@@ -46,7 +50,8 @@ object ExerciseProvider {
             gifResPath = "exercises/lateral_raise.gif",
             descriptionRes = R.string.ex_lateral_raise_desc,
             targetMuscleRes = R.string.muscle_shoulders,
-            categoryRes = R.string.cat_shoulders
+            categoryRes = R.string.cat_shoulders,
+            isBodyweight = false
         ),
 
         // 背部 (Back)
@@ -56,7 +61,8 @@ object ExerciseProvider {
             gifResPath = "exercises/pullup.gif",
             descriptionRes = R.string.ex_pullup_desc,
             targetMuscleRes = R.string.muscle_lats,
-            categoryRes = R.string.cat_back
+            categoryRes = R.string.cat_back,
+            isBodyweight = true
         ),
         Exercise(
             id = "row",
@@ -64,7 +70,8 @@ object ExerciseProvider {
             gifResPath = "exercises/row.gif",
             descriptionRes = R.string.ex_row_desc,
             targetMuscleRes = R.string.muscle_mid_back,
-            categoryRes = R.string.cat_back
+            categoryRes = R.string.cat_back,
+            isBodyweight = false
         ),
         Exercise(
             id = "deadlift",
@@ -72,7 +79,8 @@ object ExerciseProvider {
             gifResPath = "exercises/deadlift.gif",
             descriptionRes = R.string.ex_deadlift_desc,
             targetMuscleRes = R.string.muscle_lower_back,
-            categoryRes = R.string.cat_back
+            categoryRes = R.string.cat_back,
+            isBodyweight = false
         ),
 
         // 手臂 (Arms)
@@ -82,7 +90,8 @@ object ExerciseProvider {
             gifResPath = "exercises/bicep_curl.gif",
             descriptionRes = R.string.ex_bicep_curl_desc,
             targetMuscleRes = R.string.muscle_biceps,
-            categoryRes = R.string.cat_arms
+            categoryRes = R.string.cat_arms,
+            isBodyweight = false
         ),
         Exercise(
             id = "tricep_dips",
@@ -90,7 +99,8 @@ object ExerciseProvider {
             gifResPath = "exercises/tricep_dips.gif",
             descriptionRes = R.string.ex_tricep_dips_desc,
             targetMuscleRes = R.string.muscle_triceps,
-            categoryRes = R.string.cat_arms
+            categoryRes = R.string.cat_arms,
+            isBodyweight = true
         ),
 
         // 腿部 (Legs)
@@ -100,7 +110,8 @@ object ExerciseProvider {
             gifResPath = "exercises/squat.gif",
             descriptionRes = R.string.ex_squat_desc,
             targetMuscleRes = R.string.muscle_quads,
-            categoryRes = R.string.cat_legs
+            categoryRes = R.string.cat_legs,
+            isBodyweight = false
         ),
         Exercise(
             id = "lunge",
@@ -108,7 +119,8 @@ object ExerciseProvider {
             gifResPath = "exercises/lunge.gif",
             descriptionRes = R.string.ex_lunge_desc,
             targetMuscleRes = R.string.muscle_glutes_legs,
-            categoryRes = R.string.cat_legs
+            categoryRes = R.string.cat_legs,
+            isBodyweight = false
         ),
         Exercise(
             id = "calf_raise",
@@ -116,7 +128,8 @@ object ExerciseProvider {
             gifResPath = "exercises/calf_raise.gif",
             descriptionRes = R.string.ex_calf_raise_desc,
             targetMuscleRes = R.string.muscle_calves,
-            categoryRes = R.string.cat_legs
+            categoryRes = R.string.cat_legs,
+            isBodyweight = false
         ),
 
         // 核心 (Core)
@@ -126,7 +139,8 @@ object ExerciseProvider {
             gifResPath = "exercises/situp.gif",
             descriptionRes = R.string.ex_situp_desc,
             targetMuscleRes = R.string.muscle_abs,
-            categoryRes = R.string.cat_core
+            categoryRes = R.string.cat_core,
+            isBodyweight = true
         ),
         Exercise(
             id = "crunches",
@@ -134,7 +148,8 @@ object ExerciseProvider {
             gifResPath = "exercises/crunches.gif",
             descriptionRes = R.string.ex_crunches_desc,
             targetMuscleRes = R.string.muscle_abs,
-            categoryRes = R.string.cat_core
+            categoryRes = R.string.cat_core,
+            isBodyweight = true
         ),
         Exercise(
             id = "russian_twist",
@@ -142,7 +157,8 @@ object ExerciseProvider {
             gifResPath = "exercises/russian_twist.gif",
             descriptionRes = R.string.ex_russian_twist_desc,
             targetMuscleRes = R.string.muscle_abs,
-            categoryRes = R.string.cat_core
+            categoryRes = R.string.cat_core,
+            isBodyweight = true
         ),
         Exercise(
             id = "plank",
@@ -150,7 +166,8 @@ object ExerciseProvider {
             gifResPath = "exercises/plank.gif",
             descriptionRes = R.string.ex_plank_desc,
             targetMuscleRes = R.string.muscle_abs,
-            categoryRes = R.string.cat_core
+            categoryRes = R.string.cat_core,
+            isBodyweight = true
         ),
 
         // 全身 (Full Body)
@@ -160,7 +177,8 @@ object ExerciseProvider {
             gifResPath = "exercises/burpee.gif",
             descriptionRes = R.string.ex_burpee_desc,
             targetMuscleRes = R.string.muscle_full_body,
-            categoryRes = R.string.cat_full_body
+            categoryRes = R.string.cat_full_body,
+            isBodyweight = true
         )
     )
     

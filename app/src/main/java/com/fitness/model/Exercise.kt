@@ -8,5 +8,6 @@ data class Exercise(
     val gifResPath: String,
     @StringRes val descriptionRes: Int,
     @StringRes val targetMuscleRes: Int,
-    @StringRes val categoryRes: Int
+    @StringRes val categoryRes: Int,
+    val isBodyweight: Boolean = false // 是否为自重训练
 )
