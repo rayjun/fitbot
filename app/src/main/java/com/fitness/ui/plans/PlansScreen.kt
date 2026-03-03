@@ -193,7 +193,7 @@ fun CurrentPlanView(
 
                 // 核心：为每一天获取那天的计划快照
                 var dayRoutineSnapshot by remember { mutableStateOf<RoutineDay?>(null) }
-                LaunchedEffect(endOfDayTimestamp) {
+                LaunchedEffect(endOfDayTimestamp, currentRoutine) {
                     val fullRoutine = viewModel.getRoutineForTimestamp(endOfDayTimestamp)
                     dayRoutineSnapshot = fullRoutine.find { it.dayOfWeek == day.dayOfWeek }
                 }

@@ -55,7 +55,10 @@ class PlanViewModel @Inject constructor(
     }
 
     suspend fun getRoutineForTimestamp(timestamp: Long): List<RoutineDay> {
-        val plan = dao.getPlanForTimestamp(timestamp) ?: dao.getCurrentPlan()
+        // 查找在该时间点之前（包含）最后创建的计划
+        val plan = dao.getPlanForTimestamp(timestamp) 
+            ?: dao.getAllPlans().lastOrNull() // 如果没找到，说明在所有计划创建之前，取最早的那份计划
+        
         return if (plan == null) emptyList()
         else try {
             val type = object : TypeToken<List<RoutineDay>>() {}.type
