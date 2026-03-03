@@ -54,6 +54,17 @@ class PlanViewModel @Inject constructor(
         }
     }
 
+    suspend fun getRoutineForTimestamp(timestamp: Long): List<RoutineDay> {
+        val plan = dao.getPlanForTimestamp(timestamp) ?: dao.getCurrentPlan()
+        return if (plan == null) emptyList()
+        else try {
+            val type = object : TypeToken<List<RoutineDay>>() {}.type
+            gson.fromJson<List<RoutineDay>>(plan.exercisesJson, type) ?: emptyList()
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
     fun updatePlan(name: String, routine: List<RoutineDay>) {
         val version = (_currentPlan.value?.version ?: 0) + 1
         val newPlan = PlanEntity(

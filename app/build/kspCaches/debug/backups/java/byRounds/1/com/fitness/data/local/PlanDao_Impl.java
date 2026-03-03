@@ -160,6 +160,55 @@ public final class PlanDao_Impl implements PlanDao {
   }
 
   @Override
+  public Object getPlanForTimestamp(final long timestamp,
+      final Continuation<? super PlanEntity> $completion) {
+    final String _sql = "SELECT * FROM training_plans WHERE createdAt <= ? ORDER BY createdAt DESC LIMIT 1";
+    final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 1);
+    int _argIndex = 1;
+    _statement.bindLong(_argIndex, timestamp);
+    final CancellationSignal _cancellationSignal = DBUtil.createCancellationSignal();
+    return CoroutinesRoom.execute(__db, false, _cancellationSignal, new Callable<PlanEntity>() {
+      @Override
+      @Nullable
+      public PlanEntity call() throws Exception {
+        final Cursor _cursor = DBUtil.query(__db, _statement, false, null);
+        try {
+          final int _cursorIndexOfId = CursorUtil.getColumnIndexOrThrow(_cursor, "id");
+          final int _cursorIndexOfName = CursorUtil.getColumnIndexOrThrow(_cursor, "name");
+          final int _cursorIndexOfExercisesJson = CursorUtil.getColumnIndexOrThrow(_cursor, "exercisesJson");
+          final int _cursorIndexOfIsCurrent = CursorUtil.getColumnIndexOrThrow(_cursor, "isCurrent");
+          final int _cursorIndexOfVersion = CursorUtil.getColumnIndexOrThrow(_cursor, "version");
+          final int _cursorIndexOfCreatedAt = CursorUtil.getColumnIndexOrThrow(_cursor, "createdAt");
+          final PlanEntity _result;
+          if (_cursor.moveToFirst()) {
+            final int _tmpId;
+            _tmpId = _cursor.getInt(_cursorIndexOfId);
+            final String _tmpName;
+            _tmpName = _cursor.getString(_cursorIndexOfName);
+            final String _tmpExercisesJson;
+            _tmpExercisesJson = _cursor.getString(_cursorIndexOfExercisesJson);
+            final boolean _tmpIsCurrent;
+            final int _tmp;
+            _tmp = _cursor.getInt(_cursorIndexOfIsCurrent);
+            _tmpIsCurrent = _tmp != 0;
+            final int _tmpVersion;
+            _tmpVersion = _cursor.getInt(_cursorIndexOfVersion);
+            final long _tmpCreatedAt;
+            _tmpCreatedAt = _cursor.getLong(_cursorIndexOfCreatedAt);
+            _result = new PlanEntity(_tmpId,_tmpName,_tmpExercisesJson,_tmpIsCurrent,_tmpVersion,_tmpCreatedAt);
+          } else {
+            _result = null;
+          }
+          return _result;
+        } finally {
+          _cursor.close();
+          _statement.release();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
   public Object getAllPlans(final Continuation<? super List<PlanEntity>> $completion) {
     final String _sql = "SELECT * FROM training_plans ORDER BY createdAt DESC";
     final RoomSQLiteQuery _statement = RoomSQLiteQuery.acquire(_sql, 0);
