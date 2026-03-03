@@ -1,11 +1,15 @@
 package com.fitness.ui.plans
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -37,7 +41,7 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PlansScreen(
     viewModel: PlanViewModel,
@@ -46,36 +50,47 @@ fun PlansScreen(
     onDayClick: (String) -> Unit
 ) {
     val currentRoutine by viewModel.currentRoutine.collectAsStateWithLifecycle()
-    var weekOffset by remember { mutableIntStateOf(0) }
+    
+    val initialPage = 500
+    val pagerState = rememberPagerState(pageCount = { 1000 }, initialPage = initialPage)
+    val weekOffset = pagerState.currentPage - initialPage
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.nav_plans)) }
+                title = { Text(stringResource(R.string.nav_plans), fontWeight = FontWeight.Bold) },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
+                )
             )
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
-            WeekSelector(
-                weekOffset = weekOffset,
-                onOffsetChange = { weekOffset = it }
-            )
+            WeekSelectorHeader(weekOffset = weekOffset)
             
-            CurrentPlanView(
-                routine = currentRoutine, 
-                weekOffset = weekOffset,
-                padding = PaddingValues(0.dp),
-                viewModel = viewModel,
-                workoutViewModel = workoutViewModel,
-                onStartPlan = onStartPlan,
-                onDayClick = onDayClick
-            )
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.Top
+            ) { page ->
+                val currentWeekOffset = page - initialPage
+                CurrentPlanView(
+                    routine = currentRoutine, 
+                    weekOffset = currentWeekOffset,
+                    padding = PaddingValues(0.dp),
+                    viewModel = viewModel,
+                    workoutViewModel = workoutViewModel,
+                    onStartPlan = onStartPlan,
+                    onDayClick = onDayClick
+                )
+            }
         }
     }
 }
 
 @Composable
-fun WeekSelector(weekOffset: Int, onOffsetChange: (Int) -> Unit) {
+fun WeekSelectorHeader(weekOffset: Int) {
     val today = LocalDate.now()
     val mondayOfSelectedWeek = today
         .with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
@@ -89,17 +104,33 @@ fun WeekSelector(weekOffset: Int, onOffsetChange: (Int) -> Unit) {
         "${mondayOfSelectedWeek.format(formatter)} - ${sundayOfSelectedWeek.format(formatter)}"
     }
 
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+    Surface(
+        tonalElevation = 2.dp,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        IconButton(onClick = { onOffsetChange(weekOffset - 1) }) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Prev Week")
-        }
-        Text(text = rangeText, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
-        IconButton(onClick = { onOffsetChange(weekOffset + 1) }) {
-            Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next Week")
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowBack, 
+                contentDescription = null, 
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            )
+            Text(
+                text = rangeText, 
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.Bold
+            )
+            Icon(
+                Icons.AutoMirrored.Filled.ArrowForward, 
+                contentDescription = null, 
+                modifier = Modifier.size(16.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+            )
         }
     }
 }
@@ -116,85 +147,111 @@ fun CurrentPlanView(
 ) {
     var editingDayOfWeek by remember { mutableIntStateOf(-1) }
     val setsToday by workoutViewModel.setsToday.collectAsStateWithLifecycle()
-    
     val today = LocalDate.now()
     val todayDayOfWeek = today.dayOfWeek.value
 
-    Column(
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
             .padding(padding)
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = PaddingValues(vertical = 16.dp)
     ) {
         if (routine.isEmpty()) {
-            Spacer(modifier = Modifier.weight(1f))
-            Text(stringResource(R.string.no_plan), color = MaterialTheme.colorScheme.outline)
-            Spacer(modifier = Modifier.height(16.dp))
-            val routineName = stringResource(R.string.weekly_routine_name)
-            Button(onClick = {
-                val defaultRoutine = (1..7).map { day ->
-                    RoutineDay(day, isRest = (day == 3 || day == 7), exercises = emptyList())
-                }
-                viewModel.updatePlan(routineName, defaultRoutine)
-            }) {
-                Text(stringResource(R.string.create_routine))
-            }
-            Spacer(modifier = Modifier.weight(1f))
-        } else {
-            // Weekly Progress Bar
-            WeeklyProgressBar(
-                routine = routine, 
-                workoutViewModel = workoutViewModel, 
-                weekOffset = weekOffset,
-                onDayClick = onDayClick
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Today's Action Card (Only if we are in current week)
-            if (weekOffset == 0) {
-                val todayRoutine = routine.find { it.dayOfWeek == todayDayOfWeek }
-                val isCompleted = remember(setsToday, todayRoutine) {
-                    if (todayRoutine == null || todayRoutine.isRest) false
-                    else todayRoutine.exercises.isNotEmpty() && todayRoutine.exercises.all { planned ->
-                        val count = setsToday.count { it.exerciseName == planned.id }
-                        count >= planned.targetSets
+            item {
+                Box(modifier = Modifier.fillParentMaxHeight(0.8f), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(stringResource(R.string.no_plan), color = MaterialTheme.colorScheme.outline)
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = {
+                            val defaultRoutine = (1..7).map { day ->
+                                RoutineDay(day, isRest = (day == 3 || day == 7), exercises = emptyList())
+                            }
+                            viewModel.updatePlan("Daily Routine", defaultRoutine)
+                        }) {
+                            Text(stringResource(R.string.create_routine))
+                        }
                     }
                 }
-                
-                TodayTaskCard(todayRoutine, todayDayOfWeek, isCompleted, onStartPlan)
+            }
+        } else {
+            item {
+                WeeklyProgressBar(
+                    routine = routine, 
+                    workoutViewModel = workoutViewModel, 
+                    weekOffset = weekOffset,
+                    onDayClick = onDayClick
+                )
                 Spacer(modifier = Modifier.height(24.dp))
             }
             
-            Text(stringResource(R.string.week_overview), fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.Start))
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-            
-            // Overview List
-            LazyColumn(modifier = Modifier.fillMaxWidth()) {
-                items(routine.sortedBy { it.dayOfWeek }) { day ->
-                    val dateStr = remember(day.dayOfWeek, weekOffset) {
-                        val monday = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
-                        monday.plusWeeks(weekOffset.toLong()).plusDays((day.dayOfWeek - 1).toLong())
-                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+            if (weekOffset == 0) {
+                item {
+                    val todayRoutine = routine.find { it.dayOfWeek == todayDayOfWeek }
+                    val isCompleted = remember(setsToday, todayRoutine) {
+                        if (todayRoutine == null || todayRoutine.isRest) false
+                        else todayRoutine.exercises.isNotEmpty() && todayRoutine.exercises.all { planned ->
+                            val count = setsToday.count { it.exerciseName == planned.id }
+                            count >= planned.targetSets
+                        }
                     }
+                    
+                    TodayTaskCard(todayRoutine, todayDayOfWeek, isCompleted, onStartPlan)
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
+            }
+            
+            item {
+                Text(
+                    stringResource(R.string.week_overview), 
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold, 
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                )
+            }
+            
+            items(routine.sortedBy { it.dayOfWeek }) { day ->
+                val dateStr = remember(day.dayOfWeek, weekOffset) {
+                    val monday = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+                    monday.plusWeeks(weekOffset.toLong()).plusDays((day.dayOfWeek - 1).toLong())
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                }
 
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp)
+                        .clip(MaterialTheme.shapes.medium)
+                        .clickable { 
+                            if (weekOffset == 0) editingDayOfWeek = day.dayOfWeek 
+                            else onDayClick(dateStr)
+                        },
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (weekOffset == 0 && day.dayOfWeek == todayDayOfWeek)
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                    )
+                ) {
                     ListItem(
-                        headlineContent = { Text(getDayName(day.dayOfWeek)) },
+                        headlineContent = { 
+                            Text(
+                                getDayName(day.dayOfWeek),
+                                fontWeight = if (weekOffset == 0 && day.dayOfWeek == todayDayOfWeek) FontWeight.Bold else FontWeight.Normal
+                            ) 
+                        },
                         supportingContent = { 
                             Text(if (day.isRest) stringResource(R.string.rest_badge) else stringResource(R.string.exercises_count, day.exercises.size)) 
                         },
                         trailingContent = {
                             if (weekOffset == 0 && day.dayOfWeek == todayDayOfWeek) {
-                                SuggestionChip(onClick = {}, label = { Text(stringResource(R.string.today_badge)) })
+                                Badge(containerColor = MaterialTheme.colorScheme.primary) {
+                                    Text(stringResource(R.string.today_badge), modifier = Modifier.padding(4.dp))
+                                }
                             }
                         },
-                        modifier = Modifier.clickable { 
-                            if (weekOffset == 0) editingDayOfWeek = day.dayOfWeek 
-                            else onDayClick(dateStr)
-                        }
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
-                    HorizontalDivider()
                 }
             }
         }
@@ -232,7 +289,6 @@ fun WeeklyProgressBar(
     ) {
         routine.sortedBy { it.dayOfWeek }.forEach { day ->
             var isFullyCompleted by remember { mutableStateOf(false) }
-            
             val circleDate = remember(day.dayOfWeek, weekOffset) {
                 val monday = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
                 monday.plusWeeks(weekOffset.toLong()).plusDays((day.dayOfWeek - 1).toLong())
@@ -240,15 +296,11 @@ fun WeeklyProgressBar(
             val circleDateStr = circleDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 
             LaunchedEffect(circleDateStr, routine) {
-                isFullyCompleted = if (day.isRest) {
-                    true 
-                } else {
-                    workoutViewModel.isDayFullyCompleted(circleDateStr, day.exercises)
-                }
+                isFullyCompleted = if (day.isRest) true 
+                else workoutViewModel.isDayFullyCompleted(circleDateStr, day.exercises)
             }
 
             val isActualToday = weekOffset == 0 && day.dayOfWeek == todayDayOfWeek
-
             val color = when {
                 day.isRest -> Color.Transparent
                 isFullyCompleted -> MaterialTheme.colorScheme.primary
@@ -260,7 +312,7 @@ fun WeeklyProgressBar(
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(42.dp)
                     .clip(CircleShape)
                     .background(color)
                     .border(1.dp, borderColor, CircleShape)
@@ -269,7 +321,8 @@ fun WeeklyProgressBar(
                 Text(
                     text = days[day.dayOfWeek - 1],
                     color = if (isFullyCompleted && !day.isRest) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
                 )
             }
         }
@@ -283,43 +336,60 @@ fun TodayTaskCard(
     isCompleted: Boolean,
     onStartPlan: (Int) -> Unit
 ) {
-    Card(
+    ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isCompleted) Color(0xFF4CAF50).copy(alpha = 0.1f) else MaterialTheme.colorScheme.primaryContainer
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = if (isCompleted) 
+                MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.7f) 
+                else MaterialTheme.colorScheme.primaryContainer
         )
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(stringResource(R.string.today_task), fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    stringResource(R.string.today_task), 
+                    style = MaterialTheme.typography.headlineSmall, 
+                    fontWeight = FontWeight.ExtraBold,
+                    color = if (isCompleted) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                if (isCompleted) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.tertiary)
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
             
             if (todayRoutine == null || todayRoutine.isRest) {
                 Text(stringResource(R.string.rest_message), style = MaterialTheme.typography.bodyLarge)
             } else if (isCompleted) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.CheckCircle, null, tint = Color(0xFF4CAF50), modifier = Modifier.size(24.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        stringResource(R.string.training_completed), 
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2E7D32)
-                    )
-                }
-                Spacer(modifier = Modifier.height(8.dp))
-                TextButton(onClick = { onStartPlan(todayOfWeek) }) {
-                    Text("继续训练 (Continue)")
+                Text(
+                    stringResource(R.string.training_completed), 
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedButton(
+                    onClick = { onStartPlan(todayOfWeek) },
+                    modifier = Modifier.fillMaxWidth(),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary)
+                ) {
+                    Text("继续训练 (Continue)", color = MaterialTheme.colorScheme.tertiary)
                 }
             } else {
-                Text(stringResource(R.string.exercises_scheduled, todayRoutine.exercises.size), style = MaterialTheme.typography.bodyLarge)
-                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    stringResource(R.string.exercises_scheduled, todayRoutine.exercises.size), 
+                    style = MaterialTheme.typography.bodyLarge
+                )
+                Spacer(modifier = Modifier.height(20.dp))
                 Button(
                     onClick = { onStartPlan(todayOfWeek) },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium
                 ) {
                     Icon(Icons.Default.PlayArrow, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.start_training))
+                    Text(stringResource(R.string.start_training), fontWeight = FontWeight.Bold)
                 }
             }
         }
