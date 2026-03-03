@@ -11,6 +11,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -61,14 +62,19 @@ fun ExerciseLibraryScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.nav_library)) }, 
+                title = { 
+                    Text(
+                        stringResource(R.string.nav_library),
+                        fontWeight = FontWeight.Bold
+                    ) 
+                }, 
                 actions = {
                     IconButton(onClick = onConnectCloud) {
                         if (isSyncing) {
                             Icon(
                                 imageVector = Icons.Default.Sync,
                                 contentDescription = "Syncing",
-                                tint = Color(0xFFFFA000), // Orange
+                                tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.rotate(rotation)
                             )
                         } else {
@@ -79,20 +85,30 @@ fun ExerciseLibraryScreen(
                             )
                         }
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
+                )
             )
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
             val categories = ExerciseProvider.categories
 
-            // 顶部部位筛选 Tab
+            // 顶部部位筛选 Tab - 移除分割线，增加间距
             ScrollableTabRow(
                 selectedTabIndex = categories.indexOf(selectedCategoryRes).coerceAtLeast(0),
                 edgePadding = 16.dp,
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.primary,
-                divider = {}
+                divider = {}, // 移除 MD2 风格的分割线
+                indicator = { tabPositions ->
+                    TabRowDefaults.SecondaryIndicator(
+                        Modifier.tabIndicatorOffset(tabPositions[categories.indexOf(selectedCategoryRes).coerceAtLeast(0)]),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             ) {
                 categories.forEach { categoryRes ->
                     Tab(
@@ -101,20 +117,21 @@ fun ExerciseLibraryScreen(
                         text = { 
                             Text(
                                 text = stringResource(categoryRes),
-                                style = MaterialTheme.typography.titleSmall
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = if (selectedCategoryRes == categoryRes) FontWeight.Bold else FontWeight.Normal
                             ) 
                         }
                     )
                 }
             }
 
-            // 动作网格
+            // 动作网格 - 改为 2 列，增加间距
             LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
+                columns = GridCells.Fixed(2),
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                contentPadding = PaddingValues(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(filteredExercises) { exercise ->
                     ExerciseGridItem(exercise, onExerciseClick)
@@ -126,21 +143,26 @@ fun ExerciseLibraryScreen(
 
 @Composable
 fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
-    Card(
+    // 使用 MD3 ElevatedCard 增强精致感
+    ElevatedCard(
+        onClick = { onExerciseClick(exercise) },
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.8f)
-            .clickable { onExerciseClick(exercise) },
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            .aspectRatio(0.85f),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.elevatedCardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(4.dp)
+            modifier = Modifier.fillMaxSize()
         ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
+                    .weight(1f)
+                    .padding(12.dp), // 为动图增加内边距
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
@@ -161,13 +183,25 @@ fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
                 )
             }
             
-            Text(
-                text = stringResource(exercise.nameRes),
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1,
-                modifier = Modifier.padding(top = 4.dp)
-            )
+            // 强化文字显示
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            ) {
+                Column(modifier = Modifier.padding(8.dp)) {
+                    Text(
+                        text = stringResource(exercise.nameRes),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1
+                    )
+                    Text(
+                        text = stringResource(exercise.targetMuscleRes),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
         }
     }
 }
