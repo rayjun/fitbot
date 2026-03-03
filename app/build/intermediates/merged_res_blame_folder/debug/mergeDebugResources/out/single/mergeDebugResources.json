@@ -1,14 +1,10 @@
 [
     {
-        "merged": "/Users/ray/.gradle/daemon/8.4/com.fitness.app-debug-75:/mipmap-xxxhdpi_ic_launcher.png.flat",
-        "source": "/Users/ray/.gradle/daemon/8.4/com.fitness.app-main-77:/mipmap-xxxhdpi/ic_launcher.png"
+        "merged": "com.fitness.app-debug-75:/xml_locales_config.xml.flat",
+        "source": "com.fitness.app-main-77:/xml/locales_config.xml"
     },
     {
         "merged": "com.fitness.app-debug-75:/mipmap-xxxhdpi_ic_launcher.png.flat",
         "source": "com.fitness.app-main-77:/mipmap-xxxhdpi/ic_launcher.png"
-    },
-    {
-        "merged": "/Users/ray/.gradle/daemon/8.4/com.fitness.app-debug-75:/xml_locales_config.xml.flat",
-        "source": "/Users/ray/.gradle/daemon/8.4/com.fitness.app-main-77:/xml/locales_config.xml"
     }
 ]
