@@ -10,6 +10,9 @@ interface ExerciseDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertSet(set: SetEntity)
 
+    @androidx.room.Update
+    suspend fun updateSet(set: SetEntity)
+
     @Query("SELECT * FROM exercise_sets WHERE date = :date ORDER BY timestamp ASC")
     fun getSetsByDateFlow(date: String): kotlinx.coroutines.flow.Flow<List<SetEntity>>
 

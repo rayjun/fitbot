@@ -24,15 +24,12 @@ class WorkoutViewModel @Inject constructor(
     private val dao: ExerciseDao
 ) : ViewModel() {
 
-    // 使用稳定 Locale 进行日期格式化，防止数据库查询 Key 变化
     private val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     private val timeFormatter = SimpleDateFormat("HH:mm", Locale.US)
 
-    // 状态流
     private val _currentSessionId = MutableStateFlow("Session_${System.currentTimeMillis()}")
     private val _currentDate = MutableStateFlow(dateFormatter.format(Date()))
 
-    // 响应式数据源
     @OptIn(ExperimentalCoroutinesApi::class)
     val setsInSession: StateFlow<List<SetEntity>> = _currentDate
         .flatMapLatest { date -> dao.getSetsByDateFlow(date) }
@@ -76,14 +73,30 @@ class WorkoutViewModel @Inject constructor(
 
         viewModelScope.launch {
             dao.insertSet(set)
-            
             _currentDate.value = dateStr
-
-            val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
-                .setInputData(Data.Builder().putString("SYNC_DATE", dateStr).build())
-                .build()
-            WorkManager.getInstance(context).enqueue(syncRequest)
+            triggerSync(dateStr)
         }
+    }
+
+    fun updateSet(set: SetEntity) {
+        viewModelScope.launch {
+            dao.updateSet(set)
+            triggerSync(set.date)
+        }
+    }
+
+    fun deleteSet(setId: Long, date: String) {
+        viewModelScope.launch {
+            dao.deleteSet(setId)
+            triggerSync(date)
+        }
+    }
+
+    private fun triggerSync(dateStr: String) {
+        val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
+            .setInputData(Data.Builder().putString("SYNC_DATE", dateStr).build())
+            .build()
+        WorkManager.getInstance(context).enqueue(syncRequest)
     }
 
     suspend fun hasCompletedExercisesOnDate(dateStr: String): Boolean {

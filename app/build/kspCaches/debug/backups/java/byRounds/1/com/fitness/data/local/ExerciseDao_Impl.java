@@ -4,6 +4,7 @@ import android.database.Cursor;
 import android.os.CancellationSignal;
 import androidx.annotation.NonNull;
 import androidx.room.CoroutinesRoom;
+import androidx.room.EntityDeletionOrUpdateAdapter;
 import androidx.room.EntityInsertionAdapter;
 import androidx.room.RoomDatabase;
 import androidx.room.RoomSQLiteQuery;
@@ -33,6 +34,8 @@ public final class ExerciseDao_Impl implements ExerciseDao {
 
   private final EntityInsertionAdapter<SetEntity> __insertionAdapterOfSetEntity;
 
+  private final EntityDeletionOrUpdateAdapter<SetEntity> __updateAdapterOfSetEntity;
+
   private final SharedSQLiteStatement __preparedStmtOfDeleteSet;
 
   public ExerciseDao_Impl(@NonNull final RoomDatabase __db) {
@@ -58,6 +61,28 @@ public final class ExerciseDao_Impl implements ExerciseDao {
         statement.bindString(9, entity.getRemoteId());
       }
     };
+    this.__updateAdapterOfSetEntity = new EntityDeletionOrUpdateAdapter<SetEntity>(__db) {
+      @Override
+      @NonNull
+      protected String createQuery() {
+        return "UPDATE OR ABORT `exercise_sets` SET `id` = ?,`date` = ?,`sessionId` = ?,`exerciseName` = ?,`reps` = ?,`weight` = ?,`timestamp` = ?,`timeStr` = ?,`remoteId` = ? WHERE `id` = ?";
+      }
+
+      @Override
+      protected void bind(@NonNull final SupportSQLiteStatement statement,
+          @NonNull final SetEntity entity) {
+        statement.bindLong(1, entity.getId());
+        statement.bindString(2, entity.getDate());
+        statement.bindString(3, entity.getSessionId());
+        statement.bindString(4, entity.getExerciseName());
+        statement.bindLong(5, entity.getReps());
+        statement.bindDouble(6, entity.getWeight());
+        statement.bindLong(7, entity.getTimestamp());
+        statement.bindString(8, entity.getTimeStr());
+        statement.bindString(9, entity.getRemoteId());
+        statement.bindLong(10, entity.getId());
+      }
+    };
     this.__preparedStmtOfDeleteSet = new SharedSQLiteStatement(__db) {
       @Override
       @NonNull
@@ -77,6 +102,24 @@ public final class ExerciseDao_Impl implements ExerciseDao {
         __db.beginTransaction();
         try {
           __insertionAdapterOfSetEntity.insert(set);
+          __db.setTransactionSuccessful();
+          return Unit.INSTANCE;
+        } finally {
+          __db.endTransaction();
+        }
+      }
+    }, $completion);
+  }
+
+  @Override
+  public Object updateSet(final SetEntity set, final Continuation<? super Unit> $completion) {
+    return CoroutinesRoom.execute(__db, true, new Callable<Unit>() {
+      @Override
+      @NonNull
+      public Unit call() throws Exception {
+        __db.beginTransaction();
+        try {
+          __updateAdapterOfSetEntity.handle(set);
           __db.setTransactionSuccessful();
           return Unit.INSTANCE;
         } finally {
