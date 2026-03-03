@@ -47,9 +47,6 @@ fun SettingsScreen(
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            Text(stringResource(R.string.settings_general), fontWeight = FontWeight.Bold)
-            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
             SettingsItem(
                 icon = Icons.Default.Settings, 
                 title = stringResource(R.string.settings_theme), 
