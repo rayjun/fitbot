@@ -5,7 +5,7 @@ OUTPUT_PATH = "app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"
 os.makedirs(os.path.dirname(OUTPUT_PATH), exist_ok=True)
 
 WIDTH, HEIGHT = 512, 512
-LINE_COLOR = (255, 87, 34) # Sporty Orange
+LINE_COLOR = (208, 253, 62) # Electric Lime
 LINE_WIDTH = 24
 HEAD_RAD = 40
 BARBELL_WIDTH = 320

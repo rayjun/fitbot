@@ -2,34 +2,34 @@ package com.fitness.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// --- Material Design 3 Sporty Palette ---
+// --- Midnight Pro Sporty Palette ---
 
-// Primary: Vibrant Orange (The energy)
-val SportyOrange = Color(0xFFFF5722)
-val SportyOrangeContainer = Color(0xFFFFDBD1) // Light version for containers
-val OnSportyOrangeContainer = Color(0xFF3B0900)
+// Primary: Electric Lime (High visibility, energy)
+val ElectricLime = Color(0xFFD0FD3E)
+val ElectricLimeContainer = Color(0xFF3A4D00)
+val OnElectricLimeContainer = Color(0xFFD0FD3E)
 
-// Secondary: Deep Teal/Blue (The focus & stability) - To avoid orange clashing
-val SportySecondary = Color(0xFF006874)
-val SportySecondaryContainer = Color(0xFF97F0FF)
-val OnSportySecondaryContainer = Color(0xFF001F24)
+// Secondary: Glacier Blue (Stability, cool)
+val GlacierBlue = Color(0xFFB0E9FF)
+val GlacierBlueContainer = Color(0xFF004D5B)
+val OnGlacierBlueContainer = Color(0xFFB0E9FF)
 
-// Tertiary: Energetic Lime (The growth & success)
-val SportyTertiary = Color(0xFF4D6706)
-val SportyTertiaryContainer = Color(0xFFCEEE8D)
-val OnSportyTertiaryContainer = Color(0xFF151F00)
+// Tertiary: Soft Lavender (Sophistication)
+val SoftLavender = Color(0xFFD0BCFF)
+val SoftLavenderContainer = Color(0xFF4A4458)
 
-// --- Dark Theme Specifics ---
-val CarbonBlack = Color(0xFF1A1C1E)
-val DarkSurface = Color(0xFF1A1C1E)
-val DarkSurfaceVariant = Color(0xFF40484C)
-val OnDarkSurfaceVariant = Color(0xFFC0C8CC)
+// --- Dark Theme: Midnight Navy (Professional & Deep) ---
+val MidnightBlack = Color(0xFF0E1116)
+val DeepNavySurface = Color(0xFF161B22)
+val NavySurfaceVariant = Color(0xFF30363D)
+val OnNavySurfaceVariant = Color(0xFFC9D1D9)
 
-// --- Light Theme Specifics ---
-val OffWhite = Color(0xFFFCFCFF)
-val WhiteSurface = Color(0xFFFCFCFF)
-val LightSurfaceVariant = Color(0xFFDEE3E5)
-val OnLightSurfaceVariant = Color(0xFF40484C)
+// --- Light Theme: Pearl White (Clean & Minimal) ---
+val PearlWhite = Color(0xFFF6F8FA)
+val SnowSurface = Color(0xFFFFFFFF)
+val LightGrayVariant = Color(0xFFEBEEF0)
+val OnLightGrayVariant = Color(0xFF57606A)
 
-// Error
-val SportyRed = Color(0xFFBA1A1A)
+// Error & Success
+val PremiumRed = Color(0xFFFF453A)
+val SuccessGreen = Color(0xFF32D74B)

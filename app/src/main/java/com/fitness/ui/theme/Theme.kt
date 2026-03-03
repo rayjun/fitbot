@@ -13,55 +13,53 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
 private val DarkColorScheme = darkColorScheme(
-    primary = SportyOrange,
-    onPrimary = Color.White,
-    primaryContainer = OnSportyOrangeContainer,
-    onPrimaryContainer = SportyOrangeContainer,
+    primary = ElectricLime,
+    onPrimary = Color.Black,
+    primaryContainer = ElectricLimeContainer,
+    onPrimaryContainer = ElectricLime,
     
-    secondary = SportySecondaryContainer,
-    onSecondary = OnSportySecondaryContainer,
-    secondaryContainer = SportySecondary,
-    onSecondaryContainer = SportySecondaryContainer,
+    secondary = GlacierBlue,
+    onSecondary = Color.Black,
+    secondaryContainer = GlacierBlueContainer,
+    onSecondaryContainer = GlacierBlue,
     
-    tertiary = SportyTertiaryContainer,
-    onTertiary = OnSportyTertiaryContainer,
+    tertiary = SuccessGreen,
+    onTertiary = Color.Black,
     
-    background = CarbonBlack,
-    surface = DarkSurface,
-    surfaceVariant = DarkSurfaceVariant,
+    background = MidnightBlack,
+    surface = DeepNavySurface,
+    surfaceVariant = NavySurfaceVariant,
     onBackground = Color.White,
     onSurface = Color.White,
-    onSurfaceVariant = OnDarkSurfaceVariant,
+    onSurfaceVariant = OnNavySurfaceVariant,
     
-    error = SportyRed,
-    outline = OnDarkSurfaceVariant
+    error = PremiumRed,
+    outline = NavySurfaceVariant
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = SportyOrange,
+    primary = ElectricLimeContainer, // Darker lime for light mode readability
     onPrimary = Color.White,
-    primaryContainer = SportyOrangeContainer,
-    onPrimaryContainer = OnSportyOrangeContainer,
+    primaryContainer = ElectricLime,
+    onPrimaryContainer = Color.Black,
     
-    secondary = SportySecondary,
+    secondary = GlacierBlueContainer, // Using deep teal for light mode contrast
     onSecondary = Color.White,
-    secondaryContainer = SportySecondaryContainer,
-    onSecondaryContainer = OnSportySecondaryContainer,
+    secondaryContainer = GlacierBlue,
+    onSecondaryContainer = Color.Black,
     
-    tertiary = SportyTertiary,
+    tertiary = SuccessGreen,
     onTertiary = Color.White,
-    tertiaryContainer = SportyTertiaryContainer,
-    onTertiaryContainer = OnSportyTertiaryContainer,
     
-    background = OffWhite,
-    surface = WhiteSurface,
-    surfaceVariant = LightSurfaceVariant,
+    background = PearlWhite,
+    surface = SnowSurface,
+    surfaceVariant = LightGrayVariant,
     onBackground = Color.Black,
     onSurface = Color.Black,
-    onSurfaceVariant = OnLightSurfaceVariant,
+    onSurfaceVariant = OnLightGrayVariant,
 
-    error = SportyRed,
-    outline = OnLightSurfaceVariant
+    error = PremiumRed,
+    outline = LightGrayVariant
 )
 
 @Composable
@@ -83,8 +81,8 @@ fun FitnessTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.surface.toArgb() // Use surface for clean TopAppBar look
-            window.navigationBarColor = colorScheme.surface.toArgb()
+            window.statusBarColor = colorScheme.background.toArgb()
+            window.navigationBarColor = colorScheme.background.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }
