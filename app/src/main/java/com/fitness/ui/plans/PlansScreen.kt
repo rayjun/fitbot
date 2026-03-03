@@ -103,10 +103,7 @@ fun WeekSelectorHeader(weekOffset: Int) {
         "${mondayOfSelectedWeek.format(formatter)} - ${sundayOfSelectedWeek.format(formatter)}"
     }
 
-    Surface(
-        tonalElevation = 2.dp,
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    Surface(tonalElevation = 2.dp, modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -133,31 +130,51 @@ fun CurrentPlanView(
     val today = LocalDate.now()
     val todayDayOfWeek = today.dayOfWeek.value
 
-    // 获取这一周的最新计划作为基准（用于显示列表项，但每个条目的内容会根据日期动态获取快照）
     val currentRoutine by viewModel.currentRoutine.collectAsStateWithLifecycle()
+
+    // 核心改进：如果是本周或未来周，直接使用 currentRoutine；如果是历史周，拉取快照。
+    var weekRoutineToDisplay by remember { mutableStateOf<List<RoutineDay>>(emptyList()) }
+    
+    if (weekOffset >= 0) {
+        // 本周及以后：实时响应修改
+        weekRoutineToDisplay = currentRoutine
+    } else {
+        // 历史周：拉取那一周结束时的快照
+        val endOfWeekTimestamp = remember(weekOffset) {
+            today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+                .plusWeeks(weekOffset.toLong()).plusDays(6)
+                .atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        }
+        LaunchedEffect(endOfWeekTimestamp) {
+            weekRoutineToDisplay = viewModel.getRoutineForTimestamp(endOfWeekTimestamp)
+        }
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(vertical = 16.dp)
     ) {
-        if (currentRoutine.isEmpty()) {
+        if (weekRoutineToDisplay.isEmpty()) {
             item {
                 Box(modifier = Modifier.fillParentMaxHeight(0.8f), contentAlignment = Alignment.Center) {
-                    Button(onClick = {
-                        val defaultRoutine = (1..7).map { day ->
-                            RoutineDay(day, isRest = (day == 3 || day == 7), exercises = emptyList())
-                        }
-                        viewModel.updatePlan("Daily Routine", defaultRoutine)
-                    }) { Text(stringResource(R.string.create_routine)) }
+                    if (weekOffset >= 0) {
+                        Button(onClick = {
+                            val defaultRoutine = (1..7).map { day ->
+                                RoutineDay(day, isRest = (day == 3 || day == 7), exercises = emptyList())
+                            }
+                            viewModel.updatePlan("Daily Routine", defaultRoutine)
+                        }) { Text(stringResource(R.string.create_routine)) }
+                    } else {
+                        Text("那一周还没有创建计划", color = MaterialTheme.colorScheme.outline)
+                    }
                 }
             }
         } else {
             item {
                 WeeklyProgressBar(
-                    routine = currentRoutine, 
+                    routine = weekRoutineToDisplay, 
                     workoutViewModel = workoutViewModel, 
-                    planViewModel = viewModel,
                     weekOffset = weekOffset,
                     onDayClick = onDayClick
                 )
@@ -166,7 +183,7 @@ fun CurrentPlanView(
             
             if (weekOffset == 0) {
                 item {
-                    val todayRoutine = currentRoutine.find { it.dayOfWeek == todayDayOfWeek }
+                    val todayRoutine = weekRoutineToDisplay.find { it.dayOfWeek == todayDayOfWeek }
                     val isCompleted = remember(setsToday, todayRoutine) {
                         if (todayRoutine == null || todayRoutine.isRest) false
                         else todayRoutine.exercises.isNotEmpty() && todayRoutine.exercises.all { planned ->
@@ -183,32 +200,26 @@ fun CurrentPlanView(
                 Text(stringResource(R.string.week_overview), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp))
             }
             
-            items(currentRoutine.sortedBy { it.dayOfWeek }) { day ->
-                val date = remember(day.dayOfWeek, weekOffset) {
+            items(weekRoutineToDisplay.sortedBy { it.dayOfWeek }) { day ->
+                val dateStr = remember(day.dayOfWeek, weekOffset) {
                     today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
                         .plusWeeks(weekOffset.toLong()).plusDays((day.dayOfWeek - 1).toLong())
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                 }
-                val dateStr = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-                val endOfDayTimestamp = date.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-
-                // 核心：为每一天获取那天的计划快照
-                var dayRoutineSnapshot by remember { mutableStateOf<RoutineDay?>(null) }
-                LaunchedEffect(endOfDayTimestamp, currentRoutine) {
-                    val fullRoutine = viewModel.getRoutineForTimestamp(endOfDayTimestamp)
-                    dayRoutineSnapshot = fullRoutine.find { it.dayOfWeek == day.dayOfWeek }
-                }
-
-                val displayDay = dayRoutineSnapshot ?: day
 
                 Card(
                     modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp).clip(MaterialTheme.shapes.medium).clickable { 
                         if (weekOffset == 0) editingDayOfWeek = day.dayOfWeek else onDayClick(dateStr)
                     },
-                    colors = CardDefaults.cardColors(containerColor = if (weekOffset == 0 && day.dayOfWeek == todayDayOfWeek) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (weekOffset == 0 && day.dayOfWeek == todayDayOfWeek)
+                            MaterialTheme.colorScheme.primaryContainer
+                            else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                    )
                 ) {
                     ListItem(
                         headlineContent = { Text(getDayName(day.dayOfWeek), fontWeight = if (weekOffset == 0 && day.dayOfWeek == todayDayOfWeek) FontWeight.Bold else FontWeight.Normal) },
-                        supportingContent = { Text(if (displayDay.isRest) stringResource(R.string.rest_badge) else stringResource(R.string.exercises_count, displayDay.exercises.size)) },
+                        supportingContent = { Text(if (day.isRest) stringResource(R.string.rest_badge) else stringResource(R.string.exercises_count, day.exercises.size)) },
                         trailingContent = {
                             if (weekOffset == 0 && day.dayOfWeek == todayDayOfWeek) {
                                 Badge(containerColor = MaterialTheme.colorScheme.primary) { Text(stringResource(R.string.today_badge), modifier = Modifier.padding(4.dp)) }
@@ -222,7 +233,7 @@ fun CurrentPlanView(
     }
 
     if (editingDayOfWeek != -1) {
-        val dayToEdit = currentRoutine.find { it.dayOfWeek == editingDayOfWeek }
+        val dayToEdit = weekRoutineToDisplay.find { it.dayOfWeek == editingDayOfWeek }
         if (dayToEdit != null) {
             EditDayDialog(day = dayToEdit, onDismiss = { editingDayOfWeek = -1 }, onSave = { isRest, exercises ->
                 viewModel.updatePlanDay(editingDayOfWeek, isRest, exercises)
@@ -236,7 +247,6 @@ fun CurrentPlanView(
 fun WeeklyProgressBar(
     routine: List<RoutineDay>, 
     workoutViewModel: WorkoutViewModel, 
-    planViewModel: PlanViewModel,
     weekOffset: Int,
     onDayClick: (String) -> Unit
 ) {
@@ -252,15 +262,10 @@ fun WeeklyProgressBar(
                     .plusWeeks(weekOffset.toLong()).plusDays((day.dayOfWeek - 1).toLong())
             }
             val circleDateStr = circleDate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
-            val endOfCircleDayTimestamp = circleDate.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
             LaunchedEffect(circleDateStr, routine) {
-                // 获取那天的计划快照
-                val routineSnapshot = planViewModel.getRoutineForTimestamp(endOfCircleDayTimestamp)
-                val daySnapshot = routineSnapshot.find { it.dayOfWeek == day.dayOfWeek } ?: day
-                
-                isFullyCompleted = if (daySnapshot.isRest) true 
-                else workoutViewModel.isDayFullyCompleted(circleDateStr, daySnapshot.exercises)
+                isFullyCompleted = if (day.isRest) true 
+                else workoutViewModel.isDayFullyCompleted(circleDateStr, day.exercises)
             }
 
             val isActualToday = weekOffset == 0 && day.dayOfWeek == todayDayOfWeek
