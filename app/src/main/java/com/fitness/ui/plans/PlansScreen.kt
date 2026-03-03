@@ -341,7 +341,7 @@ fun TodayTaskCard(
         shape = MaterialTheme.shapes.extraLarge,
         colors = CardDefaults.elevatedCardColors(
             containerColor = if (isCompleted) 
-                MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.7f) 
+                MaterialTheme.colorScheme.tertiaryContainer 
                 else MaterialTheme.colorScheme.primaryContainer
         )
     ) {
