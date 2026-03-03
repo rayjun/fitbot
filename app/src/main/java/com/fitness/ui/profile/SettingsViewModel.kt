@@ -6,14 +6,20 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 val Context.dataStore by preferencesDataStore(name = "settings")
 
-class SettingsViewModel(private val context: Context) : ViewModel() {
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
+    @ApplicationContext private val context: Context
+) : ViewModel() {
     private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
     private val LANGUAGE_KEY = stringPreferencesKey("language")
     private val USER_QUOTE_KEY = stringPreferencesKey("user_quote")

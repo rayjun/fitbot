@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.fitness.app-mergeDebugResources-70:/values-watch-v20/values-watch-v20.xml",
+            "outputFile": "com.fitness.app-mergeDebugResources-73:/values-watch-v20/values-watch-v20.xml",
             "map": [
                 {
-                    "source": "/Users/ray/.gradle/caches/transforms-3/83189bb146978b666fcea28b140bd492/transformed/appcompat-1.6.1/res/values-watch-v20/values-watch-v20.xml",
+                    "source": "/Users/ray/.gradle/caches/transforms-3/1b921e7f093607ab40f3c6dc6c3df69c/transformed/appcompat-1.6.1/res/values-watch-v20/values-watch-v20.xml",
                     "from": {
                         "startLines": "2,5,8",
                         "startColumns": "4,4,4",
@@ -23,7 +23,7 @@
                     }
                 },
                 {
-                    "source": "/Users/ray/.gradle/caches/transforms-3/6fbd24b2b9d2a483375b56705687fbbd/transformed/jetified-play-services-auth-21.0.0/res/values-watch-v20/values.xml",
+                    "source": "/Users/ray/.gradle/caches/transforms-3/7da3f03fe4f555539a0c95c8044b58e5/transformed/jetified-play-services-auth-21.0.0/res/values-watch-v20/values.xml",
                     "from": {
                         "startLines": "4,5,6,7,8,9,10,11",
                         "startColumns": "0,0,0,0,0,0,0,0",

@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.fitness.R
 import com.fitness.data.ExerciseProvider
 import com.fitness.model.Exercise
 import com.fitness.ui.workout.WorkoutViewModel
@@ -41,11 +42,12 @@ fun PlanSessionScreen(
 
     Scaffold(
         topBar = {
-            val titleText = when (currentPlan?.name) {
-                "Weekly Routine" -> stringResource(com.fitness.R.string.weekly_routine_name)
-                null -> stringResource(com.fitness.R.string.training_session)
-                else -> currentPlan!!.name
-            }
+            val titleText = currentPlan?.name?.let { 
+                if (it == "Daily Routine" || it == "Weekly Routine") {
+                    stringResource(R.string.weekly_routine_name)
+                } else it
+            } ?: stringResource(R.string.training_session)
+
             TopAppBar(
                 title = { Text(titleText) },
                 navigationIcon = {

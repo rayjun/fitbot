@@ -1,24 +1,26 @@
 package com.fitness.ui.plans
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.fitness.data.local.AppDatabase
+import com.fitness.data.local.PlanDao
 import com.fitness.data.local.PlanEntity
 import com.fitness.model.PlannedExercise
 import com.fitness.model.RoutineDay
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class PlanViewModel(context: Context) : ViewModel() {
-    private val db = AppDatabase.getInstance(context)
-    private val dao = db.planDao()
+@HiltViewModel
+class PlanViewModel @Inject constructor(
+    private val dao: PlanDao
+) : ViewModel() {
     private val gson = Gson()
 
     private val _currentPlan = MutableStateFlow<PlanEntity?>(null)
@@ -75,6 +77,6 @@ class PlanViewModel(context: Context) : ViewModel() {
         } else {
             current.add(RoutineDay(dayOfWeek, isRest, exercises))
         }
-        updatePlan(currentPlan.value?.name ?: "Weekly Routine", current)
+        updatePlan(currentPlan.value?.name ?: "Daily Routine", current)
     }
 }

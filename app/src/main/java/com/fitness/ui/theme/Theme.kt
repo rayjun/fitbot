@@ -15,51 +15,58 @@ import androidx.core.view.WindowCompat
 private val DarkColorScheme = darkColorScheme(
     primary = SportyOrange,
     onPrimary = Color.White,
-    primaryContainer = SportyOrangeDark,
-    onPrimaryContainer = Color.White,
+    primaryContainer = OnSportyOrangeContainer,
+    onPrimaryContainer = SportyOrangeContainer,
     
-    secondary = SportyOrangeLight,
-    onSecondary = Color.Black,
-    secondaryContainer = MutedDarkOrange,
+    secondary = SportySecondaryContainer,
+    onSecondary = OnSportySecondaryContainer,
+    secondaryContainer = SportySecondary,
+    onSecondaryContainer = SportySecondaryContainer,
+    
+    tertiary = SportyTertiaryContainer,
+    onTertiary = OnSportyTertiaryContainer,
     
     background = CarbonBlack,
     surface = DarkSurface,
     surfaceVariant = DarkSurfaceVariant,
     onBackground = Color.White,
     onSurface = Color.White,
-    onSurfaceVariant = Color(0xFFB0B0B0),
+    onSurfaceVariant = OnDarkSurfaceVariant,
     
     error = SportyRed,
-    errorContainer = Color(0xFFD50000),
-    onErrorContainer = Color.White
+    outline = OnDarkSurfaceVariant
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = SportyOrange,
     onPrimary = Color.White,
-    primaryContainer = SportyOrangeLight,
-    onPrimaryContainer = Color.Black,
+    primaryContainer = SportyOrangeContainer,
+    onPrimaryContainer = OnSportyOrangeContainer,
     
-    secondary = SportyOrange,
+    secondary = SportySecondary,
     onSecondary = Color.White,
-    secondaryContainer = PaleOrange,
+    secondaryContainer = SportySecondaryContainer,
+    onSecondaryContainer = OnSportySecondaryContainer,
+    
+    tertiary = SportyTertiary,
+    onTertiary = Color.White,
+    tertiaryContainer = SportyTertiaryContainer,
+    onTertiaryContainer = OnSportyTertiaryContainer,
     
     background = OffWhite,
     surface = WhiteSurface,
     surfaceVariant = LightSurfaceVariant,
     onBackground = Color.Black,
     onSurface = Color.Black,
-    onSurfaceVariant = Color(0xFF424242),
+    onSurfaceVariant = OnLightSurfaceVariant,
 
     error = SportyRed,
-    errorContainer = Color(0xFFFF8A80),
-    onErrorContainer = Color.Black
+    outline = OnLightSurfaceVariant
 )
 
 @Composable
 fun FitnessTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    // Set dynamicColor to false by default so our sporty colors aren't overridden by Android 12+ wallpaper colors
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -76,7 +83,8 @@ fun FitnessTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.background.toArgb()
+            window.statusBarColor = colorScheme.surface.toArgb() // Use surface for clean TopAppBar look
+            window.navigationBarColor = colorScheme.surface.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
         }
     }

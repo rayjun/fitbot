@@ -1,64 +1,41 @@
 package com.fitness
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.ExistingWorkPolicy
 import androidx.compose.runtime.livedata.observeAsState
-import com.fitness.ui.library.ExerciseLibraryScreen
+import com.fitness.ui.navigation.FitBotNavHost
 import com.fitness.ui.navigation.Screen
-import com.fitness.ui.plans.PlanViewModel
-import com.fitness.ui.plans.PlansScreen
-import com.fitness.ui.plans.PlanSessionScreen
-import com.fitness.ui.plans.DayDetailsScreen
-import com.fitness.ui.profile.ProfileViewModel
-import com.fitness.ui.profile.ProfileScreen
 import com.fitness.ui.profile.SettingsViewModel
-import com.fitness.ui.profile.SettingsScreen
 import com.fitness.ui.theme.FitnessTheme
-import com.fitness.ui.workout.WorkoutRecordingScreen
-import com.fitness.ui.workout.WorkoutViewModel
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.Scope
-import com.google.api.services.drive.DriveScopes
+import com.fitness.sync.AuthManager
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
+
+    @Inject
+    lateinit var authManager: AuthManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
         setContent {
-            val settingsViewModel: SettingsViewModel = viewModel(
-                factory = object : ViewModelProvider.Factory {
-                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                        return SettingsViewModel(applicationContext) as T
-                    }
-                }
-            )
+            val settingsViewModel: SettingsViewModel = hiltViewModel()
             val themeMode by settingsViewModel.themeMode.collectAsStateWithLifecycle()
             val isDark = when (themeMode) {
                 "dark" -> true
@@ -68,54 +45,10 @@ class MainActivity : AppCompatActivity() {
 
             FitnessTheme(darkTheme = isDark) {
                 val navController = rememberNavController()
-                val context = LocalContext.current
-                
-                // WorkManager Sync State
-                val workManager = remember { WorkManager.getInstance(context) }
+                val workManager = remember { WorkManager.getInstance(applicationContext) }
                 val syncWorkInfos by workManager.getWorkInfosForUniqueWorkLiveData("FullSync").observeAsState()
                 val isSyncing = syncWorkInfos?.any { it.state == WorkInfo.State.RUNNING } == true
                 
-                // Google Login State
-                var lastAccount by remember { 
-                    mutableStateOf(GoogleSignIn.getLastSignedInAccount(context)) 
-                }
-                
-                val googleSignInLauncher = rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.StartActivityForResult()
-                ) { result ->
-                    val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                    if (task.isSuccessful) {
-                        lastAccount = task.result
-                        Toast.makeText(context, context.getString(R.string.cloud_success), Toast.LENGTH_SHORT).show()
-                    } else {
-                        Toast.makeText(context, context.getString(R.string.cloud_failed, task.exception?.message), Toast.LENGTH_LONG).show()
-                    }
-                }
-
-                val workoutViewModel: WorkoutViewModel = viewModel(
-                    factory = object : ViewModelProvider.Factory {
-                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                            return WorkoutViewModel(applicationContext) as T
-                        }
-                    }
-                )
-
-                val planViewModel: PlanViewModel = viewModel(
-                    factory = object : ViewModelProvider.Factory {
-                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                            return PlanViewModel(applicationContext) as T
-                        }
-                    }
-                )
-
-                val profileViewModel: ProfileViewModel = viewModel(
-                    factory = object : ViewModelProvider.Factory {
-                        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                            return ProfileViewModel(applicationContext) as T
-                        }
-                    }
-                )
-
                 val items = listOf(Screen.Library, Screen.Plans, Screen.Profile)
 
                 Scaffold(
@@ -155,128 +88,13 @@ class MainActivity : AppCompatActivity() {
                         }
                     }
                 ) { innerPadding ->
-                    NavHost(
-                        navController = navController, 
-                        startDestination = Screen.Library.route,
-                        modifier = Modifier.padding(innerPadding)
-                    ) {
-                        composable(Screen.Library.route) {
-                            ExerciseLibraryScreen(
-                                isCloudConnected = lastAccount != null,
-                                isSyncing = isSyncing,
-                                onConnectCloud = {
-                                    if (lastAccount == null) {
-                                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                            .requestEmail()
-                                            .requestScopes(Scope(DriveScopes.DRIVE_FILE))
-                                            .build()
-                                        val client = GoogleSignIn.getClient(this@MainActivity, gso)
-                                        googleSignInLauncher.launch(client.signInIntent)
-                                    } else {
-                                        // Manual trigger sync
-                                        val syncRequest = OneTimeWorkRequestBuilder<com.fitness.sync.SyncWorker>().build()
-                                        workManager.enqueueUniqueWork("FullSync", ExistingWorkPolicy.REPLACE, syncRequest)
-                                        Toast.makeText(context, "Sync Started", Toast.LENGTH_SHORT).show()
-                                    }
-                                },
-                                onExerciseClick = { exercise ->
-                                    navController.navigate(Screen.ExerciseDetail.createRoute(exercise.id))
-                                }
-                            )
-                        }
-                        composable(
-                            route = Screen.ExerciseDetail.route,
-                            arguments = listOf(navArgument("exerciseId") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val exerciseId = backStackEntry.arguments?.getString("exerciseId") ?: ""
-                            com.fitness.ui.library.ExerciseDetailScreen(
-                                exerciseId = exerciseId,
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable(Screen.Plans.route) {
-                            PlansScreen(
-                                viewModel = planViewModel,
-                                workoutViewModel = workoutViewModel,
-                                onStartPlan = { dayOfWeek ->
-                                    workoutViewModel.startNewSession()
-                                    navController.navigate(Screen.PlanSession.createRoute(dayOfWeek))
-                                },
-                                onDayClick = { date ->
-                                    navController.navigate(Screen.DayDetails.createRoute(date))
-                                }
-                            )
-                        }
-                        composable(
-                            route = Screen.DayDetails.route,
-                            arguments = listOf(navArgument("date") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val date = backStackEntry.arguments?.getString("date") ?: ""
-                            DayDetailsScreen(
-                                date = date,
-                                viewModel = workoutViewModel,
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable(
-                            route = Screen.PlanSession.route,
-                            arguments = listOf(navArgument("dayOfWeek") { type = NavType.IntType })
-                        ) { backStackEntry ->
-                            val dayOfWeek = backStackEntry.arguments?.getInt("dayOfWeek") ?: 0
-                            PlanSessionScreen(
-                                dayOfWeek = dayOfWeek,
-                                planViewModel = planViewModel,
-                                workoutViewModel = workoutViewModel,
-                                onExerciseClick = { exercise ->
-                                    navController.navigate(Screen.Workout.createRoute(exercise.id))
-                                },
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable(Screen.Profile.route) {
-                            ProfileScreen(
-                                viewModel = profileViewModel,
-                                settingsViewModel = settingsViewModel,
-                                account = lastAccount,
-                                onLoginClick = {
-                                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                        .requestEmail()
-                                        .requestScopes(Scope(DriveScopes.DRIVE_FILE))
-                                        .build()
-                                    val client = GoogleSignIn.getClient(this@MainActivity, gso)
-                                    googleSignInLauncher.launch(client.signInIntent)
-                                },
-                                onLogout = {
-                                    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).build()
-                                    GoogleSignIn.getClient(this@MainActivity, gso).signOut().addOnCompleteListener {
-                                        lastAccount = null
-                                        Toast.makeText(context, context.getString(R.string.logout_success), Toast.LENGTH_SHORT).show()
-                                    }
-                                },
-                                onSettingsClick = {
-                                    navController.navigate(Screen.Settings.route)
-                                }
-                            )
-                        }
-                        composable(Screen.Settings.route) {
-                            SettingsScreen(
-                                settingsViewModel = settingsViewModel,
-                                onBack = { navController.popBackStack() }
-                            )
-                        }
-                        composable(
-                            route = Screen.Workout.route,
-                            arguments = listOf(navArgument("exerciseId") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val exerciseId = backStackEntry.arguments?.getString("exerciseId") ?: ""
-                            WorkoutRecordingScreen(
-                                exerciseId = exerciseId,
-                                viewModel = workoutViewModel,
-                                onBack = { navController.popBackStack() },
-                                onFinished = { navController.popBackStack() }
-                            )
-                        }
-                    }
+                    FitBotNavHost(
+                        navController = navController,
+                        innerPadding = innerPadding,
+                        authManager = authManager,
+                        isSyncing = isSyncing,
+                        workManager = workManager
+                    )
                 }
             }
         }

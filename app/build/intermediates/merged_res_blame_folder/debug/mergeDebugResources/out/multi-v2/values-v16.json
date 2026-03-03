@@ -1,10 +1,20 @@
 {
     "logs": [
         {
-            "outputFile": "com.fitness.app-mergeDebugResources-70:/values-v16/values-v16.xml",
+            "outputFile": "com.fitness.app-mergeDebugResources-73:/values-v16/values-v16.xml",
             "map": [
                 {
-                    "source": "/Users/ray/.gradle/caches/transforms-3/83189bb146978b666fcea28b140bd492/transformed/appcompat-1.6.1/res/values-v16/values-v16.xml",
+                    "source": "/Users/ray/.gradle/caches/transforms-3/b4a0140bfad86957aafdbcf68bc025b5/transformed/core-1.12.0/res/values-v16/values-v16.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "65",
+                        "endOffsets": "116"
+                    }
+                },
+                {
+                    "source": "/Users/ray/.gradle/caches/transforms-3/1b921e7f093607ab40f3c6dc6c3df69c/transformed/appcompat-1.6.1/res/values-v16/values-v16.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
@@ -20,16 +30,6 @@
                         "endLines": "6",
                         "endColumns": "12",
                         "endOffsets": "289"
-                    }
-                },
-                {
-                    "source": "/Users/ray/.gradle/caches/transforms-3/748cf68807ae79ea25612ffdcc6e0b2f/transformed/core-1.12.0/res/values-v16/values-v16.xml",
-                    "from": {
-                        "startLines": "2",
-                        "startColumns": "4",
-                        "startOffsets": "55",
-                        "endColumns": "65",
-                        "endOffsets": "116"
                     }
                 }
             ]
