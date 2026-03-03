@@ -2,6 +2,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -12,8 +13,8 @@ android {
         applicationId = "com.fitness"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = 2
+        versionName = "0.2"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -62,6 +63,14 @@ dependencies {
     val compose_version = "1.6.1"
     val room_version = "2.6.1"
     val work_version = "2.9.0"
+    val hilt_version = "2.50"
+
+    // Hilt
+    implementation("com.google.dagger:hilt-android:$hilt_version")
+    ksp("com.google.dagger:hilt-android-compiler:$hilt_version")
+    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation("androidx.hilt:hilt-work:1.1.0")
+    ksp("androidx.hilt:hilt-compiler:1.1.0")
 
     // Core
     implementation("androidx.core:core-ktx:1.12.0")
