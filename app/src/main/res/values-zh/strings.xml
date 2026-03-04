@@ -25,6 +25,7 @@
     <string name="quote">坚持就是胜利</string>
     <string name="heatmap_title">训练热力图</string>
     <string name="settings_general">通用设置</string>
+    <string name="settings_title">设置</string>
     <string name="settings_dark_mode">深色模式</string>
     <string name="settings_language">语言 (Language)</string>
     <string name="logout">退出登录</string>

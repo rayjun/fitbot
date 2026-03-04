@@ -25,6 +25,7 @@
     <string name="quote">Keep going!</string>
     <string name="heatmap_title">Workout Heatmap</string>
     <string name="settings_general">General Settings</string>
+    <string name="settings_title">Settings</string>
     <string name="settings_dark_mode">Dark Mode</string>
     <string name="settings_language">Language</string>
     <string name="logout">Logout</string>

@@ -113,6 +113,7 @@
     <string name="settings_general">通用设置</string>
     <string name="settings_language">语言 (Language)</string>
     <string name="settings_theme">主题模式</string>
+    <string name="settings_title">设置</string>
     <string name="start_training">开始训练</string>
     <string name="theme_dark">深色</string>
     <string name="theme_light">浅色</string>
