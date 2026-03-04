@@ -10,8 +10,8 @@ sealed class Screen(val route: String, val title: String? = null, val icon: Imag
     object Library : Screen("library", "Library", Icons.Default.FitnessCenter)
     object Plans : Screen("plans", "Plans", Icons.Default.ListAlt)
     object Profile : Screen("profile", "Profile", Icons.Default.Person)
-    object Workout : Screen("workout/{exerciseId}") {
-        fun createRoute(exerciseId: String) = "workout/$exerciseId"
+    object Workout : Screen("workout/{exerciseId}/{date}") {
+        fun createRoute(exerciseId: String, date: String) = "workout/$exerciseId/$date"
     }
     object ExerciseDetail : Screen("exercise_detail/{exerciseId}") {
         fun createRoute(exerciseId: String) = "exercise_detail/$exerciseId"

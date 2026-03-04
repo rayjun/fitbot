@@ -1,6 +1,7 @@
 package com.fitness.ui.workout;
 
 import android.content.Context;
+import androidx.lifecycle.SavedStateHandle;
 import com.fitness.data.local.ExerciseDao;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
@@ -27,23 +28,27 @@ public final class WorkoutViewModel_Factory implements Factory<WorkoutViewModel>
 
   private final Provider<ExerciseDao> daoProvider;
 
+  private final Provider<SavedStateHandle> savedStateHandleProvider;
+
   public WorkoutViewModel_Factory(Provider<Context> contextProvider,
-      Provider<ExerciseDao> daoProvider) {
+      Provider<ExerciseDao> daoProvider, Provider<SavedStateHandle> savedStateHandleProvider) {
     this.contextProvider = contextProvider;
     this.daoProvider = daoProvider;
+    this.savedStateHandleProvider = savedStateHandleProvider;
   }
 
   @Override
   public WorkoutViewModel get() {
-    return newInstance(contextProvider.get(), daoProvider.get());
+    return newInstance(contextProvider.get(), daoProvider.get(), savedStateHandleProvider.get());
   }
 
   public static WorkoutViewModel_Factory create(Provider<Context> contextProvider,
-      Provider<ExerciseDao> daoProvider) {
-    return new WorkoutViewModel_Factory(contextProvider, daoProvider);
+      Provider<ExerciseDao> daoProvider, Provider<SavedStateHandle> savedStateHandleProvider) {
+    return new WorkoutViewModel_Factory(contextProvider, daoProvider, savedStateHandleProvider);
   }
 
-  public static WorkoutViewModel newInstance(Context context, ExerciseDao dao) {
-    return new WorkoutViewModel(context, dao);
+  public static WorkoutViewModel newInstance(Context context, ExerciseDao dao,
+      SavedStateHandle savedStateHandle) {
+    return new WorkoutViewModel(context, dao, savedStateHandle);
   }
 }

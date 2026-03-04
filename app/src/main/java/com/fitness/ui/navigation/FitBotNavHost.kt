@@ -81,8 +81,8 @@ fun FitBotNavHost(
             PlansScreen(
                 viewModel = hiltViewModel(),
                 workoutViewModel = hiltViewModel(),
-                onStartExercise = { exerciseId ->
-                    navController.navigate(Screen.Workout.createRoute(exerciseId))
+                onStartExercise = { exerciseId, date ->
+                    navController.navigate(Screen.Workout.createRoute(exerciseId, date))
                 },
                 onDayClick = { date ->
                     navController.navigate(Screen.DayDetails.createRoute(date))
@@ -112,7 +112,9 @@ fun FitBotNavHost(
                 planViewModel = hiltViewModel(),
                 workoutViewModel = hiltViewModel(),
                 onExerciseClick = { exercise ->
-                    navController.navigate(Screen.Workout.createRoute(exercise.id))
+                    // Fallback for old navigation if any, though Plans tab is updated
+                    val today = java.time.LocalDate.now().toString()
+                    navController.navigate(Screen.Workout.createRoute(exercise.id, today))
                 },
                 onBack = { navController.popBackStack() }
             )
@@ -154,7 +156,10 @@ fun FitBotNavHost(
 
         composable(
             route = Screen.Workout.route,
-            arguments = listOf(navArgument("exerciseId") { type = NavType.StringType })
+            arguments = listOf(
+                navArgument("exerciseId") { type = NavType.StringType },
+                navArgument("date") { type = NavType.StringType }
+            )
         ) { backStackEntry ->
             val exerciseId = backStackEntry.arguments?.getString("exerciseId") ?: ""
             WorkoutRecordingScreen(

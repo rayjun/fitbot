@@ -1,6 +1,7 @@
 package com.fitness.ui.workout
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.work.Data
@@ -21,14 +22,17 @@ import javax.inject.Inject
 @HiltViewModel
 class WorkoutViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val dao: ExerciseDao
+    private val dao: ExerciseDao,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     private val timeFormatter = SimpleDateFormat("HH:mm", Locale.US)
 
+    // 从导航参数中获取日期，如果不存在则默认为今天
+    private val navDate: String? = savedStateHandle["date"]
     private val _currentSessionId = MutableStateFlow("Session_${System.currentTimeMillis()}")
-    private val _currentDate = MutableStateFlow(dateFormatter.format(Date()))
+    private val _currentDate = MutableStateFlow(navDate ?: dateFormatter.format(Date()))
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val setsInSession: StateFlow<List<SetEntity>> = _currentDate
@@ -52,13 +56,16 @@ class WorkoutViewModel @Inject constructor(
 
     fun startNewSession() {
         val now = System.currentTimeMillis()
-        _currentDate.value = dateFormatter.format(Date(now))
+        // 只有在没有显式指定日期（即今天训练）的情况下，才随 session 更新日期
+        if (navDate == null) {
+            _currentDate.value = dateFormatter.format(Date(now))
+        }
         _currentSessionId.value = "Session_$now"
     }
 
     fun addSet(exerciseId: String, weight: Double, reps: Int) {
         val now = System.currentTimeMillis()
-        val dateStr = dateFormatter.format(Date(now))
+        val dateStr = _currentDate.value // 使用当前选中的日期，而不是强制今天
         val sessionId = _currentSessionId.value
         
         val set = SetEntity(
@@ -73,7 +80,6 @@ class WorkoutViewModel @Inject constructor(
 
         viewModelScope.launch {
             dao.insertSet(set)
-            _currentDate.value = dateStr
             triggerSync(dateStr)
         }
     }

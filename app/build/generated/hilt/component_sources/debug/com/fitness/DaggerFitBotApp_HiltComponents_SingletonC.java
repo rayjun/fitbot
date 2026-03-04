@@ -414,6 +414,8 @@ public final class DaggerFitBotApp_HiltComponents_SingletonC {
   }
 
   private static final class ViewModelCImpl extends FitBotApp_HiltComponents.ViewModelC {
+    private final SavedStateHandle savedStateHandle;
+
     private final SingletonCImpl singletonCImpl;
 
     private final ActivityRetainedCImpl activityRetainedCImpl;
@@ -433,7 +435,7 @@ public final class DaggerFitBotApp_HiltComponents_SingletonC {
         ViewModelLifecycle viewModelLifecycleParam) {
       this.singletonCImpl = singletonCImpl;
       this.activityRetainedCImpl = activityRetainedCImpl;
-
+      this.savedStateHandle = savedStateHandleParam;
       initialize(savedStateHandleParam, viewModelLifecycleParam);
 
     }
@@ -488,7 +490,7 @@ public final class DaggerFitBotApp_HiltComponents_SingletonC {
           return (T) new SettingsViewModel(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule));
 
           case 3: // com.fitness.ui.workout.WorkoutViewModel 
-          return (T) new WorkoutViewModel(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.exerciseDao());
+          return (T) new WorkoutViewModel(ApplicationContextModule_ProvideContextFactory.provideContext(singletonCImpl.applicationContextModule), singletonCImpl.exerciseDao(), viewModelCImpl.savedStateHandle);
 
           default: throw new AssertionError(id);
         }

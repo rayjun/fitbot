@@ -49,7 +49,7 @@ import java.util.*
 fun PlansScreen(
     viewModel: PlanViewModel,
     workoutViewModel: WorkoutViewModel,
-    onStartExercise: (String) -> Unit,
+    onStartExercise: (String, String) -> Unit, // Updated to pass (exerciseId, date)
     onDayClick: (String) -> Unit
 ) {
     val initialPage = 500
@@ -121,7 +121,7 @@ fun InteractivePlanView(
     weekOffset: Int,
     viewModel: PlanViewModel,
     workoutViewModel: WorkoutViewModel,
-    onStartExercise: (String) -> Unit,
+    onStartExercise: (String, String) -> Unit,
     onDayDetailsClick: (String) -> Unit
 ) {
     val today = LocalDate.now()
@@ -146,13 +146,11 @@ fun InteractivePlanView(
     var showAddExerciseDialog by remember { mutableStateOf(false) }
     var exerciseToDelete by remember { mutableStateOf<PlannedExercise?>(null) }
 
-    // 动态获取选中日期的真实锻炼记录
     var recordedSetsForSelectedDay by remember { mutableStateOf<List<com.fitness.data.local.SetEntity>>(emptyList()) }
     LaunchedEffect(selectedDateStr, setsToday) {
         recordedSetsForSelectedDay = workoutViewModel.getSetsByDate(selectedDateStr)
     }
 
-    // 权限判定：是否允许进入训练状态
     val isTrainingAllowed = (weekOffset > 0) || (weekOffset == 0 && selectedDayOfWeek >= today.dayOfWeek.value)
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -207,8 +205,8 @@ fun InteractivePlanView(
                             completedCount = completedCount,
                             isFinished = isFinished,
                             isTrainingAllowed = isTrainingAllowed,
-                            isEditable = (weekOffset == 0), // 仅限当前周可编辑
-                            onStart = { if (isTrainingAllowed) onStartExercise(exercise.id) },
+                            isEditable = (weekOffset == 0),
+                            onStart = { if (isTrainingAllowed) onStartExercise(exercise.id, selectedDateStr) },
                             onDelete = { exerciseToDelete = planned }
                         )
                     }
@@ -231,7 +229,6 @@ fun InteractivePlanView(
         }
     }
 
-    // 删除确认弹窗
     if (exerciseToDelete != null) {
         val exercise = ExerciseProvider.exercises.find { it.id == exerciseToDelete!!.id }
         AlertDialog(
