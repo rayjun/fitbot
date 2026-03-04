@@ -17,6 +17,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
@@ -177,16 +178,7 @@ fun CurrentPlanView(
                     weekOffset = weekOffset,
                     onDayClick = onDayClick
                 )
-                Spacer(modifier = Modifier.height(32.dp))
-            }
-            
-            item {
-                Text(
-                    stringResource(R.string.week_overview), 
-                    style = MaterialTheme.typography.titleMedium, 
-                    fontWeight = FontWeight.Bold, 
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
-                )
+                Spacer(modifier = Modifier.height(24.dp))
             }
             
             items(weekRoutineToDisplay.sortedBy { it.dayOfWeek }) { day ->
@@ -234,7 +226,6 @@ fun CurrentPlanView(
                         },
                         trailingContent = {
                             if (isActualToday) {
-                                // 判断今天是否已完成
                                 val isCompleted = remember(setsToday, displayDay) {
                                     if (displayDay.isRest) false
                                     else displayDay.exercises.isNotEmpty() && displayDay.exercises.all { planned ->
