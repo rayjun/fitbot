@@ -3,10 +3,14 @@ package com.fitness
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -46,22 +50,34 @@ class MainActivity : AppCompatActivity() {
 
             FitnessTheme(darkTheme = isDark) {
                 val navController = rememberNavController()
+                val context = LocalContext.current
                 val workManager = remember { WorkManager.getInstance(applicationContext) }
                 val syncWorkInfos by workManager.getWorkInfosForUniqueWorkLiveData("FullSync").observeAsState()
                 val isSyncing = syncWorkInfos?.any { it.state == WorkInfo.State.RUNNING } == true
                 
                 val items = listOf(Screen.Library, Screen.Plans, Screen.Profile)
 
+                val navBackStackEntry by navController.currentBackStackEntryAsState()
+                val currentDestination = navBackStackEntry?.destination
+                val showBottomBar = items.any { it.route == currentDestination?.route }
+
+                // 核心修复：同步系统导航栏颜色，并消除空隙
+                val systemNavBarColor = if (showBottomBar) MaterialTheme.colorScheme.surfaceVariant else MaterialTheme.colorScheme.background
+                val view = LocalView.current
+                if (!view.isInEditMode) {
+                    SideEffect {
+                        val window = (context as android.app.Activity).window
+                        window.navigationBarColor = systemNavBarColor.toArgb()
+                    }
+                }
+
                 Scaffold(
                     bottomBar = {
-                        val navBackStackEntry by navController.currentBackStackEntryAsState()
-                        val currentDestination = navBackStackEntry?.destination
-                        val showBottomBar = items.any { it.route == currentDestination?.route }
-                        
                         if (showBottomBar) {
                             NavigationBar(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                tonalElevation = 0.dp // Remove the gap/shadow effect
+                                tonalElevation = 0.dp,
+                                windowInsets = WindowInsets(0, 0, 0, 0) // 移除底部安全区域内边距
                             ) {
                                 items.forEach { screen ->
                                     NavigationBarItem(
