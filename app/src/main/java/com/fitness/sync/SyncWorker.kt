@@ -1,6 +1,7 @@
 package com.fitness.sync
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
@@ -18,6 +19,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.Scope
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
@@ -38,13 +41,34 @@ class SyncWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, workerParams) {
 
     private val gson = Gson()
+    private val TAG = "FitBotSync"
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val specificDate = inputData.getString("SYNC_DATE")
+        Log.d(TAG, "Starting sync task. Specific date: $specificDate")
         
-        // 1. 获取已登录的 Google 账户
-        val account = GoogleSignIn.getLastSignedInAccount(applicationContext)
+        // 1. 获取 Google 账户并尝试静默登录以刷新 Token
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestEmail()
+            .requestScopes(Scope(DriveScopes.DRIVE_FILE))
+            .build()
+        val googleSignInClient = GoogleSignIn.getClient(applicationContext, gso)
+        
+        val account = try {
+            // 先尝试静默登录获取最新有效 Token
+            val task = googleSignInClient.silentSignIn()
+            if (task.isSuccessful) {
+                task.result
+            } else {
+                GoogleSignIn.getLastSignedInAccount(applicationContext)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Auth failed during silent sign in", e)
+            GoogleSignIn.getLastSignedInAccount(applicationContext)
+        }
+
         if (account == null) {
+            Log.w(TAG, "No Google account found. Skipping sync.")
             return@withContext Result.success()
         }
 
@@ -64,67 +88,79 @@ class SyncWorker @AssistedInject constructor(
         val helper = DriveServiceHelper(driveService)
         
         try {
+            Log.d(TAG, "Connecting to Google Drive...")
             val folderId = helper.getOrCreateFolder("MyFitnessData")
+            Log.d(TAG, "Target folder ID: $folderId")
 
-            // --- SYNC SETS (Enhanced) ---
-            if (specificDate != null) {
-                // 如果指定了日期（如刚录完动作），只同步那一天
-                syncSets(helper, folderId, specificDate)
+            // --- SYNC SETS ---
+            val datesToSync = if (specificDate != null) {
+                listOf(specificDate)
             } else {
-                // 如果没指定日期（如手动点击“立即同步”），扫描所有有记录的日期
-                val allDates = exerciseDao.getDistinctDates().toMutableSet()
-                // 同时也要考虑今天（即使还没录入动作）
-                allDates.add(SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date()))
-                
-                allDates.forEach { date ->
+                val dbDates = exerciseDao.getDistinctDates().toMutableSet()
+                dbDates.add(SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date()))
+                dbDates.toList()
+            }
+
+            Log.d(TAG, "Syncing ${datesToSync.size} days of data...")
+            datesToSync.forEach { date ->
+                try {
                     syncSets(helper, folderId, date)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Failed to sync sets for date: $date", e)
                 }
             }
 
             // --- SYNC PLANS ---
+            Log.d(TAG, "Syncing training plans...")
             syncPlans(helper, folderId)
 
             // --- SYNC PREFS ---
+            Log.d(TAG, "Syncing user preferences...")
             syncPrefs(helper, folderId)
 
+            Log.i(TAG, "Full sync completed successfully.")
             Result.success()
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "Sync process failed", e)
             Result.retry()
         }
     }
 
     private suspend fun syncSets(helper: DriveServiceHelper, folderId: String, date: String) {
-        // 先拉取云端记录
-        val remoteJson = helper.downloadFile(folderId, "$date.json")
+        val fileName = "$date.json"
+        Log.v(TAG, "Processing file: $fileName")
+        
+        val remoteJson = helper.downloadFile(folderId, fileName)
         val existingRemoteIds = exerciseDao.getAllRemoteIds().toSet()
 
         if (remoteJson != null) {
             try {
                 val remoteDay = gson.fromJson(remoteJson, TrainingDay::class.java)
                 val remoteSets = transformToSetEntities(remoteDay)
+                var mergedCount = 0
                 remoteSets.forEach { remoteSet ->
                     if (!existingRemoteIds.contains(remoteSet.remoteId)) {
                         exerciseDao.insertSet(remoteSet)
+                        mergedCount++
                     }
                 }
+                if (mergedCount > 0) Log.d(TAG, "Merged $mergedCount new sets from cloud for $date")
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Error parsing remote JSON for $date", e)
             }
         }
 
-        // 后推送本地记录（包含合并后的）
         val allSets = exerciseDao.getSetsByDate(date)
         if (allSets.isNotEmpty()) {
             val trainingDay = transformToTrainingDay(date, allSets)
             val jsonString = gson.toJson(trainingDay)
-            helper.uploadOrUpdateFile(folderId, "$date.json", jsonString)
+            helper.uploadOrUpdateFile(folderId, fileName, jsonString)
+            Log.v(TAG, "Uploaded ${allSets.size} sets for $date")
         }
     }
 
     private suspend fun syncPlans(helper: DriveServiceHelper, folderId: String) {
         val remoteJson = helper.downloadFile(folderId, "plans.json")
-        
         if (remoteJson != null) {
             try {
                 val type = object : TypeToken<List<PlanEntity>>() {}.type
@@ -135,10 +171,11 @@ class SyncWorker @AssistedInject constructor(
                     val localPlan = localPlans[remotePlan.id]
                     if (localPlan == null || remotePlan.version > localPlan.version) {
                         planDao.insertPlan(remotePlan)
+                        Log.d(TAG, "Updated local plan: ${remotePlan.name}")
                     }
                 }
             } catch (e: Exception) {
-                e.printStackTrace()
+                Log.e(TAG, "Error parsing plans.json", e)
             }
         }
         
