@@ -248,9 +248,7 @@ fun CurrentPlanView(
                                     contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
                                     modifier = Modifier.height(32.dp),
                                     shape = MaterialTheme.shapes.small,
-                                    colors = if (isCompleted) 
-                                        ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
-                                        else ButtonDefaults.buttonColors()
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                                 ) {
                                     Text(
                                         if (isCompleted) "继续训练" else stringResource(R.string.start_training),
