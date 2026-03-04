@@ -60,17 +60,6 @@ fun FitBotNavHost(
     ) {
         composable(Screen.Library.route) {
             ExerciseLibraryScreen(
-                isCloudConnected = lastAccount != null,
-                isSyncing = isSyncing,
-                onConnectCloud = {
-                    if (lastAccount == null) {
-                        googleSignInLauncher.launch(authManager.getSignInIntent())
-                    } else {
-                        val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
-                        workManager.enqueueUniqueWork("FullSync", ExistingWorkPolicy.REPLACE, syncRequest)
-                        Toast.makeText(context, "Sync Started", Toast.LENGTH_SHORT).show()
-                    }
-                },
                 onExerciseClick = { exercise ->
                     navController.navigate(Screen.ExerciseDetail.createRoute(exercise.id))
                 }
@@ -154,6 +143,13 @@ fun FitBotNavHost(
         composable(Screen.Settings.route) {
             SettingsScreen(
                 settingsViewModel = hiltViewModel(),
+                isCloudConnected = lastAccount != null,
+                isSyncing = isSyncing,
+                onSyncClick = {
+                    val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
+                    workManager.enqueueUniqueWork("FullSync", ExistingWorkPolicy.REPLACE, syncRequest)
+                    Toast.makeText(context, "Sync Started", Toast.LENGTH_SHORT).show()
+                },
                 onBack = { navController.popBackStack() }
             )
         }
