@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -143,6 +144,12 @@ fun InteractivePlanView(
 
     val displayDay = dayRoutineSnapshot ?: RoutineDay(selectedDayOfWeek, true, emptyList())
     var showAddExerciseDialog by remember { mutableStateOf(false) }
+    var exerciseToDelete by remember { mutableStateOf<PlannedExercise?>(null) }
+
+    // 权限判定：是否允许进入训练状态
+    // 条件：是本周 (weekOffset == 0) 且 选中天数 >= 今天的天数 (selectedDayOfWeek >= today.dayOfWeek.value)
+    // 或者 是未来周 (weekOffset > 0)
+    val isTrainingAllowed = (weekOffset > 0) || (weekOffset == 0 && selectedDayOfWeek >= today.dayOfWeek.value)
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         WeeklyProgressBarNavigation(
@@ -197,12 +204,10 @@ fun InteractivePlanView(
                             planned = planned,
                             completedCount = completedCount,
                             isFinished = isFinished,
-                            isEditable = weekOffset == 0,
-                            onStart = { onStartExercise(exercise.id) },
-                            onDelete = {
-                                val updatedExercises = displayDay.exercises.filter { it.id != planned.id }
-                                viewModel.updatePlanDay(selectedDayOfWeek, updatedExercises.isEmpty(), updatedExercises)
-                            }
+                            isTrainingAllowed = isTrainingAllowed,
+                            isEditable = (weekOffset == 0), // 仅限当前周可编辑
+                            onStart = { if (isTrainingAllowed) onStartExercise(exercise.id) },
+                            onDelete = { exerciseToDelete = planned }
                         )
                     }
                 }
@@ -222,6 +227,28 @@ fun InteractivePlanView(
                 }
             }
         }
+    }
+
+    // 删除确认弹窗
+    if (exerciseToDelete != null) {
+        val exercise = ExerciseProvider.exercises.find { it.id == exerciseToDelete!!.id }
+        AlertDialog(
+            onDismissRequest = { exerciseToDelete = null },
+            title = { Text("确认删除动作") },
+            text = { Text("确定要将“${exercise?.let { stringResource(it.nameRes) } ?: exerciseToDelete!!.id}”从当天的计划中移除吗？") },
+            confirmButton = {
+                TextButton(onClick = {
+                    val updatedExercises = displayDay.exercises.filter { it.id != exerciseToDelete!!.id }
+                    viewModel.updatePlanDay(selectedDayOfWeek, updatedExercises.isEmpty(), updatedExercises)
+                    exerciseToDelete = null
+                }) {
+                    Text("删除", color = MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { exerciseToDelete = null }) { Text("取消") }
+            }
+        )
     }
 
     if (showAddExerciseDialog) {
@@ -305,6 +332,7 @@ fun ExerciseActionCard(
     planned: PlannedExercise,
     completedCount: Int,
     isFinished: Boolean,
+    isTrainingAllowed: Boolean,
     isEditable: Boolean,
     onStart: () -> Unit,
     onDelete: () -> Unit
@@ -312,7 +340,7 @@ fun ExerciseActionCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = if (isFinished) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f) 
+            containerColor = if (isFinished) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f) 
                              else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         )
     ) {
@@ -320,12 +348,14 @@ fun ExerciseActionCard(
             modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f).clickable { onStart() }) {
+            Column(
+                modifier = Modifier.weight(1f).clickable(enabled = isTrainingAllowed) { onStart() }
+            ) {
                 Text(
                     stringResource(exercise.nameRes), 
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = if (isFinished) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface
+                    color = if (isFinished) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     "${stringResource(exercise.targetMuscleRes)} • $completedCount / ${planned.targetSets} 组",
@@ -335,8 +365,8 @@ fun ExerciseActionCard(
             }
             
             if (isFinished) {
-                Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.padding(horizontal = 8.dp))
-            } else {
+                Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(horizontal = 8.dp))
+            } else if (isTrainingAllowed) {
                 IconButton(onClick = onStart) {
                     Icon(Icons.Default.PlayArrow, null, tint = MaterialTheme.colorScheme.primary)
                 }
