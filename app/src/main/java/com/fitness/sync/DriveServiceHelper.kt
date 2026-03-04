@@ -13,12 +13,8 @@ import java.io.IOException
 class DriveServiceHelper(private val driveService: Drive) {
     private val TAG = "FitBotDrive"
 
-    /**
-     * 在 Drive 根目录创建或获取应用专用的文件夹。
-     */
     @Throws(IOException::class)
     fun getOrCreateFolder(folderName: String): String {
-        // 修改查询条件：增加 'and trashed = false' 并确保 parent 是 root
         val query = "name = '$folderName' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
         val result = driveService.files().list()
             .setQ(query)
@@ -27,26 +23,28 @@ class DriveServiceHelper(private val driveService: Drive) {
             .execute()
 
         val folder = result.files.firstOrNull()
-        if (folder != null) {
-            Log.d(TAG, "Found existing folder: ${folder.name} (${folder.id})")
-            return folder.id
-        }
+        if (folder != null) return folder.id
 
-        // 创建新文件夹
-        Log.d(TAG, "Folder not found. Creating new folder: $folderName")
         val folderMetadata = File().apply {
             name = folderName
             mimeType = "application/vnd.google-apps.folder"
         }
-        val newFolder = driveService.files().create(folderMetadata)
-            .setFields("id")
-            .execute()
-        return newFolder.id
+        return driveService.files().create(folderMetadata).setFields("id").execute().id
     }
 
     /**
-     * 下载文件内容
+     * 根据查询条件列出所有符合条件的文件名和 ID
      */
+    @Throws(IOException::class)
+    fun queryFiles(folderId: String, q: String): List<File> {
+        val query = "'$folderId' in parents and trashed = false and $q"
+        return driveService.files().list()
+            .setQ(query)
+            .setSpaces("drive")
+            .setFields("files(id, name)")
+            .execute().files ?: emptyList()
+    }
+
     @Throws(IOException::class)
     fun downloadFile(folderId: String, fileName: String): String? {
         val query = "name = '$fileName' and '$folderId' in parents and trashed = false"
@@ -56,19 +54,22 @@ class DriveServiceHelper(private val driveService: Drive) {
             .setFields("files(id, name)")
             .execute()
 
-        val file = result.files.firstOrNull() ?: run {
-            Log.v(TAG, "Remote file not found: $fileName")
-            return null
-        }
-        
+        val file = result.files.firstOrNull() ?: return null
         val outputStream = ByteArrayOutputStream()
         driveService.files().get(file.id).executeMediaAndDownloadTo(outputStream)
         return outputStream.toString()
     }
 
     /**
-     * 上传或覆盖 JSON 文件。
+     * 直接通过文件 ID 下载内容
      */
+    @Throws(IOException::class)
+    fun downloadFileById(fileId: String): String {
+        val outputStream = ByteArrayOutputStream()
+        driveService.files().get(fileId).executeMediaAndDownloadTo(outputStream)
+        return outputStream.toString()
+    }
+
     @Throws(IOException::class)
     fun uploadOrUpdateFile(folderId: String, fileName: String, content: String) {
         val query = "name = '$fileName' and '$folderId' in parents and trashed = false"
@@ -82,12 +83,8 @@ class DriveServiceHelper(private val driveService: Drive) {
         val mediaContent = ByteArrayContent.fromString("application/json", content)
 
         if (existingFile != null) {
-            // 更新现有文件
-            Log.v(TAG, "Updating existing remote file: $fileName")
             driveService.files().update(existingFile.id, null, mediaContent).execute()
         } else {
-            // 创建新文件
-            Log.v(TAG, "Creating new remote file: $fileName")
             val fileMetadata = File().apply {
                 name = fileName
                 parents = listOf(folderId)
