@@ -50,7 +50,7 @@ fun ProfileScreen(
     Scaffold(
         topBar = { 
             TopAppBar(
-                title = { Text(stringResource(R.string.nav_profile)) },
+                title = { Text(stringResource(R.string.nav_profile), fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = onSettingsClick) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings")
