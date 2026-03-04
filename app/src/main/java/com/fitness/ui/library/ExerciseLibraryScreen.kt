@@ -125,13 +125,13 @@ fun ExerciseLibraryScreen(
                 }
             }
 
-            // 动作网格 - 改为 2 列，增加间距
+            // 动作网格 - 改为 3 列
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Fixed(3),
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                contentPadding = PaddingValues(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 items(filteredExercises) { exercise ->
                     ExerciseGridItem(exercise, onExerciseClick)
@@ -143,13 +143,13 @@ fun ExerciseLibraryScreen(
 
 @Composable
 fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
-    // 使用 MD3 ElevatedCard 增强精致感
+    // 使用 MD3 ElevatedCard
     ElevatedCard(
         onClick = { onExerciseClick(exercise) },
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.85f),
-        shape = MaterialTheme.shapes.large,
+            .aspectRatio(0.75f), // 稍微拉长一点
+        shape = MaterialTheme.shapes.medium,
         colors = CardDefaults.elevatedCardColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
@@ -162,7 +162,7 @@ fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(12.dp), // 为动图增加内边距
+                    .padding(8.dp),
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
@@ -183,22 +183,23 @@ fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
                 )
             }
             
-            // 强化文字显示
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
             ) {
-                Column(modifier = Modifier.padding(8.dp)) {
+                Column(modifier = Modifier.padding(6.dp)) {
                     Text(
                         text = stringResource(exercise.nameRes),
-                        style = MaterialTheme.typography.titleMedium,
+                        style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1
                     )
                     Text(
                         text = stringResource(exercise.targetMuscleRes),
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        fontSize = 10.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
                     )
                 }
             }
