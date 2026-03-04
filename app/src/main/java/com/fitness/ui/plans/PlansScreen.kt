@@ -146,9 +146,13 @@ fun InteractivePlanView(
     var showAddExerciseDialog by remember { mutableStateOf(false) }
     var exerciseToDelete by remember { mutableStateOf<PlannedExercise?>(null) }
 
+    // 动态获取选中日期的真实锻炼记录
+    var recordedSetsForSelectedDay by remember { mutableStateOf<List<com.fitness.data.local.SetEntity>>(emptyList()) }
+    LaunchedEffect(selectedDateStr, setsToday) {
+        recordedSetsForSelectedDay = workoutViewModel.getSetsByDate(selectedDateStr)
+    }
+
     // 权限判定：是否允许进入训练状态
-    // 条件：是本周 (weekOffset == 0) 且 选中天数 >= 今天的天数 (selectedDayOfWeek >= today.dayOfWeek.value)
-    // 或者 是未来周 (weekOffset > 0)
     val isTrainingAllowed = (weekOffset > 0) || (weekOffset == 0 && selectedDayOfWeek >= today.dayOfWeek.value)
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -194,9 +198,7 @@ fun InteractivePlanView(
                 items(displayDay.exercises) { planned ->
                     val exercise = ExerciseProvider.exercises.find { it.id == planned.id }
                     if (exercise != null) {
-                        val completedCount = if (weekOffset == 0 && selectedDayOfWeek == today.dayOfWeek.value) {
-                            setsToday.count { it.exerciseName == planned.id }
-                        } else { 0 }
+                        val completedCount = recordedSetsForSelectedDay.count { it.exerciseName == planned.id }
                         val isFinished = completedCount >= planned.targetSets
 
                         ExerciseActionCard(
