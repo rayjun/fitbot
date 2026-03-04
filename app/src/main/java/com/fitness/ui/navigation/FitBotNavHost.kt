@@ -78,13 +78,11 @@ fun FitBotNavHost(
         }
 
         composable(Screen.Plans.route) {
-            val workoutViewModel = hiltViewModel<com.fitness.ui.workout.WorkoutViewModel>()
             PlansScreen(
                 viewModel = hiltViewModel(),
-                workoutViewModel = workoutViewModel,
-                onStartPlan = { dayOfWeek ->
-                    workoutViewModel.startNewSession()
-                    navController.navigate(Screen.PlanSession.createRoute(dayOfWeek))
+                workoutViewModel = hiltViewModel(),
+                onStartExercise = { exerciseId ->
+                    navController.navigate(Screen.Workout.createRoute(exerciseId))
                 },
                 onDayClick = { date ->
                     navController.navigate(Screen.DayDetails.createRoute(date))
