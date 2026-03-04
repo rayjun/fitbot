@@ -17,7 +17,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
@@ -103,7 +102,10 @@ fun WeekSelectorHeader(weekOffset: Int) {
         "${mondayOfSelectedWeek.format(formatter)} - ${sundayOfSelectedWeek.format(formatter)}"
     }
 
-    Surface(tonalElevation = 2.dp, modifier = Modifier.fillMaxWidth()) {
+    Surface(
+        tonalElevation = 2.dp,
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -132,14 +134,11 @@ fun CurrentPlanView(
 
     val currentRoutine by viewModel.currentRoutine.collectAsStateWithLifecycle()
 
-    // 核心改进：如果是本周或未来周，直接使用 currentRoutine；如果是历史周，拉取快照。
     var weekRoutineToDisplay by remember { mutableStateOf<List<RoutineDay>>(emptyList()) }
     
     if (weekOffset >= 0) {
-        // 本周及以后：实时响应修改
         weekRoutineToDisplay = currentRoutine
     } else {
-        // 历史周：拉取那一周结束时的快照
         val endOfWeekTimestamp = remember(weekOffset) {
             today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
                 .plusWeeks(weekOffset.toLong()).plusDays(6)
@@ -178,51 +177,87 @@ fun CurrentPlanView(
                     weekOffset = weekOffset,
                     onDayClick = onDayClick
                 )
-                Spacer(modifier = Modifier.height(24.dp))
-            }
-            
-            if (weekOffset == 0) {
-                item {
-                    val todayRoutine = weekRoutineToDisplay.find { it.dayOfWeek == todayDayOfWeek }
-                    val isCompleted = remember(setsToday, todayRoutine) {
-                        if (todayRoutine == null || todayRoutine.isRest) false
-                        else todayRoutine.exercises.isNotEmpty() && todayRoutine.exercises.all { planned ->
-                            val count = setsToday.count { it.exerciseName == planned.id }
-                            count >= planned.targetSets
-                        }
-                    }
-                    TodayTaskCard(todayRoutine, todayDayOfWeek, isCompleted, onStartPlan)
-                    Spacer(modifier = Modifier.height(32.dp))
-                }
+                Spacer(modifier = Modifier.height(32.dp))
             }
             
             item {
-                Text(stringResource(R.string.week_overview), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp))
+                Text(
+                    stringResource(R.string.week_overview), 
+                    style = MaterialTheme.typography.titleMedium, 
+                    fontWeight = FontWeight.Bold, 
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp)
+                )
             }
             
             items(weekRoutineToDisplay.sortedBy { it.dayOfWeek }) { day ->
-                val dateStr = remember(day.dayOfWeek, weekOffset) {
+                val date = remember(day.dayOfWeek, weekOffset) {
                     today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
                         .plusWeeks(weekOffset.toLong()).plusDays((day.dayOfWeek - 1).toLong())
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                }
+                val dateStr = date.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                val endOfDayTimestamp = date.atTime(23, 59, 59).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+                var dayRoutineSnapshot by remember { mutableStateOf<RoutineDay?>(null) }
+                LaunchedEffect(endOfDayTimestamp, currentRoutine) {
+                    val fullRoutine = viewModel.getRoutineForTimestamp(endOfDayTimestamp)
+                    dayRoutineSnapshot = fullRoutine.find { it.dayOfWeek == day.dayOfWeek }
                 }
 
+                val displayDay = dayRoutineSnapshot ?: day
+                val isActualToday = (weekOffset == 0 && day.dayOfWeek == todayDayOfWeek)
+
                 Card(
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp).clip(MaterialTheme.shapes.medium).clickable { 
-                        if (weekOffset == 0) editingDayOfWeek = day.dayOfWeek else onDayClick(dateStr)
-                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 6.dp)
+                        .clip(MaterialTheme.shapes.medium)
+                        .clickable { 
+                            if (weekOffset == 0) editingDayOfWeek = day.dayOfWeek 
+                            else onDayClick(dateStr)
+                        },
                     colors = CardDefaults.cardColors(
-                        containerColor = if (weekOffset == 0 && day.dayOfWeek == todayDayOfWeek)
-                            MaterialTheme.colorScheme.primaryContainer
+                        containerColor = if (isActualToday)
+                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
                             else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
                     )
                 ) {
                     ListItem(
-                        headlineContent = { Text(getDayName(day.dayOfWeek), fontWeight = if (weekOffset == 0 && day.dayOfWeek == todayDayOfWeek) FontWeight.Bold else FontWeight.Normal) },
-                        supportingContent = { Text(if (day.isRest) stringResource(R.string.rest_badge) else stringResource(R.string.exercises_count, day.exercises.size)) },
+                        headlineContent = { 
+                            Text(
+                                getDayName(day.dayOfWeek),
+                                fontWeight = if (isActualToday) FontWeight.Bold else FontWeight.Normal,
+                                color = if (isActualToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                            ) 
+                        },
+                        supportingContent = { 
+                            Text(if (displayDay.isRest) stringResource(R.string.rest_badge) else stringResource(R.string.exercises_count, displayDay.exercises.size)) 
+                        },
                         trailingContent = {
-                            if (weekOffset == 0 && day.dayOfWeek == todayDayOfWeek) {
-                                Badge(containerColor = MaterialTheme.colorScheme.primary) { Text(stringResource(R.string.today_badge), modifier = Modifier.padding(4.dp)) }
+                            if (isActualToday) {
+                                // 判断今天是否已完成
+                                val isCompleted = remember(setsToday, displayDay) {
+                                    if (displayDay.isRest) false
+                                    else displayDay.exercises.isNotEmpty() && displayDay.exercises.all { planned ->
+                                        val count = setsToday.count { it.exerciseName == planned.id }
+                                        count >= planned.targetSets
+                                    }
+                                }
+
+                                Button(
+                                    onClick = { onStartPlan(day.dayOfWeek) },
+                                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                                    modifier = Modifier.height(32.dp),
+                                    shape = MaterialTheme.shapes.small,
+                                    colors = if (isCompleted) 
+                                        ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+                                        else ButtonDefaults.buttonColors()
+                                ) {
+                                    Text(
+                                        if (isCompleted) "继续训练" else stringResource(R.string.start_training),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent)
@@ -275,31 +310,23 @@ fun WeeklyProgressBar(
                 isActualToday -> MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                 else -> MaterialTheme.colorScheme.surfaceVariant
             }
-            Box(contentAlignment = Alignment.Center, modifier = Modifier.size(42.dp).clip(CircleShape).background(color).border(1.dp, if (day.isRest) MaterialTheme.colorScheme.outline else Color.Transparent, CircleShape).clickable { onDayClick(circleDateStr) }) {
-                Text(text = days[day.dayOfWeek - 1], color = if (isFullyCompleted && !day.isRest) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-            }
-        }
-    }
-}
+            val borderColor = if (day.isRest) MaterialTheme.colorScheme.outline else Color.Transparent
 
-@Composable
-fun TodayTaskCard(todayRoutine: RoutineDay?, todayOfWeek: Int, isCompleted: Boolean, onStartPlan: (Int) -> Unit) {
-    ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraLarge, colors = CardDefaults.elevatedCardColors(containerColor = if (isCompleted) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer)) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(stringResource(R.string.today_task), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.ExtraBold, color = if (isCompleted) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onPrimaryContainer)
-                if (isCompleted) { Spacer(modifier = Modifier.width(8.dp)); Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.tertiary) }
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            if (todayRoutine == null || todayRoutine.isRest) { Text(stringResource(R.string.rest_message), style = MaterialTheme.typography.bodyLarge) }
-            else if (isCompleted) {
-                Text(stringResource(R.string.training_completed), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
-                Spacer(modifier = Modifier.height(16.dp))
-                OutlinedButton(onClick = { onStartPlan(todayOfWeek) }, modifier = Modifier.fillMaxWidth(), border = BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary)) { Text("继续训练 (Continue)", color = MaterialTheme.colorScheme.tertiary) }
-            } else {
-                Text(stringResource(R.string.exercises_scheduled, todayRoutine.exercises.size), style = MaterialTheme.typography.bodyLarge)
-                Spacer(modifier = Modifier.height(20.dp))
-                Button(onClick = { onStartPlan(todayOfWeek) }, modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.medium) { Icon(Icons.Default.PlayArrow, null); Spacer(modifier = Modifier.width(8.dp)); Text(stringResource(R.string.start_training), fontWeight = FontWeight.Bold) }
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .size(42.dp)
+                    .clip(CircleShape)
+                    .background(color)
+                    .border(1.dp, borderColor, CircleShape)
+                    .clickable { onDayClick(circleDateStr) }
+            ) {
+                Text(
+                    text = days[day.dayOfWeek - 1],
+                    color = if (isFullyCompleted && !day.isRest) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp
+                )
             }
         }
     }
