@@ -40,7 +40,7 @@ class SyncWorker @AssistedInject constructor(
     private val gson = Gson()
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        val date = inputData.getString("SYNC_DATE") ?: SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+        val specificDate = inputData.getString("SYNC_DATE")
         
         // 1. 获取已登录的 Google 账户
         val account = GoogleSignIn.getLastSignedInAccount(applicationContext)
@@ -66,8 +66,20 @@ class SyncWorker @AssistedInject constructor(
         try {
             val folderId = helper.getOrCreateFolder("MyFitnessData")
 
-            // --- SYNC SETS ---
-            syncSets(helper, folderId, date)
+            // --- SYNC SETS (Enhanced) ---
+            if (specificDate != null) {
+                // 如果指定了日期（如刚录完动作），只同步那一天
+                syncSets(helper, folderId, specificDate)
+            } else {
+                // 如果没指定日期（如手动点击“立即同步”），扫描所有有记录的日期
+                val allDates = exerciseDao.getDistinctDates().toMutableSet()
+                // 同时也要考虑今天（即使还没录入动作）
+                allDates.add(SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date()))
+                
+                allDates.forEach { date ->
+                    syncSets(helper, folderId, date)
+                }
+            }
 
             // --- SYNC PLANS ---
             syncPlans(helper, folderId)
@@ -83,19 +95,25 @@ class SyncWorker @AssistedInject constructor(
     }
 
     private suspend fun syncSets(helper: DriveServiceHelper, folderId: String, date: String) {
+        // 先拉取云端记录
         val remoteJson = helper.downloadFile(folderId, "$date.json")
         val existingRemoteIds = exerciseDao.getAllRemoteIds().toSet()
 
         if (remoteJson != null) {
-            val remoteDay = gson.fromJson(remoteJson, TrainingDay::class.java)
-            val remoteSets = transformToSetEntities(remoteDay)
-            remoteSets.forEach { remoteSet ->
-                if (!existingRemoteIds.contains(remoteSet.remoteId)) {
-                    exerciseDao.insertSet(remoteSet)
+            try {
+                val remoteDay = gson.fromJson(remoteJson, TrainingDay::class.java)
+                val remoteSets = transformToSetEntities(remoteDay)
+                remoteSets.forEach { remoteSet ->
+                    if (!existingRemoteIds.contains(remoteSet.remoteId)) {
+                        exerciseDao.insertSet(remoteSet)
+                    }
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
 
+        // 后推送本地记录（包含合并后的）
         val allSets = exerciseDao.getSetsByDate(date)
         if (allSets.isNotEmpty()) {
             val trainingDay = transformToTrainingDay(date, allSets)
@@ -108,15 +126,19 @@ class SyncWorker @AssistedInject constructor(
         val remoteJson = helper.downloadFile(folderId, "plans.json")
         
         if (remoteJson != null) {
-            val type = object : TypeToken<List<PlanEntity>>() {}.type
-            val remotePlans: List<PlanEntity> = gson.fromJson(remoteJson, type) ?: emptyList()
-            val localPlans = planDao.getAllPlans().associateBy { it.id }
-            
-            remotePlans.forEach { remotePlan ->
-                val localPlan = localPlans[remotePlan.id]
-                if (localPlan == null || remotePlan.version > localPlan.version) {
-                    planDao.insertPlan(remotePlan)
+            try {
+                val type = object : TypeToken<List<PlanEntity>>() {}.type
+                val remotePlans: List<PlanEntity> = gson.fromJson(remoteJson, type) ?: emptyList()
+                val localPlans = planDao.getAllPlans().associateBy { it.id }
+                
+                remotePlans.forEach { remotePlan ->
+                    val localPlan = localPlans[remotePlan.id]
+                    if (localPlan == null || remotePlan.version > localPlan.version) {
+                        planDao.insertPlan(remotePlan)
+                    }
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
         
