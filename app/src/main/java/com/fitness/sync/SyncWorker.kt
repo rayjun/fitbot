@@ -45,9 +45,7 @@ class SyncWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val specificDate = inputData.getString("SYNC_DATE")
-        Log.d(TAG, "Starting sync task. Specific date: $specificDate")
         
-        // 1. 获取 Google 账户并尝试静默登录以刷新 Token
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestEmail()
             .requestScopes(Scope(DriveScopes.DRIVE_FILE))
@@ -55,70 +53,35 @@ class SyncWorker @AssistedInject constructor(
         val googleSignInClient = GoogleSignIn.getClient(applicationContext, gso)
         
         val account = try {
-            // 先尝试静默登录获取最新有效 Token
             val task = googleSignInClient.silentSignIn()
-            if (task.isSuccessful) {
-                task.result
-            } else {
-                GoogleSignIn.getLastSignedInAccount(applicationContext)
-            }
+            if (task.isSuccessful) task.result else GoogleSignIn.getLastSignedInAccount(applicationContext)
         } catch (e: Exception) {
-            Log.e(TAG, "Auth failed during silent sign in", e)
             GoogleSignIn.getLastSignedInAccount(applicationContext)
         }
 
-        if (account == null) {
-            Log.w(TAG, "No Google account found. Skipping sync.")
-            return@withContext Result.success()
-        }
+        if (account == null) return@withContext Result.success()
 
-        // 2. 初始化 Drive 服务
         val credential = GoogleAccountCredential.usingOAuth2(
             applicationContext, listOf(DriveScopes.DRIVE_FILE)
-        ).apply {
-            selectedAccount = account.account
-        }
+        ).apply { selectedAccount = account.account }
 
-        val driveService = Drive.Builder(
-            NetHttpTransport(),
-            GsonFactory(),
-            credential
-        ).setApplicationName("FitBot").build()
+        val driveService = Drive.Builder(NetHttpTransport(), GsonFactory(), credential)
+            .setApplicationName("FitBot").build()
 
         val helper = DriveServiceHelper(driveService)
         
         try {
-            Log.d(TAG, "Connecting to Google Drive...")
             val folderId = helper.getOrCreateFolder("MyFitnessData")
-            Log.d(TAG, "Target folder ID: $folderId")
 
-            // --- SYNC SETS ---
-            val datesToSync = if (specificDate != null) {
-                listOf(specificDate)
-            } else {
-                val dbDates = exerciseDao.getDistinctDates().toMutableSet()
-                dbDates.add(SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date()))
-                dbDates.toList()
-            }
+            // 1. 同步锻炼记录
+            syncSetsLogic(helper, folderId, specificDate)
 
-            Log.d(TAG, "Syncing ${datesToSync.size} days of data...")
-            datesToSync.forEach { date ->
-                try {
-                    syncSets(helper, folderId, date)
-                } catch (e: Exception) {
-                    Log.e(TAG, "Failed to sync sets for date: $date", e)
-                }
-            }
+            // 2. 同步训练计划 (带归档逻辑)
+            syncPlansLogic(helper, folderId)
 
-            // --- SYNC PLANS ---
-            Log.d(TAG, "Syncing training plans...")
-            syncPlans(helper, folderId)
-
-            // --- SYNC PREFS ---
-            Log.d(TAG, "Syncing user preferences...")
+            // 3. 同步偏好设置
             syncPrefs(helper, folderId)
 
-            Log.i(TAG, "Full sync completed successfully.")
             Result.success()
         } catch (e: Exception) {
             Log.e(TAG, "Sync process failed", e)
@@ -126,10 +89,17 @@ class SyncWorker @AssistedInject constructor(
         }
     }
 
+    private suspend fun syncSetsLogic(helper: DriveServiceHelper, folderId: String, specificDate: String?) {
+        val datesToSync = if (specificDate != null) listOf(specificDate) else {
+            val dbDates = exerciseDao.getDistinctDates().toMutableSet()
+            dbDates.add(SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date()))
+            dbDates.toList()
+        }
+        datesToSync.forEach { date -> syncSets(helper, folderId, date) }
+    }
+
     private suspend fun syncSets(helper: DriveServiceHelper, folderId: String, date: String) {
         val fileName = "$date.json"
-        Log.v(TAG, "Processing file: $fileName")
-        
         val remoteJson = helper.downloadFile(folderId, fileName)
         val existingRemoteIds = exerciseDao.getAllRemoteIds().toSet()
 
@@ -137,69 +107,63 @@ class SyncWorker @AssistedInject constructor(
             try {
                 val remoteDay = gson.fromJson(remoteJson, TrainingDay::class.java)
                 val remoteSets = transformToSetEntities(remoteDay)
-                var mergedCount = 0
-                remoteSets.forEach { remoteSet ->
-                    if (!existingRemoteIds.contains(remoteSet.remoteId)) {
-                        exerciseDao.insertSet(remoteSet)
-                        mergedCount++
-                    }
-                }
-                if (mergedCount > 0) Log.d(TAG, "Merged $mergedCount new sets from cloud for $date")
-            } catch (e: Exception) {
-                Log.e(TAG, "Error parsing remote JSON for $date", e)
-            }
+                remoteSets.forEach { if (!existingRemoteIds.contains(it.remoteId)) exerciseDao.insertSet(it) }
+            } catch (e: Exception) { Log.e(TAG, "Error parsing $fileName", e) }
         }
 
         val allSets = exerciseDao.getSetsByDate(date)
         if (allSets.isNotEmpty()) {
             val trainingDay = transformToTrainingDay(date, allSets)
-            val jsonString = gson.toJson(trainingDay)
-            helper.uploadOrUpdateFile(folderId, fileName, jsonString)
-            Log.v(TAG, "Uploaded ${allSets.size} sets for $date")
+            helper.uploadOrUpdateFile(folderId, fileName, gson.toJson(trainingDay))
         }
     }
 
-    private suspend fun syncPlans(helper: DriveServiceHelper, folderId: String) {
-        val remoteJson = helper.downloadFile(folderId, "plans.json")
-        if (remoteJson != null) {
+    /**
+     * 实现计划拆分同步：plans.json (当前) vs archived_plans.json (历史)
+     */
+    private suspend fun syncPlansLogic(helper: DriveServiceHelper, folderId: String) {
+        // --- 1. 处理 plans.json (仅当前生效计划) ---
+        val remotePlansJson = helper.downloadFile(folderId, "plans.json")
+        if (remotePlansJson != null) {
             try {
                 val type = object : TypeToken<List<PlanEntity>>() {}.type
-                val remotePlans: List<PlanEntity> = gson.fromJson(remoteJson, type) ?: emptyList()
-                val localPlans = planDao.getAllPlans().associateBy { it.id }
-                
-                remotePlans.forEach { remotePlan ->
-                    val localPlan = localPlans[remotePlan.id]
-                    if (localPlan == null || remotePlan.version > localPlan.version) {
-                        planDao.insertPlan(remotePlan)
-                        Log.d(TAG, "Updated local plan: ${remotePlan.name}")
-                    }
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error parsing plans.json", e)
-            }
+                val remotePlans: List<PlanEntity> = gson.fromJson(remotePlansJson, type) ?: emptyList()
+                remotePlans.forEach { planDao.insertPlan(it) }
+            } catch (e: Exception) { Log.e(TAG, "Error parsing plans.json", e) }
         }
+
+        // --- 2. 处理 archived_plans.json (历史归档) ---
+        val remoteArchivedJson = helper.downloadFile(folderId, "archived_plans.json")
+        if (remoteArchivedJson != null) {
+            try {
+                val type = object : TypeToken<List<PlanEntity>>() {}.type
+                val remoteArchived: List<PlanEntity> = gson.fromJson(remoteArchivedJson, type) ?: emptyList()
+                remoteArchived.forEach { planDao.insertPlan(it) }
+            } catch (e: Exception) { Log.e(TAG, "Error parsing archived_plans.json", e) }
+        }
+
+        // --- 3. 重新导出并上传 ---
+        val allLocalPlans = planDao.getAllPlans()
+        val currentPlans = allLocalPlans.filter { it.isCurrent }
+        val archivedPlans = allLocalPlans.filter { !it.isCurrent }
+
+        // 上传当前计划
+        helper.uploadOrUpdateFile(folderId, "plans.json", gson.toJson(currentPlans))
         
-        val updatedLocalPlans = planDao.getAllPlans()
-        if (updatedLocalPlans.isNotEmpty()) {
-            val jsonString = gson.toJson(updatedLocalPlans)
-            helper.uploadOrUpdateFile(folderId, "plans.json", jsonString)
+        // 如果有归档，上传归档文件
+        if (archivedPlans.isNotEmpty()) {
+            helper.uploadOrUpdateFile(folderId, "archived_plans.json", gson.toJson(archivedPlans))
         }
     }
 
     private suspend fun syncPrefs(helper: DriveServiceHelper, folderId: String) {
         val prefs = applicationContext.dataStore.data.first()
-        val theme = prefs[stringPreferencesKey("theme_mode")] ?: "system"
-        val language = prefs[stringPreferencesKey("language")] ?: "zh"
-        val quote = prefs[stringPreferencesKey("user_quote")] ?: "坚持就是胜利"
-        
         val localPrefsMap = mapOf(
-            "theme_mode" to theme,
-            "language" to language,
-            "user_quote" to quote
+            "theme_mode" to (prefs[stringPreferencesKey("theme_mode")] ?: "system"),
+            "language" to (prefs[stringPreferencesKey("language")] ?: "zh"),
+            "user_quote" to (prefs[stringPreferencesKey("user_quote")] ?: "坚持就是胜利")
         )
-
-        val jsonString = gson.toJson(localPrefsMap)
-        helper.uploadOrUpdateFile(folderId, "user_prefs.json", jsonString)
+        helper.uploadOrUpdateFile(folderId, "user_prefs.json", gson.toJson(localPrefsMap))
     }
 
     private fun transformToSetEntities(day: TrainingDay): List<SetEntity> {
@@ -208,25 +172,9 @@ class SyncWorker @AssistedInject constructor(
             session.exercises.forEach { exercise ->
                 exercise.sets.forEach { setRecord ->
                     val time = try {
-                        val parsed = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US)
-                            .parse("${day.date} ${setRecord.time}")
-                        parsed?.time ?: System.currentTimeMillis()
-                    } catch (e: Exception) {
-                        System.currentTimeMillis()
-                    }
-
-                    result.add(
-                        SetEntity(
-                            date = day.date,
-                            sessionId = session.sessionId,
-                            exerciseName = exercise.name,
-                            reps = setRecord.reps,
-                            weight = setRecord.weight,
-                            timestamp = time,
-                            timeStr = setRecord.time,
-                            remoteId = setRecord.remoteId
-                        )
-                    )
+                        SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).parse("${day.date} ${setRecord.time}")?.time ?: System.currentTimeMillis()
+                    } catch (e: Exception) { System.currentTimeMillis() }
+                    result.add(SetEntity(date = day.date, sessionId = session.sessionId, exerciseName = exercise.name, reps = setRecord.reps, weight = setRecord.weight, timestamp = time, timeStr = setRecord.time, remoteId = setRecord.remoteId))
                 }
             }
         }
@@ -236,26 +184,10 @@ class SyncWorker @AssistedInject constructor(
     private fun transformToTrainingDay(date: String, sets: List<SetEntity>): TrainingDay {
         val sessions = sets.groupBy { it.sessionId }.map { (sessionId, sessionSets) ->
             val exercises = sessionSets.groupBy { it.exerciseName }.map { (exerciseName, exerciseSets) ->
-                val setRecords = exerciseSets.map { 
-                    SetRecord(
-                        reps = it.reps, 
-                        weight = it.weight, 
-                        time = it.timeStr,
-                        remoteId = it.remoteId
-                    ) 
-                }
+                val setRecords = exerciseSets.map { SetRecord(reps = it.reps, weight = it.weight, time = it.timeStr, remoteId = it.remoteId) }
                 ExerciseRecord(name = exerciseName, sets = setRecords)
             }
-            
-            val startTime = sessionSets.firstOrNull()?.timeStr ?: "00:00"
-            val endTime = sessionSets.lastOrNull()?.timeStr ?: "23:59"
-            
-            TrainingSession(
-                sessionId = sessionId,
-                startTime = startTime,
-                endTime = endTime,
-                exercises = exercises
-            )
+            TrainingSession(sessionId = sessionId, startTime = sessionSets.firstOrNull()?.timeStr ?: "00:00", endTime = sessionSets.lastOrNull()?.timeStr ?: "23:59", exercises = exercises)
         }
         return TrainingDay(date = date, sessions = sessions)
     }
