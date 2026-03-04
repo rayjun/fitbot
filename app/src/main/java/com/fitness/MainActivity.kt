@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
                         
                         if (showBottomBar) {
                             NavigationBar(
-                                containerColor = MaterialTheme.colorScheme.surface,
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
                                 tonalElevation = 0.dp // Remove the gap/shadow effect
                             ) {
                                 items.forEach { screen ->
