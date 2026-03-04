@@ -152,6 +152,8 @@ fun InteractivePlanView(
     }
 
     val isTrainingAllowed = (weekOffset > 0) || (weekOffset == 0 && selectedDayOfWeek >= today.dayOfWeek.value)
+    // 只有今天或未来的日期才允许修改计划（增加动作）
+    val isEditingAllowed = (weekOffset > 0) || (weekOffset == 0 && selectedDayOfWeek >= today.dayOfWeek.value)
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         WeeklyProgressBarNavigation(
@@ -213,7 +215,7 @@ fun InteractivePlanView(
                 }
             }
 
-            if (weekOffset == 0) {
+            if (isEditingAllowed) {
                 item {
                     OutlinedButton(
                         onClick = { showAddExerciseDialog = true },
