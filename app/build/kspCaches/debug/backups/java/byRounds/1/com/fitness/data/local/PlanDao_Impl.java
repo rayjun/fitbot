@@ -42,7 +42,7 @@ public final class PlanDao_Impl implements PlanDao {
       @Override
       @NonNull
       protected String createQuery() {
-        return "INSERT OR ABORT INTO `training_plans` (`id`,`name`,`exercisesJson`,`isCurrent`,`version`,`createdAt`) VALUES (nullif(?, 0),?,?,?,?,?)";
+        return "INSERT OR REPLACE INTO `training_plans` (`id`,`name`,`exercisesJson`,`isCurrent`,`version`,`createdAt`) VALUES (nullif(?, 0),?,?,?,?,?)";
       }
 
       @Override

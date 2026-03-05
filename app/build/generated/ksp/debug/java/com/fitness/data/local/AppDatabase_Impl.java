@@ -16,6 +16,7 @@ import java.lang.Override;
 import java.lang.String;
 import java.lang.SuppressWarnings;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,8 +39,9 @@ public final class AppDatabase_Impl extends AppDatabase {
       public void createAllTables(@NonNull final SupportSQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS `exercise_sets` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` TEXT NOT NULL, `sessionId` TEXT NOT NULL, `exerciseName` TEXT NOT NULL, `reps` INTEGER NOT NULL, `weight` REAL NOT NULL, `timestamp` INTEGER NOT NULL, `timeStr` TEXT NOT NULL, `remoteId` TEXT NOT NULL)");
         db.execSQL("CREATE TABLE IF NOT EXISTS `training_plans` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `exercisesJson` TEXT NOT NULL, `isCurrent` INTEGER NOT NULL, `version` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL)");
+        db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_training_plans_createdAt` ON `training_plans` (`createdAt`)");
         db.execSQL("CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)");
-        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '582bdc8ee970998d6abaa5e510f68e63')");
+        db.execSQL("INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd798d80a362aa11683b40b96ef6860d3')");
       }
 
       @Override
@@ -116,7 +118,8 @@ public final class AppDatabase_Impl extends AppDatabase {
         _columnsTrainingPlans.put("version", new TableInfo.Column("version", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         _columnsTrainingPlans.put("createdAt", new TableInfo.Column("createdAt", "INTEGER", true, 0, null, TableInfo.CREATED_FROM_ENTITY));
         final HashSet<TableInfo.ForeignKey> _foreignKeysTrainingPlans = new HashSet<TableInfo.ForeignKey>(0);
-        final HashSet<TableInfo.Index> _indicesTrainingPlans = new HashSet<TableInfo.Index>(0);
+        final HashSet<TableInfo.Index> _indicesTrainingPlans = new HashSet<TableInfo.Index>(1);
+        _indicesTrainingPlans.add(new TableInfo.Index("index_training_plans_createdAt", true, Arrays.asList("createdAt"), Arrays.asList("ASC")));
         final TableInfo _infoTrainingPlans = new TableInfo("training_plans", _columnsTrainingPlans, _foreignKeysTrainingPlans, _indicesTrainingPlans);
         final TableInfo _existingTrainingPlans = TableInfo.read(db, "training_plans");
         if (!_infoTrainingPlans.equals(_existingTrainingPlans)) {
@@ -126,7 +129,7 @@ public final class AppDatabase_Impl extends AppDatabase {
         }
         return new RoomOpenHelper.ValidationResult(true, null);
       }
-    }, "582bdc8ee970998d6abaa5e510f68e63", "49570a51ea01c0029ff0909b6477e3db");
+    }, "d798d80a362aa11683b40b96ef6860d3", "0535d5946be13c05e18cb162dd153d06");
     final SupportSQLiteOpenHelper.Configuration _sqliteConfig = SupportSQLiteOpenHelper.Configuration.builder(config.context).name(config.name).callback(_openCallback).build();
     final SupportSQLiteOpenHelper _helper = config.sqliteOpenHelperFactory.create(_sqliteConfig);
     return _helper;

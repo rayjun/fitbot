@@ -2,14 +2,17 @@ package com.fitness.data.local
 
 import androidx.room.*
 
-@Entity(tableName = "training_plans")
+@Entity(
+    tableName = "training_plans",
+    indices = [Index(value = ["createdAt"], unique = true)] // 核心修复：防止同步产生重复计划
+)
 data class PlanEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
-    val exercisesJson: String, // 动作 ID 列表，如 "benchpress,pushup"
+    val exercisesJson: String, 
     val isCurrent: Boolean,
     val version: Int,
-    val createdAt: Long
+    val createdAt: Long // 作为唯一的版本标识
 )
 
 @Dao
@@ -23,7 +26,7 @@ interface PlanDao {
     @Query("SELECT * FROM training_plans ORDER BY createdAt DESC")
     suspend fun getAllPlans(): List<PlanEntity>
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE) // 确保版本更新时覆盖或跳过重复
     suspend fun insertPlan(plan: PlanEntity)
 
     @Query("UPDATE training_plans SET isCurrent = 0 WHERE isCurrent = 1")
