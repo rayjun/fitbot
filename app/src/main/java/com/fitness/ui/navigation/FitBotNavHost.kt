@@ -48,6 +48,9 @@ fun FitBotNavHost(
         if (task.isSuccessful) {
             lastAccount = task.result
             Toast.makeText(context, context.getString(R.string.cloud_success), Toast.LENGTH_SHORT).show()
+            // 登录成功后立即触发一次全量同步，确保文件夹被创建且数据被对齐
+            val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
+            workManager.enqueueUniqueWork("FullSync", ExistingWorkPolicy.REPLACE, syncRequest)
         } else {
             Toast.makeText(context, context.getString(R.string.cloud_failed, task.exception?.message), Toast.LENGTH_LONG).show()
         }
