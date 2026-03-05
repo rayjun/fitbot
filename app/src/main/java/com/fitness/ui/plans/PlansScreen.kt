@@ -152,8 +152,8 @@ fun InteractivePlanView(
     }
 
     // 权限判定优化：
-    // 只要是在本周 (weekOffset == 0)，就允许修改任何一天的“计划模板”
-    val isEditingAllowed = (weekOffset >= 0)
+    // 只有在“本周” (weekOffset == 0) 这种活跃周期内，才允许修改计划模板
+    val isEditingAllowed = (weekOffset == 0)
     
     // 只有今天及以后才允许进入录入/训练状态
     val isTrainingAllowed = (weekOffset > 0) || (weekOffset == 0 && selectedDayOfWeek >= today.dayOfWeek.value)
