@@ -151,11 +151,7 @@ fun InteractivePlanView(
         recordedSetsForSelectedDay = workoutViewModel.getSetsByDate(selectedDateStr)
     }
 
-    // 权限判定优化：
-    // 只有在“本周” (weekOffset == 0) 这种活跃周期内，才允许修改计划模板
     val isEditingAllowed = (weekOffset == 0)
-    
-    // 只有今天及以后才允许进入录入/训练状态
     val isTrainingAllowed = (weekOffset > 0) || (weekOffset == 0 && selectedDayOfWeek >= today.dayOfWeek.value)
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -198,7 +194,7 @@ fun InteractivePlanView(
                             Text("今天是休息日", color = Color.Gray, style = MaterialTheme.typography.bodyLarge)
                             if (isEditingAllowed) {
                                 TextButton(onClick = { showAddExerciseDialog = true }) {
-                                    Text("添加动作以取消休息")
+                                    Text("管理训练动作以取消休息")
                                 }
                             }
                         }
@@ -223,7 +219,7 @@ fun InteractivePlanView(
                             completedCount = completedCount,
                             isFinished = isFinished,
                             isTrainingAllowed = isTrainingAllowed,
-                            isEditable = (weekOffset == 0),
+                            isEditable = isEditingAllowed,
                             onStart = { if (isTrainingAllowed) onStartExercise(exercise.id, selectedDateStr) },
                             onDelete = { exerciseToDelete = planned }
                         )
@@ -240,7 +236,7 @@ fun InteractivePlanView(
                     ) {
                         Icon(Icons.Default.Add, null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(if (displayDay.isRest) "管理训练动作" else "增加动作")
+                        Text(if (displayDay.isRest) "管理训练动作" else "管理训练动作")
                     }
                 }
             }
@@ -256,7 +252,6 @@ fun InteractivePlanView(
             confirmButton = {
                 TextButton(onClick = {
                     val updatedExercises = displayDay.exercises.filter { it.id != exerciseToDelete!!.id }
-                    // 如果删完了，自动设为休息日
                     viewModel.updatePlanDay(selectedDayOfWeek, updatedExercises.isEmpty(), updatedExercises)
                     exerciseToDelete = null
                 }) {
@@ -274,11 +269,8 @@ fun InteractivePlanView(
             currentExercises = displayDay.exercises,
             isInitiallyRest = displayDay.isRest,
             onDismiss = { showAddExerciseDialog = false },
-            onSave = { selectedIds, isRest ->
-                val newPlanned = selectedIds.map { id ->
-                    displayDay.exercises.find { it.id == id } ?: PlannedExercise(id, 3)
-                }
-                viewModel.updatePlanDay(selectedDayOfWeek, isRest, newPlanned)
+            onSave = { updatedExercises, isRest ->
+                viewModel.updatePlanDay(selectedDayOfWeek, isRest, updatedExercises)
                 showAddExerciseDialog = false
             }
         )
@@ -405,12 +397,15 @@ fun QuickAddExerciseDialog(
     currentExercises: List<PlannedExercise>,
     isInitiallyRest: Boolean,
     onDismiss: () -> Unit,
-    onSave: (List<String>, Boolean) -> Unit
+    onSave: (List<PlannedExercise>, Boolean) -> Unit
 ) {
     var isRest by remember { mutableStateOf(isInitiallyRest) }
-    val selectedIds = remember { mutableStateListOf<String>().apply { 
-        addAll(currentExercises.map { it.id }) 
-    } }
+    // 使用 Map 存储 ID 到 PlannedExercise 的映射，方便管理组数
+    val selectedMap = remember { 
+        mutableStateMapOf<String, Int>().apply {
+            currentExercises.forEach { put(it.id, it.targetSets) }
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -430,18 +425,44 @@ fun QuickAddExerciseDialog(
                     HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp))
                     LazyColumn(modifier = Modifier.heightIn(max = 350.dp)) {
                         items(ExerciseProvider.exercises) { exercise ->
-                            val isSelected = selectedIds.contains(exercise.id)
+                            val currentSets = selectedMap[exercise.id]
+                            val isChecked = currentSets != null
+                            
                             Row(
                                 modifier = Modifier.fillMaxWidth().clickable { 
-                                    if (isSelected) selectedIds.remove(exercise.id) else selectedIds.add(exercise.id)
-                                }.padding(vertical = 8.dp),
+                                    if (isChecked) selectedMap.remove(exercise.id) else selectedMap[exercise.id] = 3
+                                }.padding(vertical = 4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Checkbox(checked = isSelected, onCheckedChange = null)
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
+                                Checkbox(checked = isChecked, onCheckedChange = null)
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Column(modifier = Modifier.weight(1f)) {
                                     Text(stringResource(exercise.nameRes), fontWeight = FontWeight.Medium)
                                     Text(stringResource(exercise.targetMuscleRes), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                }
+                                
+                                if (isChecked) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        IconButton(
+                                            onClick = { 
+                                                val s = selectedMap[exercise.id] ?: 3
+                                                if (s > 1) selectedMap[exercise.id] = s - 1
+                                            },
+                                            modifier = Modifier.size(32.dp)
+                                        ) { Icon(Icons.Default.Remove, null, modifier = Modifier.size(16.dp)) }
+                                        Text(
+                                            text = "${selectedMap[exercise.id]}", 
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            modifier = Modifier.padding(horizontal = 4.dp)
+                                        )
+                                        IconButton(
+                                            onClick = { 
+                                                val s = selectedMap[exercise.id] ?: 3
+                                                selectedMap[exercise.id] = s + 1
+                                            },
+                                            modifier = Modifier.size(32.dp)
+                                        ) { Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp)) }
+                                    }
                                 }
                             }
                         }
@@ -450,7 +471,10 @@ fun QuickAddExerciseDialog(
             }
         },
         confirmButton = {
-            Button(onClick = { onSave(selectedIds.toList(), isRest) }) { Text("保存修改") }
+            Button(onClick = { 
+                val updatedList = selectedMap.map { PlannedExercise(it.key, it.value) }
+                onSave(updatedList, isRest) 
+            }) { Text("保存修改") }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text(stringResource(R.string.dialog_cancel)) }
