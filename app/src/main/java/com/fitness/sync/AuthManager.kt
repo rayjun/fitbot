@@ -18,7 +18,10 @@ class AuthManager @Inject constructor(
 ) {
     private val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestEmail()
-        .requestScopes(Scope(DriveScopes.DRIVE_FILE))
+        .requestScopes(
+            Scope(DriveScopes.DRIVE_FILE),
+            Scope(DriveScopes.DRIVE_APPDATA) // 增加应用专属数据空间权限
+        )
         .build()
 
     private val client = GoogleSignIn.getClient(context, gso)

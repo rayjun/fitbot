@@ -13,30 +13,36 @@ import java.io.IOException
 class DriveServiceHelper(private val driveService: Drive) {
     private val TAG = "FitBotDrive"
 
+    /**
+     * 获取或创建应用文件夹。
+     * 优先在 appDataFolder 中操作，这是最稳健的方案。
+     */
     @Throws(IOException::class)
     fun getOrCreateFolder(folderName: String): String {
-        // 增加 spaces 限制，确保在主云盘查找
+        // 首先尝试在 appDataFolder 中查找
         val query = "name = '$folderName' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
         val result = driveService.files().list()
             .setQ(query)
-            .setSpaces("drive")
+            .setSpaces("appDataFolder") // 切换到应用专属隐藏空间
             .setFields("files(id, name)")
             .execute()
 
         val folder = result.files.firstOrNull()
         if (folder != null) {
-            Log.d(TAG, "Found existing folder: ${folder.id}")
+            Log.d(TAG, "Found folder in appDataFolder: ${folder.id}")
             return folder.id
         }
 
+        // 如果没找到，创建一个新的
         val folderMetadata = File().apply {
             name = folderName
             mimeType = "application/vnd.google-apps.folder"
+            parents = listOf("appDataFolder") // 显式指定父级为隐藏空间
         }
         val newFolder = driveService.files().create(folderMetadata)
             .setFields("id")
             .execute()
-        Log.d(TAG, "Created new folder: ${newFolder.id}")
+        Log.d(TAG, "Created new folder in appDataFolder: ${newFolder.id}")
         return newFolder.id
     }
 
@@ -45,7 +51,7 @@ class DriveServiceHelper(private val driveService: Drive) {
         val query = "'$folderId' in parents and trashed = false and $q"
         return driveService.files().list()
             .setQ(query)
-            .setSpaces("drive")
+            .setSpaces("appDataFolder") // 保持空间一致性
             .setFields("files(id, name)")
             .execute().files ?: emptyList()
     }
@@ -55,7 +61,7 @@ class DriveServiceHelper(private val driveService: Drive) {
         val query = "name = '$fileName' and '$folderId' in parents and trashed = false"
         val result = driveService.files().list()
             .setQ(query)
-            .setSpaces("drive")
+            .setSpaces("appDataFolder")
             .setFields("files(id, name)")
             .execute()
 
@@ -77,7 +83,7 @@ class DriveServiceHelper(private val driveService: Drive) {
         val query = "name = '$fileName' and '$folderId' in parents and trashed = false"
         val result = driveService.files().list()
             .setQ(query)
-            .setSpaces("drive")
+            .setSpaces("appDataFolder")
             .setFields("files(id, name)")
             .execute()
 
@@ -85,10 +91,10 @@ class DriveServiceHelper(private val driveService: Drive) {
         val mediaContent = ByteArrayContent.fromString("application/json", content)
 
         if (existingFile != null) {
-            Log.d(TAG, "Updating existing file: $fileName")
+            Log.d(TAG, "Updating: $fileName")
             driveService.files().update(existingFile.id, null, mediaContent).execute()
         } else {
-            Log.d(TAG, "Creating new file: $fileName")
+            Log.d(TAG, "Creating: $fileName")
             val fileMetadata = File().apply {
                 name = fileName
                 parents = listOf(folderId)
