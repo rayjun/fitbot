@@ -15,6 +15,7 @@ class DriveServiceHelper(private val driveService: Drive) {
 
     @Throws(IOException::class)
     fun getOrCreateFolder(folderName: String): String {
+        // 增加 spaces 限制，确保在主云盘查找
         val query = "name = '$folderName' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
         val result = driveService.files().list()
             .setQ(query)
@@ -23,18 +24,22 @@ class DriveServiceHelper(private val driveService: Drive) {
             .execute()
 
         val folder = result.files.firstOrNull()
-        if (folder != null) return folder.id
+        if (folder != null) {
+            Log.d(TAG, "Found existing folder: ${folder.id}")
+            return folder.id
+        }
 
         val folderMetadata = File().apply {
             name = folderName
             mimeType = "application/vnd.google-apps.folder"
         }
-        return driveService.files().create(folderMetadata).setFields("id").execute().id
+        val newFolder = driveService.files().create(folderMetadata)
+            .setFields("id")
+            .execute()
+        Log.d(TAG, "Created new folder: ${newFolder.id}")
+        return newFolder.id
     }
 
-    /**
-     * 根据查询条件列出所有符合条件的文件名和 ID
-     */
     @Throws(IOException::class)
     fun queryFiles(folderId: String, q: String): List<File> {
         val query = "'$folderId' in parents and trashed = false and $q"
@@ -60,9 +65,6 @@ class DriveServiceHelper(private val driveService: Drive) {
         return outputStream.toString()
     }
 
-    /**
-     * 直接通过文件 ID 下载内容
-     */
     @Throws(IOException::class)
     fun downloadFileById(fileId: String): String {
         val outputStream = ByteArrayOutputStream()
@@ -83,8 +85,10 @@ class DriveServiceHelper(private val driveService: Drive) {
         val mediaContent = ByteArrayContent.fromString("application/json", content)
 
         if (existingFile != null) {
+            Log.d(TAG, "Updating existing file: $fileName")
             driveService.files().update(existingFile.id, null, mediaContent).execute()
         } else {
+            Log.d(TAG, "Creating new file: $fileName")
             val fileMetadata = File().apply {
                 name = fileName
                 parents = listOf(folderId)

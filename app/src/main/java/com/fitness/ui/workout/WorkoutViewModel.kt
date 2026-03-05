@@ -99,8 +99,13 @@ class WorkoutViewModel @Inject constructor(
     }
 
     private fun triggerSync(dateStr: String) {
+        val constraints = androidx.work.Constraints.Builder()
+            .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
+            .build()
+            
         val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>()
             .setInputData(Data.Builder().putString("SYNC_DATE", dateStr).build())
+            .setConstraints(constraints)
             .build()
         WorkManager.getInstance(context).enqueue(syncRequest)
     }
