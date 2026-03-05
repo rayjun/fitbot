@@ -42,35 +42,27 @@ class SyncWorker @AssistedInject constructor(
 
     private val gson = Gson()
     private val TAG = "FitBotSync"
+    private val FOLDER_NAME = "FitBot" // 按照要求更新文件夹名称
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
         val specificDate = inputData.getString("SYNC_DATE")
-        Log.i(TAG, "Starting sync worker. Specific date: ${specificDate ?: "ALL"}")
+        Log.i(TAG, "Starting sync worker. Target: ${specificDate ?: "FULL"}")
         
-        // 1. 获取 Google 账户并确保权限
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestScopes(Scope(DriveScopes.DRIVE_FILE)) // 统一使用 DRIVE_FILE 权限
-            .build()
-        val googleSignInClient = GoogleSignIn.getClient(applicationContext, gso)
-        
+        // 1. 授权准备
         val account = try {
-            val task = googleSignInClient.silentSignIn()
-            Tasks.await(task) // 同步等待授权刷新
+            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .requestScopes(Scope(DriveScopes.DRIVE_FILE))
+                .build()
+            Tasks.await(GoogleSignIn.getClient(applicationContext, gso).silentSignIn())
         } catch (e: Exception) {
-            Log.e(TAG, "Silent sign-in failed", e)
             GoogleSignIn.getLastSignedInAccount(applicationContext)
         }
 
-        if (account == null) {
-            Log.e(TAG, "No Google account found. Terminating.")
-            return@withContext Result.success()
-        }
+        if (account == null) return@withContext Result.success()
 
-        // 2. 初始化 Drive 服务
-        val credential = GoogleAccountCredential.usingOAuth2(
-            applicationContext, listOf(DriveScopes.DRIVE_FILE)
-        ).apply { selectedAccount = account.account }
+        val credential = GoogleAccountCredential.usingOAuth2(applicationContext, listOf(DriveScopes.DRIVE_FILE))
+            .apply { selectedAccount = account.account }
 
         val driveService = Drive.Builder(NetHttpTransport(), GsonFactory(), credential)
             .setApplicationName("FitBot").build()
@@ -78,80 +70,102 @@ class SyncWorker @AssistedInject constructor(
         val helper = DriveServiceHelper(driveService)
         
         try {
-            // 获取文件夹 ID
-            val folderId = helper.getOrCreateFolder("MyFitnessData")
+            // 2. 检查并创建 FitBot 文件夹
+            val folderId = helper.getOrCreateFolder(FOLDER_NAME)
 
-            // 3. 同步锻炼记录
-            val dbDates = exerciseDao.getDistinctDates()
-            val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
-            val datesToSync = if (specificDate != null) listOf(specificDate) else (dbDates.toSet() + today).toList()
-            
-            datesToSync.forEach { date ->
-                syncSets(helper, folderId, date)
-            }
+            // 3. 同步锻炼记录逻辑：对比并合并
+            syncSetsWorkflow(helper, folderId, specificDate)
 
-            // 4. 同板同步：原子化归档计划
-            syncPlansAtomic(helper, folderId)
+            // 4. 同步训练计划逻辑：基于版本号比对
+            syncPlansWorkflow(helper, folderId)
 
             // 5. 同步偏好设置
             syncPrefs(helper, folderId)
 
-            Log.i(TAG, "Sync successful.")
+            Log.i(TAG, "Sync logic alignment completed.")
             Result.success()
         } catch (e: Exception) {
-            Log.e(TAG, "Sync error", e)
+            Log.e(TAG, "Sync failed", e)
             Result.retry()
         }
     }
 
-    private suspend fun syncSets(helper: DriveServiceHelper, folderId: String, date: String) {
-        val fileName = "$date.json"
-        val remoteJson = helper.downloadFile(folderId, fileName)
-        val existingRemoteIds = exerciseDao.getAllRemoteIds().toSet()
+    /**
+     * 锻炼记录同步流程：检查云端 -> 补全本地 -> 推送最新
+     */
+    private suspend fun syncSetsWorkflow(helper: DriveServiceHelper, folderId: String, specificDate: String?) {
+        val dbDates = exerciseDao.getDistinctDates().toMutableSet()
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+        val datesToSync = if (specificDate != null) listOf(specificDate) else (dbDates + today).toList()
 
-        // 合并云端到本地
-        if (remoteJson != null) {
-            try {
-                val remoteDay = gson.fromJson(remoteJson, TrainingDay::class.java)
-                val remoteSets = transformToSetEntities(remoteDay)
-                remoteSets.forEach { if (!existingRemoteIds.contains(it.remoteId)) exerciseDao.insertSet(it) }
-            } catch (e: Exception) { Log.e(TAG, "Parse error for $date", e) }
-        }
+        datesToSync.forEach { date ->
+            val fileName = "$date.json"
+            
+            // A. 检查云端数据
+            val remoteJson = helper.downloadFile(folderId, fileName)
+            val localSets = exerciseDao.getSetsByDate(date)
+            val existingRemoteIds = exerciseDao.getAllRemoteIds().toSet()
 
-        // 推送本地到云端
-        val localSets = exerciseDao.getSetsByDate(date)
-        if (localSets.isNotEmpty()) {
-            val json = gson.toJson(transformToTrainingDay(date, localSets))
-            helper.uploadOrUpdateFile(folderId, fileName, json)
+            if (remoteJson != null) {
+                // 如果云端有数据，先补全本地没有的
+                try {
+                    val remoteDay = gson.fromJson(remoteJson, TrainingDay::class.java)
+                    val remoteSets = transformToSetEntities(remoteDay)
+                    var merged = 0
+                    remoteSets.forEach { 
+                        if (!existingRemoteIds.contains(it.remoteId)) {
+                            exerciseDao.insertSet(it)
+                            merged++
+                        }
+                    }
+                    if (merged > 0) Log.d(TAG, "Pulled $merged new sets from cloud for $date")
+                } catch (e: Exception) { Log.e(TAG, "Remote data parse error for $date") }
+            }
+
+            // B. 获取合并后的最新本地数据
+            val updatedLocalSets = exerciseDao.getSetsByDate(date)
+            
+            // C. 如果本地数据比云端新（数量多或云端没有），则推送到云端
+            if (updatedLocalSets.isNotEmpty()) {
+                val localJson = gson.toJson(transformToTrainingDay(date, updatedLocalSets))
+                // 只有当内容不一致时才上传（uploadOrUpdateFile 内部有基础判断）
+                if (localJson != remoteJson) {
+                    helper.uploadOrUpdateFile(folderId, fileName, localJson)
+                    Log.d(TAG, "Pushed latest local sets to cloud for $date")
+                }
+            }
         }
     }
 
-    private suspend fun syncPlansAtomic(helper: DriveServiceHelper, folderId: String) {
+    /**
+     * 训练计划同步流程：比较版本号
+     */
+    private suspend fun syncPlansWorkflow(helper: DriveServiceHelper, folderId: String) {
+        // 1. 处理所有原子化的历史计划文件
         val remoteHistoryFiles = helper.queryFiles(folderId, "name contains 'plan_history_'")
         val localPlans = planDao.getAllPlans().associateBy { it.createdAt }
 
-        // 下载缺失的历史计划
         remoteHistoryFiles.forEach { remoteFile ->
             val timestamp = remoteFile.name.substringAfter("plan_history_").substringBefore(".json").toLongOrNull()
             if (timestamp != null && !localPlans.containsKey(timestamp)) {
-                try {
-                    val content = helper.downloadFileById(remoteFile.id)
-                    val remotePlan = gson.fromJson(content, PlanEntity::class.java)
-                    // Room 会根据 Index 自动处理或根据 Insert Strategy 覆盖
-                    planDao.insertPlan(remotePlan.copy(id = 0)) 
-                } catch (e: Exception) { Log.e(TAG, "Error syncing plan ${remoteFile.name}", e) }
+                // 本地没有，从云端拉取
+                val content = helper.downloadFileById(remoteFile.id)
+                val remotePlan = gson.fromJson(content, PlanEntity::class.java)
+                planDao.insertPlan(remotePlan.copy(id = 0))
+                Log.d(TAG, "Pulled historical plan from cloud: ${remoteFile.name}")
             }
         }
 
-        // 上传本地新生成的归档
+        // 2. 检查本地是否有比云端更新的归档
         planDao.getAllPlans().forEach { localPlan ->
             val fileName = "plan_history_${localPlan.createdAt}.json"
             if (remoteHistoryFiles.none { it.name == fileName }) {
                 helper.uploadOrUpdateFile(folderId, fileName, gson.toJson(localPlan))
+                Log.d(TAG, "Pushed new local plan archive to cloud: $fileName")
             }
         }
 
-        // 刷新 plans.json (仅含当前活跃)
+        // 3. 刷新 plans.json (当前活跃计划索引)
         val current = planDao.getCurrentPlan()
         if (current != null) {
             helper.uploadOrUpdateFile(folderId, "plans.json", gson.toJson(listOf(current)))
