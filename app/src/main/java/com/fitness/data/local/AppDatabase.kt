@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [SetEntity::class, PlanEntity::class], version = 3, exportSchema = false)
+@Database(entities = [SetEntity::class, PlanEntity::class], version = 4, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun exerciseDao(): ExerciseDao
     abstract fun planDao(): PlanDao
@@ -19,9 +19,9 @@ abstract class AppDatabase : RoomDatabase() {
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
                     AppDatabase::class.java,
-                    "fitness-db"
+                    "fitness_db"
                 )
-                .fallbackToDestructiveMigration() // 开发阶段允许销毁重建
+                .fallbackToDestructiveMigration() // 核心修复：防止因唯一索引冲突导致的启动闪退
                 .build()
                 INSTANCE = instance
                 instance
