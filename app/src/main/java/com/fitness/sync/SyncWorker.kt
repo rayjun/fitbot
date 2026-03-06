@@ -2,6 +2,8 @@ package com.fitness.sync
 
 import android.content.Context
 import android.util.Log
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
@@ -43,11 +45,11 @@ class SyncWorker @AssistedInject constructor(
     private val gson = Gson()
     private val TAG = "FitBotSync"
     private val FOLDER_NAME = "FitBot"
+    private val LAST_SYNC_KEY = longPreferencesKey("last_sync_time")
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        Log.i(TAG, "Starting sync worker process...")
+        Log.i(TAG, "Starting optimized sync worker...")
         
-        // 1. 获取 Google 账户并强制同步 Token
         val account = try {
             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
@@ -65,9 +67,6 @@ class SyncWorker @AssistedInject constructor(
             return@withContext Result.success()
         }
 
-        Log.d(TAG, "Auth: Success for account ${account.email}")
-
-        // 2. 初始化 Drive 服务
         val credential = GoogleAccountCredential.usingOAuth2(
             applicationContext, listOf(DriveScopes.DRIVE_FILE)
         ).apply { selectedAccount = account.account }
@@ -78,34 +77,47 @@ class SyncWorker @AssistedInject constructor(
         val helper = DriveServiceHelper(driveService)
         
         try {
-            // 3. 检查/创建文件夹 (核心步骤)
-            Log.d(TAG, "Drive: Searching for folder '$FOLDER_NAME'...")
             val folderId = helper.getOrCreateFolder(FOLDER_NAME)
-            Log.i(TAG, "Drive: Folder identified successfully (ID: $folderId)")
+            val remoteFiles = helper.queryFiles(folderId, "")
+            val remoteFilesMap = remoteFiles.associateBy { it.name }
+            
+            val lastSyncTime = applicationContext.dataStore.data.first()[LAST_SYNC_KEY] ?: 0L
 
-            // 4. 同步逻辑
-            syncSetsLogic(helper, folderId)
-            syncPlansLogic(helper, folderId)
-            syncPrefs(helper, folderId)
+            syncSetsLogic(helper, folderId, remoteFilesMap, lastSyncTime)
+            syncPlansLogic(helper, folderId, remoteFilesMap, lastSyncTime)
+            syncPrefs(helper, folderId, remoteFilesMap, lastSyncTime)
 
+            applicationContext.dataStore.edit { it[LAST_SYNC_KEY] = System.currentTimeMillis() }
             Log.i(TAG, "Sync complete.")
             Result.success()
         } catch (e: Exception) {
-            Log.e(TAG, "Sync: Critical error during execution - ${e.message}", e)
+            Log.e(TAG, "Sync: Critical error - ${e.message}", e)
             Result.retry()
         }
     }
 
-    private suspend fun syncSetsLogic(helper: DriveServiceHelper, folderId: String) {
+    private suspend fun syncSetsLogic(helper: DriveServiceHelper, folderId: String, remoteMap: Map<String, com.google.api.services.drive.model.File>, lastSync: Long) {
         val dbDates = exerciseDao.getDistinctDates().toMutableSet()
-        dbDates.add(SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date()))
+        val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
+        dbDates.add(today)
         
+        // 合并远程存在的日期
+        remoteMap.keys.filter { it.matches(Regex("\\d{4}-\\d{2}-\\d{2}\\.json")) }.forEach { 
+            dbDates.add(it.substringBefore(".json"))
+        }
+
+        val existingIds = exerciseDao.getAllRemoteIds().toSet()
+
         dbDates.forEach { date ->
             val fileName = "$date.json"
-            val remoteJson = helper.downloadFile(folderId, fileName)
-            val existingIds = exerciseDao.getAllRemoteIds().toSet()
+            val remoteFile = remoteMap[fileName]
+            var remoteJson: String? = null
 
-            if (remoteJson != null) {
+            // 仅当远程有更新或本地缺失该日期数据时下载
+            val shouldDownload = remoteFile != null && (remoteFile.modifiedTime.value > lastSync || !exerciseDao.getDistinctDates().contains(date))
+
+            if (shouldDownload && remoteFile != null) {
+                remoteJson = helper.downloadFileById(remoteFile.id)
                 try {
                     val remoteDay = gson.fromJson(remoteJson, TrainingDay::class.java)
                     transformToSetEntities(remoteDay).forEach { 
@@ -116,20 +128,25 @@ class SyncWorker @AssistedInject constructor(
 
             val localSets = exerciseDao.getSetsByDate(date)
             if (localSets.isNotEmpty()) {
-                val json = gson.toJson(transformToTrainingDay(date, localSets))
+                val currentLocalDay = transformToTrainingDay(date, localSets)
+                val json = gson.toJson(currentLocalDay)
+                
+                // 如果没有下载 remoteJson (因为没变)，但本地有数据，我们需要确保远程存在且一致
                 if (json != remoteJson) {
-                    helper.uploadOrUpdateFile(folderId, fileName, json)
-                    Log.d(TAG, "Uploaded sets for $date")
+                    if (remoteFile != null) {
+                        helper.updateFile(remoteFile.id, json)
+                    } else {
+                        helper.createFile(folderId, fileName, json)
+                    }
                 }
             }
         }
     }
 
-    private suspend fun syncPlansLogic(helper: DriveServiceHelper, folderId: String) {
-        val remoteFiles = helper.queryFiles(folderId, "name contains 'plan_history_'")
+    private suspend fun syncPlansLogic(helper: DriveServiceHelper, folderId: String, remoteMap: Map<String, com.google.api.services.drive.model.File>, lastSync: Long) {
+        // 1. 同步历史计划 (Append-only)
         val localPlans = planDao.getAllPlans().associateBy { it.createdAt }
-
-        remoteFiles.forEach { file ->
+        remoteMap.values.filter { it.name.startsWith("plan_history_") }.forEach { file ->
             val ts = file.name.substringAfter("plan_history_").substringBefore(".json").toLongOrNull()
             if (ts != null && !localPlans.containsKey(ts)) {
                 try {
@@ -138,27 +155,50 @@ class SyncWorker @AssistedInject constructor(
                 } catch (e: Exception) { Log.e(TAG, "Plan pull error: ${file.name}") }
             }
         }
-
+        
         planDao.getAllPlans().forEach { plan ->
             val name = "plan_history_${plan.createdAt}.json"
-            if (remoteFiles.none { it.name == name }) {
-                helper.uploadOrUpdateFile(folderId, name, gson.toJson(plan))
+            if (!remoteMap.containsKey(name)) {
+                helper.createFile(folderId, name, gson.toJson(plan))
             }
         }
 
-        planDao.getCurrentPlan()?.let { 
-            helper.uploadOrUpdateFile(folderId, "plans.json", gson.toJson(listOf(it))) 
+        // 2. 同步当前计划 (Bidirectional)
+        val currentPlanFile = remoteMap["plans.json"]
+        if (currentPlanFile != null && currentPlanFile.modifiedTime.value > lastSync) {
+            val content = helper.downloadFileById(currentPlanFile.id)
+            val remotePlans = gson.fromJson<List<PlanEntity>>(content, object : TypeToken<List<PlanEntity>>() {}.type)
+            remotePlans.firstOrNull()?.let { planDao.insertPlan(it.copy(id = 0)) }
+        } else {
+            planDao.getCurrentPlan()?.let { 
+                val json = gson.toJson(listOf(it))
+                if (currentPlanFile != null) helper.updateFile(currentPlanFile.id, json)
+                else helper.createFile(folderId, "plans.json", json)
+            }
         }
     }
 
-    private suspend fun syncPrefs(helper: DriveServiceHelper, folderId: String) {
-        val prefs = applicationContext.dataStore.data.first()
-        val map = mapOf(
-            "theme_mode" to (prefs[stringPreferencesKey("theme_mode")] ?: "system"),
-            "language" to (prefs[stringPreferencesKey("language")] ?: "zh"),
-            "user_quote" to (prefs[stringPreferencesKey("user_quote")] ?: "坚持就是胜利")
-        )
-        helper.uploadOrUpdateFile(folderId, "user_prefs.json", gson.toJson(map))
+    private suspend fun syncPrefs(helper: DriveServiceHelper, folderId: String, remoteMap: Map<String, com.google.api.services.drive.model.File>, lastSync: Long) {
+        val prefFile = remoteMap["user_prefs.json"]
+        if (prefFile != null && prefFile.modifiedTime.value > lastSync) {
+            val remoteJson = helper.downloadFileById(prefFile.id)
+            val remotePrefs = gson.fromJson<Map<String, String>>(remoteJson, object : TypeToken<Map<String, String>>() {}.type)
+            applicationContext.dataStore.edit {
+                remotePrefs["theme_mode"]?.let { v -> it[stringPreferencesKey("theme_mode")] = v }
+                remotePrefs["language"]?.let { v -> it[stringPreferencesKey("language")] = v }
+                remotePrefs["user_quote"]?.let { v -> it[stringPreferencesKey("user_quote")] = v }
+            }
+        } else {
+            val prefs = applicationContext.dataStore.data.first()
+            val map = mapOf(
+                "theme_mode" to (prefs[stringPreferencesKey("theme_mode")] ?: "system"),
+                "language" to (prefs[stringPreferencesKey("language")] ?: "zh"),
+                "user_quote" to (prefs[stringPreferencesKey("user_quote")] ?: "坚持就是胜利")
+            )
+            val json = gson.toJson(map)
+            if (prefFile != null) helper.updateFile(prefFile.id, json)
+            else helper.createFile(folderId, "user_prefs.json", json)
+        }
     }
 
     private fun transformToSetEntities(day: TrainingDay): List<SetEntity> {

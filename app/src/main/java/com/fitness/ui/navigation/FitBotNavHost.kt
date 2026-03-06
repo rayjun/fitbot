@@ -23,7 +23,6 @@ import com.fitness.sync.SyncWorker
 import com.fitness.ui.library.ExerciseDetailScreen
 import com.fitness.ui.library.ExerciseLibraryScreen
 import com.fitness.ui.plans.DayDetailsScreen
-import com.fitness.ui.plans.PlanSessionScreen
 import com.fitness.ui.plans.PlansScreen
 import com.fitness.ui.profile.ProfileScreen
 import com.fitness.ui.profile.SettingsScreen
@@ -44,22 +43,31 @@ fun FitBotNavHost(
     var lastAccount by remember { mutableStateOf(authManager.getSignedInAccount()) }
     val driveScope = Scope(DriveScopes.DRIVE_FILE)
 
+    // 统一的登录结果处理器
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         val task = authManager.getSignedInAccountFromIntent(result.data)
         if (task.isSuccessful) {
-            lastAccount = task.result
-            val hasPerm = GoogleSignIn.hasPermissions(lastAccount, driveScope)
-            if (hasPerm) {
+            val account = task.result
+            lastAccount = account
+            if (GoogleSignIn.hasPermissions(account, driveScope)) {
                 Toast.makeText(context, context.getString(R.string.cloud_success), Toast.LENGTH_SHORT).show()
                 val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
                 workManager.enqueueUniqueWork("FullSync", ExistingWorkPolicy.REPLACE, syncRequest)
             } else {
-                Toast.makeText(context, "请在授权时勾选云端硬盘权限以开启同步", Toast.LENGTH_LONG).show()
+                // 如果登录成功但依然没权限（用户没勾选），引导用户
+                Toast.makeText(context, "同步失败：请在登录时务必勾选 Drive 权限复选框", Toast.LENGTH_LONG).show()
             }
         } else {
             Toast.makeText(context, context.getString(R.string.cloud_failed, task.exception?.message), Toast.LENGTH_LONG).show()
+        }
+    }
+
+    // 强制重新授权的逻辑：先退出登录，再拉起 Intent
+    val triggerAuthFlow = {
+        authManager.signOut {
+            googleSignInLauncher.launch(authManager.getSignInIntent())
         }
     }
 
@@ -69,7 +77,6 @@ fun FitBotNavHost(
         modifier = Modifier.padding(innerPadding)
     ) {
         composable(Screen.Library.route) {
-            val hasDrivePermission = lastAccount?.let { GoogleSignIn.hasPermissions(it, driveScope) } ?: false
             ExerciseLibraryScreen(
                 onExerciseClick = { exercise ->
                     navController.navigate(Screen.ExerciseDetail.createRoute(exercise.id))
@@ -118,10 +125,8 @@ fun FitBotNavHost(
             ProfileScreen(
                 viewModel = hiltViewModel(),
                 settingsViewModel = hiltViewModel(),
-                account = if (hasDrivePermission) lastAccount else null, // 没权限视为未连接，强制重新授权
-                onLoginClick = {
-                    googleSignInLauncher.launch(authManager.getSignInIntent())
-                },
+                account = if (hasDrivePermission) lastAccount else null,
+                onLoginClick = { triggerAuthFlow() }, // 始终强制刷新流程
                 onLogout = {
                     authManager.signOut {
                         lastAccount = null
@@ -146,7 +151,7 @@ fun FitBotNavHost(
                         workManager.enqueueUniqueWork("FullSync", ExistingWorkPolicy.REPLACE, syncRequest)
                         Toast.makeText(context, "Sync Started", Toast.LENGTH_SHORT).show()
                     } else {
-                        googleSignInLauncher.launch(authManager.getSignInIntent())
+                        triggerAuthFlow() // 缺失权限时强制重新授权
                     }
                 },
                 onBack = { navController.popBackStack() }
@@ -164,8 +169,7 @@ fun FitBotNavHost(
             WorkoutRecordingScreen(
                 exerciseId = exerciseId,
                 viewModel = hiltViewModel(),
-                onBack = { navController.popBackStack() },
-                onFinished = { navController.popBackStack() }
+                onBack = { navController.popBackStack() }
             )
         }
     }

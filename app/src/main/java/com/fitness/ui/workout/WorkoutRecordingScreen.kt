@@ -30,8 +30,7 @@ import com.fitness.data.local.SetEntity
 fun WorkoutRecordingScreen(
     exerciseId: String,
     viewModel: WorkoutViewModel,
-    onBack: () -> Unit,
-    onFinished: () -> Unit
+    onBack: () -> Unit
 ) {
     val exercise = remember(exerciseId) { ExerciseProvider.exercises.find { it.id == exerciseId } }
     val localizedName = exercise?.let { stringResource(it.nameRes) } ?: exerciseId

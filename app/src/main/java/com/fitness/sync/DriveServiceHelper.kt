@@ -24,7 +24,7 @@ class DriveServiceHelper(private val driveService: Drive) {
         val result = driveService.files().list()
             .setQ(query)
             .setSpaces("drive") 
-            .setFields("files(id, name)")
+            .setFields("files(id, name, modifiedTime)")
             .execute()
 
         val folder = result.files.firstOrNull()
@@ -47,11 +47,11 @@ class DriveServiceHelper(private val driveService: Drive) {
 
     @Throws(IOException::class)
     fun queryFiles(folderId: String, q: String): List<File> {
-        val query = "'$folderId' in parents and trashed = false and $q"
+        val query = "'$folderId' in parents and trashed = false" + (if (q.isNotEmpty()) " and $q" else "")
         return driveService.files().list()
             .setQ(query)
             .setSpaces("drive") 
-            .setFields("files(id, name)")
+            .setFields("files(id, name, modifiedTime)")
             .execute().files ?: emptyList()
     }
 
@@ -75,6 +75,24 @@ class DriveServiceHelper(private val driveService: Drive) {
         val outputStream = ByteArrayOutputStream()
         driveService.files().get(fileId).executeMediaAndDownloadTo(outputStream)
         return outputStream.toString()
+    }
+
+    @Throws(IOException::class)
+    fun updateFile(fileId: String, content: String) {
+        val mediaContent = ByteArrayContent.fromString("application/json", content)
+        Log.d(TAG, "Updating file with ID: $fileId")
+        driveService.files().update(fileId, null, mediaContent).execute()
+    }
+
+    @Throws(IOException::class)
+    fun createFile(folderId: String, fileName: String, content: String) {
+        val mediaContent = ByteArrayContent.fromString("application/json", content)
+        Log.d(TAG, "Creating file: $fileName")
+        val fileMetadata = File().apply {
+            name = fileName
+            parents = listOf(folderId)
+        }
+        driveService.files().create(fileMetadata, mediaContent).execute()
     }
 
     @Throws(IOException::class)
