@@ -6,6 +6,8 @@ import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
+import android.util.Log
+...
 @HiltAndroidApp
 class FitBotApp : Application(), Configuration.Provider {
 
@@ -13,7 +15,10 @@ class FitBotApp : Application(), Configuration.Provider {
     lateinit var workerFactory: HiltWorkerFactory
 
     override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder()
-            .setWorkerFactory(workerFactory)
-            .build()
+        get() {
+            Log.i("FitBotApp", "Providing custom WorkManager configuration with HiltWorkerFactory")
+            return Configuration.Builder()
+                .setWorkerFactory(workerFactory)
+                .build()
+        }
 }
