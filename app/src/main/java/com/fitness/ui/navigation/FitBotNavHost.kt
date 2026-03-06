@@ -1,5 +1,6 @@
 package com.fitness.ui.navigation
 
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -51,22 +52,24 @@ fun FitBotNavHost(
         if (task.isSuccessful) {
             val account = task.result
             lastAccount = account
-            if (GoogleSignIn.hasPermissions(account, driveScope)) {
+            val hasPerm = GoogleSignIn.hasPermissions(account, driveScope)
+            Log.d("FitBotSync", "Login successful. Drive permission: $hasPerm")
+            if (hasPerm) {
                 Toast.makeText(context, context.getString(R.string.cloud_success), Toast.LENGTH_SHORT).show()
                 val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
                 workManager.enqueueUniqueWork("FullSync", ExistingWorkPolicy.REPLACE, syncRequest)
             } else {
-                // 如果登录成功但依然没权限（用户没勾选），引导用户
-                Toast.makeText(context, "同步失败：请在登录时务必勾选 Drive 权限复选框", Toast.LENGTH_LONG).show()
+                Toast.makeText(context, "同步失败：您必须勾选并允许 Drive 访问权限才能使用云同步功能。", Toast.LENGTH_LONG).show()
             }
         } else {
+            Log.e("FitBotSync", "Login failed: ${task.exception?.message}")
             Toast.makeText(context, context.getString(R.string.cloud_failed, task.exception?.message), Toast.LENGTH_LONG).show()
         }
     }
 
-    // 强制重新授权的逻辑：先退出登录，再拉起 Intent
+    // 彻底强制重新授权：撤销权限并退出，确保下次登录显示完整勾选框
     val triggerAuthFlow = {
-        authManager.signOut {
+        authManager.revokeAccess {
             googleSignInLauncher.launch(authManager.getSignInIntent())
         }
     }

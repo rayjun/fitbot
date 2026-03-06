@@ -34,4 +34,8 @@ class AuthManager @Inject constructor(
     fun signOut(onComplete: () -> Unit) {
         client.signOut().addOnCompleteListener { onComplete() }
     }
+
+    fun revokeAccess(onComplete: () -> Unit) {
+        client.revokeAccess().addOnCompleteListener { onComplete() }
+    }
 }

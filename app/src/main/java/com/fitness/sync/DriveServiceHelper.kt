@@ -19,7 +19,7 @@ class DriveServiceHelper(private val driveService: Drive) {
      */
     @Throws(IOException::class)
     fun getOrCreateFolder(folderName: String): String {
-        // 在可见的 drive 空间中查找
+        Log.d(TAG, "getOrCreateFolder: Searching for $folderName")
         val query = "name = '$folderName' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
         val result = driveService.files().list()
             .setQ(query)
@@ -29,11 +29,11 @@ class DriveServiceHelper(private val driveService: Drive) {
 
         val folder = result.files.firstOrNull()
         if (folder != null) {
-            Log.d(TAG, "Found existing visible folder: ${folder.id}")
+            Log.d(TAG, "getOrCreateFolder: Found existing folder: ${folder.id}")
             return folder.id
         }
 
-        // 如果没找到，创建一个可见的文件夹
+        Log.d(TAG, "getOrCreateFolder: Creating new folder $folderName")
         val folderMetadata = File().apply {
             name = folderName
             mimeType = "application/vnd.google-apps.folder"
@@ -41,7 +41,7 @@ class DriveServiceHelper(private val driveService: Drive) {
         val newFolder = driveService.files().create(folderMetadata)
             .setFields("id")
             .execute()
-        Log.d(TAG, "Created new visible folder: ${newFolder.id}")
+        Log.d(TAG, "getOrCreateFolder: Created folder with ID: ${newFolder.id}")
         return newFolder.id
     }
 

@@ -67,31 +67,37 @@ class SyncWorker @AssistedInject constructor(
             return@withContext Result.success()
         }
 
+        Log.d(TAG, "Sync: Authenticated as ${account.email}")
         val credential = GoogleAccountCredential.usingOAuth2(
             applicationContext, listOf(DriveScopes.DRIVE_FILE)
-        ).apply { selectedAccount = account.account }
+        ).apply { selectedAccountName = account.email }
 
         val driveService = Drive.Builder(NetHttpTransport(), GsonFactory(), credential)
             .setApplicationName("FitBot").build()
-
+        
         val helper = DriveServiceHelper(driveService)
         
         try {
+            Log.d(TAG, "Sync: Starting folder and file check...")
             val folderId = helper.getOrCreateFolder(FOLDER_NAME)
+            Log.d(TAG, "Sync: Folder ID is $folderId")
+            
             val remoteFiles = helper.queryFiles(folderId, "")
+            Log.d(TAG, "Sync: Found ${remoteFiles.size} remote files.")
             val remoteFilesMap = remoteFiles.associateBy { it.name }
             
             val lastSyncTime = applicationContext.dataStore.data.first()[LAST_SYNC_KEY] ?: 0L
+            Log.d(TAG, "Sync: Last sync time: $lastSyncTime")
 
             syncSetsLogic(helper, folderId, remoteFilesMap, lastSyncTime)
             syncPlansLogic(helper, folderId, remoteFilesMap, lastSyncTime)
             syncPrefs(helper, folderId, remoteFilesMap, lastSyncTime)
 
             applicationContext.dataStore.edit { it[LAST_SYNC_KEY] = System.currentTimeMillis() }
-            Log.i(TAG, "Sync complete.")
+            Log.i(TAG, "Sync complete successfully.")
             Result.success()
         } catch (e: Exception) {
-            Log.e(TAG, "Sync: Critical error - ${e.message}", e)
+            Log.e(TAG, "Sync: Critical error during drive operations: ${e.message}", e)
             Result.retry()
         }
     }
