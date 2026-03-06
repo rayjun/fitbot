@@ -1,13 +1,12 @@
 package com.fitness
 
 import android.app.Application
+import android.util.Log
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
-import android.util.Log
-...
 @HiltAndroidApp
 class FitBotApp : Application(), Configuration.Provider {
 

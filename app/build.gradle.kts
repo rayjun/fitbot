@@ -13,8 +13,8 @@ android {
         applicationId = "com.fitness"
         minSdk = 26
         targetSdk = 34
-        versionCode = 7
-        versionName = "0.3.5"
+        versionCode = 8
+        versionName = "0.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
