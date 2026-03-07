@@ -16,15 +16,10 @@ kotlin {
         }
     }
     
-    val xcfName = "ComposeApp"
-    
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
+    val iosTargets = listOf(iosX64(), iosArm64(), iosSimulatorArm64())
+    iosTargets.forEach { iosTarget ->
         iosTarget.binaries.framework {
-            baseName = xcfName
+            baseName = "ComposeApp"
             isStatic = true
         }
     }
