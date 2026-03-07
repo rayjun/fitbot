@@ -18,16 +18,14 @@ kotlin {
     
     val xcfName = "ComposeApp"
     
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
-
-    targets.withType<org.jetbrains.kotlin.gradle.plugin.mpp.KotlinNativeTarget> {
-        if (konanTarget.family == org.jetbrains.konan.target.Family.IOS) {
-            binaries.framework {
-                baseName = xcfName
-                isStatic = true
-            }
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
+            baseName = xcfName
+            isStatic = true
         }
     }
     
