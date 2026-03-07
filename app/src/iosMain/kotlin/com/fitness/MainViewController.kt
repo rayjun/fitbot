@@ -1,5 +1,6 @@
 package com.fitness
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
@@ -27,13 +28,19 @@ fun MainViewController() = ComposeUIViewController {
     var language by remember { mutableStateOf("en") }
     var userQuote by remember { mutableStateOf("Stay fit with FitBot") }
 
-    FitnessTheme(darkTheme = themeMode == "dark") {
+    val isDark = when (themeMode) {
+        "dark" -> true
+        "light" -> false
+        else -> isSystemInDarkTheme()
+    }
+
+    FitnessTheme(darkTheme = isDark) {
         Scaffold(
             bottomBar = {
                 val items = listOf(Screen.Library, Screen.Plans, Screen.Profile)
                 if (items.any { it.route == currentScreen.route } && selectedExercise == null) {
                     NavigationBar(
-                        containerColor = MaterialTheme.colorScheme.surface,
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = MaterialTheme.colorScheme.primary
                     ) {
                         items.forEach { screen ->

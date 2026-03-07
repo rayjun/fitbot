@@ -31,10 +31,12 @@ fun ExerciseLibraryScreen(
     val allLabelKey = "category_all"
     var selectedCategoryKey by remember { mutableStateOf(allLabelKey) }
 
-    val filteredExercises = if (selectedCategoryKey == allLabelKey) {
-        ExerciseProvider.exercises
-    } else {
-        ExerciseProvider.exercises.filter { it.categoryKey == selectedCategoryKey }
+    val filteredExercises = remember(selectedCategoryKey) {
+        if (selectedCategoryKey == allLabelKey) {
+            ExerciseProvider.exercises
+        } else {
+            ExerciseProvider.exercises.filter { it.categoryKey == selectedCategoryKey }
+        }
     }
 
     Scaffold(
@@ -47,25 +49,20 @@ fun ExerciseLibraryScreen(
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     ) 
-                }, 
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.background
-                )
+                }
             )
         }
     ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
+        Column(modifier = Modifier.padding(padding).fillMaxSize()) {
             val categories = ExerciseProvider.categories
 
-            ScrollableTabRow(
-                selectedTabIndex = categories.indexOf(selectedCategoryKey).coerceAtLeast(0),
-                edgePadding = 16.dp,
-                containerColor = Color.Transparent,
-                contentColor = MaterialTheme.colorScheme.primary,
-                divider = {},
-                indicator = { tabPositions ->
-                    if (categories.isNotEmpty()) {
+            if (categories.isNotEmpty()) {
+                ScrollableTabRow(
+                    selectedTabIndex = categories.indexOf(selectedCategoryKey).coerceAtLeast(0),
+                    edgePadding = 16.dp,
+                    containerColor = Color.Transparent,
+                    divider = {},
+                    indicator = { tabPositions ->
                         val selectedIndex = categories.indexOf(selectedCategoryKey).coerceAtLeast(0)
                         if (selectedIndex < tabPositions.size) {
                             Box(
@@ -73,41 +70,43 @@ fun ExerciseLibraryScreen(
                                     .tabIndicatorOffset(tabPositions[selectedIndex])
                                     .height(3.dp)
                                     .padding(horizontal = 16.dp)
-                                    .background(
-                                        color = MaterialTheme.colorScheme.primary,
-                                        shape = MaterialTheme.shapes.small
-                                    )
+                                    .background(MaterialTheme.colorScheme.primary)
                             )
                         }
                     }
-                }
-            ) {
-                categories.forEach { categoryKey ->
-                    val isSelected = selectedCategoryKey == categoryKey
-                    Tab(
-                        selected = isSelected,
-                        onClick = { selectedCategoryKey = categoryKey },
-                        text = { 
-                            Text(
-                                text = getString(categoryKey),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                            ) 
-                        }
-                    )
+                ) {
+                    categories.forEach { categoryKey ->
+                        val isSelected = selectedCategoryKey == categoryKey
+                        Tab(
+                            selected = isSelected,
+                            onClick = { selectedCategoryKey = categoryKey },
+                            text = { 
+                                Text(
+                                    text = getString(categoryKey),
+                                    style = MaterialTheme.typography.labelLarge,
+                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
+                                ) 
+                            }
+                        )
+                    }
                 }
             }
 
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(16.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(filteredExercises) { exercise ->
-                    ExerciseGridItem(exercise, onExerciseClick)
+            if (filteredExercises.isEmpty()) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    Text("Total exercises: ${ExerciseProvider.exercises.size}")
+                }
+            } else {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(filteredExercises, key = { it.id }) { exercise ->
+                        ExerciseGridItem(exercise, onExerciseClick)
+                    }
                 }
             }
         }
@@ -122,60 +121,43 @@ fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
         onClick = { onExerciseClick(exercise) },
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.82f),
+            .aspectRatio(0.8f),
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.1f)
         )
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            // Image Container: Creates a "paper stage" for the white-bg GIF
+        Column(modifier = Modifier.fillMaxSize()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
                     .padding(8.dp)
                     .clip(MaterialTheme.shapes.medium)
-                    .background(
-                        if (isDark) Color(0xFFF0F2F5).copy(alpha = 0.9f) 
-                        else Color.White
-                    ),
+                    .background(if (isDark) Color(0xFFF0F2F5).copy(alpha = 0.8f) else Color.White),
                 contentAlignment = Alignment.Center
             ) {
                 ExerciseImage(
                     gifResPath = exercise.gifResPath,
-                    contentDescription = getString(exercise.nameKey),
+                    contentDescription = null,
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize().padding(12.dp)
+                    modifier = Modifier.fillMaxSize().padding(8.dp)
                 )
             }
             
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 10.dp)
-            ) {
-                Column {
-                    Text(
-                        text = getString(exercise.nameKey),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = getString(exercise.targetMuscleKey),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary,
-                        maxLines = 1
-                    )
-                }
+            Column(modifier = Modifier.padding(12.dp)) {
+                Text(
+                    text = getString(exercise.nameKey),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1
+                )
+                Text(
+                    text = getString(exercise.targetMuscleKey),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }

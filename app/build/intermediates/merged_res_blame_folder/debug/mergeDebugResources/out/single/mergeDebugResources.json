@@ -1,10 +1,10 @@
 [
     {
         "merged": "com.fitness.app-debug-75:/xml_locales_config.xml.flat",
-        "source": "com.fitness.app-main-77:/xml/locales_config.xml"
+        "source": "com.fitness.app-main-78:/xml/locales_config.xml"
     },
     {
         "merged": "com.fitness.app-debug-75:/mipmap-xxxhdpi_ic_launcher.png.flat",
-        "source": "com.fitness.app-main-77:/mipmap-xxxhdpi/ic_launcher.png"
+        "source": "com.fitness.app-main-78:/mipmap-xxxhdpi/ic_launcher.png"
     }
 ]

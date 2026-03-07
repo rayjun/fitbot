@@ -152,8 +152,8 @@ fun FitBotNavHost(
             ProfileScreen(
                 userQuote = userQuote,
                 heatmapData = heatmapData,
-                accountName = if (hasDrivePermission) lastAccount?.displayName else null,
-                accountPhotoUrl = if (hasDrivePermission) lastAccount?.photoUrl?.toString() else null,
+                accountName = lastAccount?.displayName,
+                accountPhotoUrl = lastAccount?.photoUrl?.toString(),
                 onLoginClick = { triggerAuthFlow() },
                 onLogout = {
                     authManager.signOut {
