@@ -1,0 +1,24 @@
+# Android
+build/
+.gradle/
+local.properties
+*.apk
+
+# iOS
+iosApp/Pods/
+iosApp/.build/
+*.xcworkspace
+xcuserdata/
+DerivedData/
+
+# KMP/Compose Multiplatform
+.kotlin/
+composeApp/build/
+
+# Local JDK
+jdk-17.0.10+7/
+jdk17.tar.gz
+
+# IDE
+.idea/
+*.iml
