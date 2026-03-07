@@ -8,6 +8,10 @@ targets:
     deploymentTarget: "14.1"
     sources:
       - iosApp
+    dependencies:
+      # Explicit dependency on the framework file to help Xcode discover the module
+      - framework: ../app/build/bin/iosSimulatorArm64/debugFramework/ComposeApp.framework
+        embed: true
     settings:
       base:
         INFOPLIST_FILE: iosApp/Info.plist
@@ -16,14 +20,19 @@ targets:
         CURRENT_PROJECT_VERSION: 9
         PRODUCT_NAME: FitBot
         DEVELOPMENT_TEAM: ""
-        FRAMEWORK_SEARCH_PATHS: $(inherited) $(SRCROOT)/../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)
-        # Link the framework
-        OTHER_LDFLAGS: $(inherited) -framework ComposeApp
+        # HARDCODED ROBUST SEARCH PATHS for module discovery
+        # These point to the actual Gradle build output
+        FRAMEWORK_SEARCH_PATHS:
+          - $(inherited)
+          - $(SRCROOT)/../app/build/bin/iosSimulatorArm64/debugFramework
+          - $(SRCROOT)/../app/build/bin/iosArm64/debugFramework
         ENABLE_USER_SCRIPT_SANDBOXING: NO
     preBuildPhases:
       - name: "Compile Kotlin Multiplatform"
         script: |
           cd "$SRCROOT/.."
+          export JAVA_HOME="$SRCROOT/../jdk-17.0.10+7/Contents/Home"
+          # Only run if we need to update, to speed up build
           ./gradlew :app:embedAndSignAppleFrameworkForXcode
         executionPosition: beforeCompile
 
