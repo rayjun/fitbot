@@ -22,8 +22,10 @@ kotlin {
     iosSimulatorArm64()
 
     cocoapods {
+        name = "ComposeApp"
         summary = "FitBot Shared Module"
         homepage = "https://github.com/rayjun/fitbot"
+        version = "0.4.1"
         ios.deploymentTarget = "14.1"
         podfile = project.file("../iosApp/Podfile")
         framework {
@@ -43,6 +45,7 @@ kotlin {
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
             }
         }
         val androidMain by getting {
