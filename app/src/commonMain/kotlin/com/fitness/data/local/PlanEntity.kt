@@ -1,11 +1,13 @@
 package com.fitness.data.local
 
 import androidx.room.*
+import kotlinx.serialization.Serializable
 
 @Entity(
     tableName = "training_plans",
     indices = [Index(value = ["createdAt"], unique = true)] // 核心修复：防止同步产生重复计划
 )
+@Serializable
 data class PlanEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,

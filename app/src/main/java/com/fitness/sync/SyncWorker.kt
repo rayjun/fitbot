@@ -14,7 +14,8 @@ import com.fitness.data.local.PlanEntity
 import com.fitness.data.local.SetEntity
 import com.fitness.model.*
 import com.fitness.ui.profile.dataStore
-import com.google.gson.Gson
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
@@ -28,7 +29,6 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import com.google.api.services.drive.Drive
 import com.google.api.services.drive.DriveScopes
-import com.google.gson.reflect.TypeToken
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.text.SimpleDateFormat
@@ -42,7 +42,7 @@ class SyncWorker @AssistedInject constructor(
     private val planDao: PlanDao
 ) : CoroutineWorker(appContext, workerParams) {
 
-    private val gson = Gson()
+    private val json = Json { ignoreUnknownKeys = true }
     private val TAG = "FitBotSync"
     private val FOLDER_NAME = "FitBot"
     private val LAST_SYNC_KEY = longPreferencesKey("last_sync_time")
@@ -125,7 +125,7 @@ class SyncWorker @AssistedInject constructor(
             if (shouldDownload && remoteFile != null) {
                 remoteJson = helper.downloadFileById(remoteFile.id)
                 try {
-                    val remoteDay = gson.fromJson(remoteJson, TrainingDay::class.java)
+                    val remoteDay = json.decodeFromString<TrainingDay>(remoteJson)
                     transformToSetEntities(remoteDay).forEach { 
                         if (!existingIds.contains(it.remoteId)) exerciseDao.insertSet(it) 
                     }
@@ -135,14 +135,14 @@ class SyncWorker @AssistedInject constructor(
             val localSets = exerciseDao.getSetsByDate(date)
             if (localSets.isNotEmpty()) {
                 val currentLocalDay = transformToTrainingDay(date, localSets)
-                val json = gson.toJson(currentLocalDay)
+                val jsonStr = json.encodeToString(currentLocalDay)
                 
                 // 如果没有下载 remoteJson (因为没变)，但本地有数据，我们需要确保远程存在且一致
-                if (json != remoteJson) {
+                if (jsonStr != remoteJson) {
                     if (remoteFile != null) {
-                        helper.updateFile(remoteFile.id, json)
+                        helper.updateFile(remoteFile.id, jsonStr)
                     } else {
-                        helper.createFile(folderId, fileName, json)
+                        helper.createFile(folderId, fileName, jsonStr)
                     }
                 }
             }
@@ -157,7 +157,7 @@ class SyncWorker @AssistedInject constructor(
             if (ts != null && !localPlans.containsKey(ts)) {
                 try {
                     val content = helper.downloadFileById(file.id)
-                    planDao.insertPlan(gson.fromJson(content, PlanEntity::class.java).copy(id = 0))
+                    planDao.insertPlan(json.decodeFromString<PlanEntity>(content).copy(id = 0))
                 } catch (e: Exception) { Log.e(TAG, "Plan pull error: ${file.name}") }
             }
         }
@@ -165,7 +165,7 @@ class SyncWorker @AssistedInject constructor(
         planDao.getAllPlans().forEach { plan ->
             val name = "plan_history_${plan.createdAt}.json"
             if (!remoteMap.containsKey(name)) {
-                helper.createFile(folderId, name, gson.toJson(plan))
+                helper.createFile(folderId, name, json.encodeToString(plan))
             }
         }
 
@@ -173,13 +173,13 @@ class SyncWorker @AssistedInject constructor(
         val currentPlanFile = remoteMap["plans.json"]
         if (currentPlanFile != null && currentPlanFile.modifiedTime.value > lastSync) {
             val content = helper.downloadFileById(currentPlanFile.id)
-            val remotePlans = gson.fromJson<List<PlanEntity>>(content, object : TypeToken<List<PlanEntity>>() {}.type)
+            val remotePlans = json.decodeFromString<List<PlanEntity>>(content)
             remotePlans.firstOrNull()?.let { planDao.insertPlan(it.copy(id = 0)) }
         } else {
             planDao.getCurrentPlan()?.let { 
-                val json = gson.toJson(listOf(it))
-                if (currentPlanFile != null) helper.updateFile(currentPlanFile.id, json)
-                else helper.createFile(folderId, "plans.json", json)
+                val jsonStr = json.encodeToString(listOf(it))
+                if (currentPlanFile != null) helper.updateFile(currentPlanFile.id, jsonStr)
+                else helper.createFile(folderId, "plans.json", jsonStr)
             }
         }
     }
@@ -188,7 +188,7 @@ class SyncWorker @AssistedInject constructor(
         val prefFile = remoteMap["user_prefs.json"]
         if (prefFile != null && prefFile.modifiedTime.value > lastSync) {
             val remoteJson = helper.downloadFileById(prefFile.id)
-            val remotePrefs = gson.fromJson<Map<String, String>>(remoteJson, object : TypeToken<Map<String, String>>() {}.type)
+            val remotePrefs = json.decodeFromString<Map<String, String>>(remoteJson)
             applicationContext.dataStore.edit {
                 remotePrefs["theme_mode"]?.let { v -> it[stringPreferencesKey("theme_mode")] = v }
                 remotePrefs["language"]?.let { v -> it[stringPreferencesKey("language")] = v }
@@ -201,9 +201,9 @@ class SyncWorker @AssistedInject constructor(
                 "language" to (prefs[stringPreferencesKey("language")] ?: "zh"),
                 "user_quote" to (prefs[stringPreferencesKey("user_quote")] ?: "坚持就是胜利")
             )
-            val json = gson.toJson(map)
-            if (prefFile != null) helper.updateFile(prefFile.id, json)
-            else helper.createFile(folderId, "user_prefs.json", json)
+            val jsonStr = json.encodeToString(map)
+            if (prefFile != null) helper.updateFile(prefFile.id, jsonStr)
+            else helper.createFile(folderId, "user_prefs.json", jsonStr)
         }
     }
 

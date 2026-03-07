@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,7 @@ import com.fitness.R
 import com.fitness.data.ExerciseProvider
 import com.fitness.model.Exercise
 import com.fitness.ui.workout.WorkoutViewModel
+import com.fitness.util.toResId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +37,7 @@ fun PlanSessionScreen(
     val currentPlan by planViewModel.currentPlan.collectAsStateWithLifecycle()
     val currentRoutine by planViewModel.currentRoutine.collectAsStateWithLifecycle()
     val setsToday by workoutViewModel.setsToday.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     
     val plannedExercises = remember(currentRoutine, dayOfWeek) {
         currentRoutine.find { it.dayOfWeek == dayOfWeek }?.exercises ?: emptyList()
@@ -83,13 +86,13 @@ fun PlanSessionScreen(
                             ListItem(
                                 headlineContent = { 
                                     Text(
-                                        stringResource(exercise.nameRes), 
+                                        stringResource(exercise.nameKey.toResId(context)), 
                                         fontWeight = FontWeight.Bold,
                                         color = if (isFinished) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                     ) 
                                 },
                                 supportingContent = { 
-                                    Text("${stringResource(exercise.targetMuscleRes)} • $completedCount / ${planned.targetSets}") 
+                                    Text("${stringResource(exercise.targetMuscleKey.toResId(context))} • $completedCount / ${planned.targetSets}") 
                                 },
                                 trailingContent = {
                                     Icon(

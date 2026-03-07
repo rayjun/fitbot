@@ -31,12 +31,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.fitness.R
 import com.fitness.data.ExerciseProvider
 import com.fitness.model.PlannedExercise
 import com.fitness.model.RoutineDay
 import com.fitness.ui.workout.WorkoutViewModel
+import com.fitness.util.toResId
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.ZoneId
@@ -169,6 +171,7 @@ fun InteractivePlanView(
 
     val isEditingAllowed = (weekOffset == 0)
     val isTrainingAllowed = (weekOffset > 0) || (weekOffset == 0 && selectedDayOfWeek >= today.dayOfWeek.value)
+    val context = LocalContext.current
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         WeeklyProgressBarNavigation(
@@ -275,7 +278,7 @@ fun InteractivePlanView(
         AlertDialog(
             onDismissRequest = { exerciseToDelete = null },
             title = { Text("确认删除动作", fontWeight = FontWeight.Bold) },
-            text = { Text("确定要将“${exercise?.let { stringResource(it.nameRes) } ?: exerciseToDelete!!.id}”从当天的计划中移除吗？") },
+            text = { Text("确定要将“${exercise?.let { stringResource(it.nameKey.toResId(context)) } ?: exerciseToDelete!!.id}”从当天的计划中移除吗？") },
             confirmButton = {
                 TextButton(onClick = {
                     val updatedExercises = displayDay.exercises.filter { it.id != exerciseToDelete!!.id }
@@ -387,6 +390,7 @@ fun ExerciseActionCard(
     onStart: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val context = LocalContext.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -404,13 +408,13 @@ fun ExerciseActionCard(
                 modifier = Modifier.weight(1f).clickable(enabled = isTrainingAllowed) { onStart() }
             ) {
                 Text(
-                    stringResource(exercise.targetMuscleRes),
+                    stringResource(exercise.targetMuscleKey.toResId(context)),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    stringResource(exercise.nameRes), 
+                    stringResource(exercise.nameKey.toResId(context)), 
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -461,6 +465,7 @@ fun QuickAddExerciseDialog(
     onDismiss: () -> Unit,
     onSave: (List<PlannedExercise>, Boolean) -> Unit
 ) {
+    val context = LocalContext.current
     var isRest by remember { mutableStateOf(isInitiallyRest) }
     val selectedMap = remember { 
         mutableStateMapOf<String, Int>().apply {
@@ -498,8 +503,8 @@ fun QuickAddExerciseDialog(
                                 Checkbox(checked = isChecked, onCheckedChange = null)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(stringResource(exercise.nameRes), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
-                                    Text(stringResource(exercise.targetMuscleRes), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                                    Text(stringResource(exercise.nameKey.toResId(context)), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                                    Text(stringResource(exercise.targetMuscleKey.toResId(context)), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
                                 }
                                 
                                 if (isChecked) {

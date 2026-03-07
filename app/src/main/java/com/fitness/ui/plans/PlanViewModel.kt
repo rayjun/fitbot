@@ -6,8 +6,6 @@ import com.fitness.data.local.PlanDao
 import com.fitness.data.local.PlanEntity
 import com.fitness.model.PlannedExercise
 import com.fitness.model.RoutineDay
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,6 +13,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -23,7 +23,7 @@ import javax.inject.Inject
 class PlanViewModel @Inject constructor(
     private val dao: PlanDao
 ) : ViewModel() {
-    private val gson = Gson()
+    private val json = Json { ignoreUnknownKeys = true }
     private val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.US)
 
     private val _currentPlan = MutableStateFlow<PlanEntity?>(null)
@@ -32,8 +32,7 @@ class PlanViewModel @Inject constructor(
     val currentRoutine: StateFlow<List<RoutineDay>> = _currentPlan.map { plan ->
         if (plan == null) emptyList()
         else try {
-            val type = object : TypeToken<List<RoutineDay>>() {}.type
-            gson.fromJson<List<RoutineDay>>(plan.exercisesJson, type) ?: emptyList()
+            json.decodeFromString<List<RoutineDay>>(plan.exercisesJson)
         } catch (e: Exception) { emptyList() }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
@@ -65,8 +64,7 @@ class PlanViewModel @Inject constructor(
 
         return if (planToParse == null) emptyList()
         else try {
-            val type = object : TypeToken<List<RoutineDay>>() {}.type
-            gson.fromJson<List<RoutineDay>>(planToParse.exercisesJson, type) ?: emptyList()
+            json.decodeFromString<List<RoutineDay>>(planToParse.exercisesJson)
         } catch (e: Exception) { emptyList() }
     }
 
@@ -85,7 +83,7 @@ class PlanViewModel @Inject constructor(
             if (current != null && lastCreatedDayStr == todayStr) {
                 val updatedPlan = current.copy(
                     name = name,
-                    exercisesJson = gson.toJson(routine),
+                    exercisesJson = json.encodeToString(routine),
                     createdAt = now // 更新时间戳
                 )
                 dao.insertPlan(updatedPlan) // REPLACE 冲突策略会覆盖 ID 相同的记录
@@ -94,7 +92,7 @@ class PlanViewModel @Inject constructor(
                 val version = (current?.version ?: 0) + 1
                 val newPlan = PlanEntity(
                     name = name,
-                    exercisesJson = gson.toJson(routine),
+                    exercisesJson = json.encodeToString(routine),
                     isCurrent = true,
                     version = version,
                     createdAt = now

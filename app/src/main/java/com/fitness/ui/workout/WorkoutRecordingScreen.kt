@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Delete
 import com.fitness.R
 import com.fitness.data.ExerciseProvider
 import com.fitness.data.local.SetEntity
+import com.fitness.util.toResId
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,8 +34,9 @@ fun WorkoutRecordingScreen(
     viewModel: WorkoutViewModel,
     onBack: () -> Unit
 ) {
+    val context = LocalContext.current
     val exercise = remember(exerciseId) { ExerciseProvider.exercises.find { it.id == exerciseId } }
-    val localizedName = exercise?.let { stringResource(it.nameRes) } ?: exerciseId
+    val localizedName = exercise?.let { stringResource(it.nameKey.toResId(context)) } ?: exerciseId
     val isBodyweight = exercise?.isBodyweight ?: false
 
     val sets by viewModel.setsToday.collectAsStateWithLifecycle()

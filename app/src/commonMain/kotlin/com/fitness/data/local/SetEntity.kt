@@ -2,7 +2,6 @@ package com.fitness.data.local
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import java.util.UUID
 
 /**
  * 对应数据库中的每一组训练记录。
@@ -18,5 +17,5 @@ data class SetEntity(
     val weight: Double,
     val timestamp: Long,       // 用于记录和排序
     val timeStr: String,       // 格式: 09:05，方便序列化
-    val remoteId: String = UUID.randomUUID().toString() // 用于跨设备唯一标识
+    val remoteId: String = "" // 用于跨设备唯一标识
 )

@@ -21,6 +21,7 @@ import androidx.work.WorkManager
 import com.fitness.R
 import com.fitness.sync.AuthManager
 import com.fitness.sync.SyncWorker
+import com.fitness.data.local.SetEntity
 import com.fitness.ui.library.ExerciseDetailScreen
 import com.fitness.ui.library.ExerciseLibraryScreen
 import com.fitness.ui.plans.DayDetailsScreen
@@ -28,6 +29,7 @@ import com.fitness.ui.plans.PlansScreen
 import com.fitness.ui.profile.ProfileScreen
 import com.fitness.ui.profile.SettingsScreen
 import com.fitness.ui.workout.WorkoutRecordingScreen
+import com.fitness.ui.workout.WorkoutViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.Scope
 import com.google.api.services.drive.DriveScopes
@@ -116,9 +118,13 @@ fun FitBotNavHost(
             arguments = listOf(navArgument("date") { type = NavType.StringType })
         ) { backStackEntry ->
             val date = backStackEntry.arguments?.getString("date") ?: ""
+            val workoutViewModel: WorkoutViewModel = hiltViewModel()
+            val sets by produceState(initialValue = emptyList<SetEntity>(), date) {
+                workoutViewModel.getSetsByDateFlow(date).collect { value = it }
+            }
             DayDetailsScreen(
                 date = date,
-                viewModel = hiltViewModel(),
+                sets = sets,
                 onBack = { navController.popBackStack() }
             )
         }

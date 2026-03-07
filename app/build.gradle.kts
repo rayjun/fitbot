@@ -4,6 +4,7 @@ plugins {
     id("org.jetbrains.compose")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 kotlin {
@@ -32,9 +33,12 @@ kotlin {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
                 implementation(compose.material3)
+                implementation(compose.materialIconsExtended)
                 implementation(compose.ui)
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
+                implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+                implementation("androidx.room:room-runtime:2.6.1")
             }
         }
         val androidMain by getting {
@@ -91,7 +95,8 @@ kotlin {
                 implementation("io.coil-kt:coil-gif:2.6.0")
             }
         }
-        val iosMain by getting {
+        val iosMain by creating {
+            dependsOn(commonMain)
             dependencies {
             }
         }

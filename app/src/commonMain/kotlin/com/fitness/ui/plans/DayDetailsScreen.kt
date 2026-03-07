@@ -10,35 +10,26 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.fitness.R
 import com.fitness.data.ExerciseProvider
 import com.fitness.data.local.SetEntity
-import com.fitness.ui.workout.WorkoutViewModel
+import com.fitness.util.getString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DayDetailsScreen(
     date: String,
-    viewModel: WorkoutViewModel,
+    sets: List<SetEntity>,
     onBack: () -> Unit
 ) {
-    var sets by remember { mutableStateOf<List<SetEntity>>(emptyList()) }
-    
-    LaunchedEffect(date) {
-        sets = viewModel.getSetsByDate(date)
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(date) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = getString("back"))
                     }
                 }
             )
@@ -46,7 +37,7 @@ fun DayDetailsScreen(
     ) { padding ->
         if (sets.isEmpty()) {
             Box(modifier = Modifier.padding(padding).fillMaxSize(), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.history_empty), color = Color.Gray)
+                Text(getString("history_empty"), color = Color.Gray)
             }
         } else {
             val groupedByExercise = sets.groupBy { it.exerciseName }
@@ -60,7 +51,7 @@ fun DayDetailsScreen(
             ) {
                 items(groupedByExercise.toList()) { (exerciseId, exerciseSets) ->
                     val exercise = ExerciseProvider.exercises.find { it.id == exerciseId }
-                    val name = exercise?.let { stringResource(it.nameRes) } ?: exerciseId
+                    val name = exercise?.let { getString(it.nameKey) } ?: exerciseId
                     val isBodyweight = exercise?.isBodyweight ?: false
                     
                     Card(
@@ -78,7 +69,7 @@ fun DayDetailsScreen(
                             )
                             exercise?.let {
                                 Text(
-                                    text = stringResource(it.targetMuscleRes),
+                                    text = getString(it.targetMuscleKey),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -91,9 +82,9 @@ fun DayDetailsScreen(
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
                                     val text = if (isBodyweight) {
-                                        "${set.reps} ${stringResource(R.string.reps)}"
+                                        "${set.reps} ${getString("reps")}"
                                     } else {
-                                        "${set.weight} kg  x  ${set.reps}"
+                                        "${set.weight} ${getString("kg")}  x  ${set.reps}"
                                     }
                                     Text(
                                         text = text,

@@ -118,6 +118,10 @@ class WorkoutViewModel @Inject constructor(
         return dao.getSetsByDate(dateStr)
     }
 
+    fun getSetsByDateFlow(date: String): Flow<List<SetEntity>> {
+        return dao.getSetsByDateFlow(date)
+    }
+
     suspend fun isDayFullyCompleted(dateStr: String, routine: List<com.fitness.model.PlannedExercise>): Boolean {
         if (routine.isEmpty()) return false
         val setsOnDate = dao.getSetsByDate(dateStr)

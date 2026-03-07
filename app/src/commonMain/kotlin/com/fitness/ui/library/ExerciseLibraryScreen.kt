@@ -2,43 +2,38 @@ package com.fitness.ui.library
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.decode.GifDecoder
-import coil.decode.ImageDecoderDecoder
-import coil.request.ImageRequest
-import com.fitness.R
 import com.fitness.data.ExerciseProvider
 import com.fitness.model.Exercise
+import com.fitness.ui.components.ExerciseImage
+import com.fitness.util.getString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExerciseLibraryScreen(
     onExerciseClick: (Exercise) -> Unit
 ) {
-    val allLabelRes = R.string.category_all
-    var selectedCategoryRes by remember { mutableIntStateOf(allLabelRes) }
+    val allLabelKey = "category_all"
+    var selectedCategoryKey by remember { mutableStateOf(allLabelKey) }
 
-    val filteredExercises = if (selectedCategoryRes == allLabelRes) {
+    val filteredExercises = if (selectedCategoryKey == allLabelKey) {
         ExerciseProvider.exercises
     } else {
-        ExerciseProvider.exercises.filter { it.categoryRes == selectedCategoryRes }
+        ExerciseProvider.exercises.filter { it.categoryKey == selectedCategoryKey }
     }
 
     Scaffold(
@@ -47,7 +42,7 @@ fun ExerciseLibraryScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        stringResource(R.string.nav_library),
+                        getString("nav_library"),
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold
                     ) 
@@ -63,32 +58,37 @@ fun ExerciseLibraryScreen(
             val categories = ExerciseProvider.categories
 
             ScrollableTabRow(
-                selectedTabIndex = categories.indexOf(selectedCategoryRes).coerceAtLeast(0),
+                selectedTabIndex = categories.indexOf(selectedCategoryKey).coerceAtLeast(0),
                 edgePadding = 16.dp,
                 containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.primary,
                 divider = {},
                 indicator = { tabPositions ->
-                    Box(
-                        Modifier
-                            .tabIndicatorOffset(tabPositions[categories.indexOf(selectedCategoryRes).coerceAtLeast(0)])
-                            .height(3.dp)
-                            .padding(horizontal = 16.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = MaterialTheme.shapes.small
+                    if (categories.isNotEmpty()) {
+                        val selectedIndex = categories.indexOf(selectedCategoryKey).coerceAtLeast(0)
+                        if (selectedIndex < tabPositions.size) {
+                            Box(
+                                Modifier
+                                    .tabIndicatorOffset(tabPositions[selectedIndex])
+                                    .height(3.dp)
+                                    .padding(horizontal = 16.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.primary,
+                                        shape = MaterialTheme.shapes.small
+                                    )
                             )
-                    )
+                        }
+                    }
                 }
             ) {
-                categories.forEach { categoryRes ->
-                    val isSelected = selectedCategoryRes == categoryRes
+                categories.forEach { categoryKey ->
+                    val isSelected = selectedCategoryKey == categoryKey
                     Tab(
                         selected = isSelected,
-                        onClick = { selectedCategoryRes = categoryRes },
+                        onClick = { selectedCategoryKey = categoryKey },
                         text = { 
                             Text(
-                                text = stringResource(categoryRes),
+                                text = getString(categoryKey),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
@@ -145,19 +145,9 @@ fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data("file:///android_asset/${exercise.gifResPath}")
-                        .decoderFactory(
-                            if (android.os.Build.VERSION.SDK_INT >= 28) {
-                                ImageDecoderDecoder.Factory()
-                            } else {
-                                GifDecoder.Factory()
-                            }
-                        )
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = stringResource(exercise.nameRes),
+                ExerciseImage(
+                    gifResPath = exercise.gifResPath,
+                    contentDescription = getString(exercise.nameKey),
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize().padding(12.dp)
                 )
@@ -170,14 +160,14 @@ fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
             ) {
                 Column {
                     Text(
-                        text = stringResource(exercise.nameRes),
+                        text = getString(exercise.nameKey),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = stringResource(exercise.targetMuscleRes),
+                        text = getString(exercise.targetMuscleKey),
                         style = MaterialTheme.typography.labelSmall,
                         fontSize = 10.sp,
                         fontWeight = FontWeight.Bold,
