@@ -31,6 +31,10 @@
     <string name="logout">Logout</string>
     <string name="logout_success">Logged out</string>
     <string name="cloud_success">Cloud connected</string>
+    <string name="cloud_sync_title">Cloud Sync</string>
+    <string name="cloud_disconnected">Not Connected</string>
+    <string name="sync_now">Sync Now</string>
+    <string name="syncing">Syncing...</string>
     
     <!-- Workout Screen -->
     <string name="weight_kg">Weight (kg)</string>

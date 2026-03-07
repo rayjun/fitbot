@@ -1006,8 +1006,10 @@ string close_drawer
 string close_sheet
 string cloud_connect
 string cloud_connected
+string cloud_disconnected
 string cloud_failed
 string cloud_success
+string cloud_sync_title
 string common_google_play_services_enable_button
 string common_google_play_services_enable_text
 string common_google_play_services_enable_title
@@ -1199,6 +1201,8 @@ string settings_title
 string start_training
 string status_bar_notification_info_overflow
 string switch_role
+string sync_now
+string syncing
 string tab
 string template_percent
 string theme_dark

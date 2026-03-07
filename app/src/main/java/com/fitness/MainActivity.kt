@@ -3,6 +3,8 @@ package com.fitness
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.*
@@ -42,6 +44,14 @@ class MainActivity : AppCompatActivity() {
         setContent {
             val settingsViewModel: SettingsViewModel = hiltViewModel()
             val themeMode by settingsViewModel.themeMode.collectAsStateWithLifecycle()
+            val language by settingsViewModel.language.collectAsStateWithLifecycle()
+
+            // 核心修复：监听语言变化并实时应用到 Activity 句柄
+            LaunchedEffect(language) {
+                val appLocale: LocaleListCompat = LocaleListCompat.forLanguageTags(language)
+                AppCompatDelegate.setApplicationLocales(appLocale)
+            }
+
             val isDark = when (themeMode) {
                 "dark" -> true
                 "light" -> false
@@ -77,7 +87,7 @@ class MainActivity : AppCompatActivity() {
                             NavigationBar(
                                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                                 tonalElevation = 0.dp,
-                                windowInsets = WindowInsets(0, 0, 0, 0) // 移除底部安全区域内边距
+                                windowInsets = WindowInsets(0, 0, 0, 0)
                             ) {
                                 items.forEach { screen ->
                                     NavigationBarItem(

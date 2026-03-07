@@ -11,8 +11,10 @@
     <string name="category_all">All</string>
     <string name="cloud_connect">Connect Cloud</string>
     <string name="cloud_connected">Cloud Connected</string>
+    <string name="cloud_disconnected">Not Connected</string>
     <string name="cloud_failed">Connection Failed: %1$s</string>
     <string name="cloud_success">Cloud connected</string>
+    <string name="cloud_sync_title">Cloud Sync</string>
     <string name="create_routine">Create Weekly Routine</string>
     <string name="current_plan">Current Training Plan</string>
     <string name="current_tag">Current</string>
@@ -115,6 +117,8 @@
     <string name="settings_theme">Theme Mode</string>
     <string name="settings_title">Settings</string>
     <string name="start_training">Start Training</string>
+    <string name="sync_now">Sync Now</string>
+    <string name="syncing">Syncing...</string>
     <string name="theme_dark">Dark</string>
     <string name="theme_light">Light</string>
     <string name="theme_system">System Default</string>

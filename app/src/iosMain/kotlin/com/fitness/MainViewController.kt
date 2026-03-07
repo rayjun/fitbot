@@ -19,6 +19,9 @@ import com.fitness.model.Exercise
 import com.fitness.util.getString
 
 fun MainViewController() = ComposeUIViewController {
+    LaunchedEffect(Unit) {
+        println("FitBotDebug: App started. ExerciseProvider size: ${com.fitness.data.ExerciseProvider.exercises.size}")
+    }
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Library) }
     var previousScreen by remember { mutableStateOf<Screen?>(null) }
     var selectedExercise by remember { mutableStateOf<Exercise?>(null) }

@@ -12,8 +12,10 @@ string cat_shoulders
 string category_all
 string cloud_connect
 string cloud_connected
+string cloud_disconnected
 string cloud_failed
 string cloud_success
+string cloud_sync_title
 string create_routine
 string current_plan
 string current_tag
@@ -116,6 +118,8 @@ string settings_language
 string settings_theme
 string settings_title
 string start_training
+string sync_now
+string syncing
 string theme_dark
 string theme_light
 string theme_system

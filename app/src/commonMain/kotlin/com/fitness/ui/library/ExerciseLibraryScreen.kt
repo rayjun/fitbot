@@ -28,19 +28,17 @@ import com.fitness.util.getString
 fun ExerciseLibraryScreen(
     onExerciseClick: (Exercise) -> Unit
 ) {
-    LaunchedEffect(Unit) {
-        println("FitBotDebug: Total exercises in provider: ${ExerciseProvider.exercises.size}")
-    }
-    
     val allLabelKey = "category_all"
     var selectedCategoryKey by remember { mutableStateOf(allLabelKey) }
 
     val filteredExercises = remember(selectedCategoryKey) {
-        if (selectedCategoryKey == allLabelKey) {
+        val list = if (selectedCategoryKey == allLabelKey) {
             ExerciseProvider.exercises
         } else {
             ExerciseProvider.exercises.filter { it.categoryKey == selectedCategoryKey }
         }
+        println("FitBotDebug: Filtered list size for $selectedCategoryKey is ${list.size}")
+        list
     }
 
     Scaffold(
@@ -97,18 +95,37 @@ fun ExerciseLibraryScreen(
             }
 
             if (filteredExercises.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("Total exercises: ${ExerciseProvider.exercises.size}")
+                Box(modifier = Modifier.weight(1f).fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text("No exercises found", style = MaterialTheme.typography.titleMedium)
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text("Category: $selectedCategoryKey", style = MaterialTheme.typography.bodySmall)
+                        Text("Total available: ${ExerciseProvider.exercises.size}", style = MaterialTheme.typography.bodySmall)
+                        
+                        if (ExerciseProvider.exercises.isNotEmpty()) {
+                            Button(onClick = { selectedCategoryKey = allLabelKey }, modifier = Modifier.padding(top = 16.dp)) {
+                                Text("Reset Filter")
+                            }
+                        }
+                    }
                 }
             } else {
+                // Debug indicator to prove list is not empty
+                Text(
+                    text = "Displaying ${filteredExercises.size} exercises", 
+                    style = MaterialTheme.typography.labelSmall,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
+                )
+                
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
                     contentPadding = PaddingValues(16.dp),
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    items(filteredExercises, key = { it.id }) { exercise ->
+                    items(filteredExercises) { exercise ->
                         ExerciseGridItem(exercise, onExerciseClick)
                     }
                 }
@@ -125,7 +142,7 @@ fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
         onClick = { onExerciseClick(exercise) },
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.8f),
+            .height(200.dp), // Use fixed height instead of aspectRatio for stability
         shape = MaterialTheme.shapes.large,
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)),
         colors = CardDefaults.cardColors(

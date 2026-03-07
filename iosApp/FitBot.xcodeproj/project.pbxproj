@@ -14,7 +14,7 @@
 /* Begin PBXFileReference section */
 		6C84DF8908456403C23CA5B8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B98E413B8D8F64A7589E48F9 /* iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iosApp.swift; sourceTree = "<group>"; };
-		BD82E34348B64107BCD3AC30 /* FitBot.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = FitBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD82E34348B64107BCD3AC30 /* FitBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FitBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CFC4AADDE105FDFF628364B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -73,11 +73,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
-				TargetAttributes = {
-					6BE98B0655095954058B984E = {
-						DevelopmentTeam = "";
-					};
-				};
 			};
 			buildConfigurationList = 1D6F5641674950A97097ACE4 /* Build configuration list for PBXProject "FitBot" */;
 			developmentRegion = en;
@@ -117,9 +112,16 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 9;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = E9M73F85W6;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited) $(SRCROOT)/../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
+				"FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/../app/build/bin/iosArm64/releaseFramework",
+				);
+				"FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/../app/build/bin/iosSimulatorArm64/releaseFramework",
+				);
 				INFOPLIST_FILE = iosApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -127,7 +129,11 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.4.1;
-				OTHER_LDFLAGS = "$(inherited) -framework ComposeApp";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					ComposeApp,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.fitness.FitBot;
 				PRODUCT_NAME = FitBot;
 				SDKROOT = iphoneos;
@@ -258,9 +264,16 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 9;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = E9M73F85W6;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
-				FRAMEWORK_SEARCH_PATHS = "$(inherited) $(SRCROOT)/../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)";
+				"FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/../app/build/bin/iosArm64/debugFramework",
+				);
+				"FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]" = (
+					"$(inherited)",
+					"$(SRCROOT)/../app/build/bin/iosSimulatorArm64/debugFramework",
+				);
 				INFOPLIST_FILE = iosApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -268,7 +281,11 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 0.4.1;
-				OTHER_LDFLAGS = "$(inherited) -framework ComposeApp";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					"-framework",
+					ComposeApp,
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.fitness.FitBot;
 				PRODUCT_NAME = FitBot;
 				SDKROOT = iphoneos;
