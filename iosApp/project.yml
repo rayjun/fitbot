@@ -8,6 +8,9 @@ targets:
     deploymentTarget: "14.1"
     sources:
       - iosApp
+    dependencies:
+      - framework: ../app/build/bin/iosSimulatorArm64/debugFramework/ComposeApp.framework
+        embed: true
     settings:
       base:
         INFOPLIST_FILE: iosApp/Info.plist
@@ -16,6 +19,7 @@ targets:
         CURRENT_PROJECT_VERSION: 9
         PRODUCT_NAME: FitBot
         DEVELOPMENT_TEAM: ""
+        FRAMEWORK_SEARCH_PATHS: $(SRCROOT)/../app/build/bin/iosSimulatorArm64/debugFramework
 
 schemes:
   FitBot:
