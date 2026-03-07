@@ -10,6 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -101,14 +102,24 @@ fun FitBotNavHost(
         }
 
         composable(Screen.Plans.route) {
+            val planViewModel: com.fitness.ui.plans.PlanViewModel = hiltViewModel()
+            val workoutViewModel: com.fitness.ui.workout.WorkoutViewModel = hiltViewModel()
+            val routine by planViewModel.currentRoutine.collectAsStateWithLifecycle()
+            val setsToday by workoutViewModel.setsToday.collectAsStateWithLifecycle()
+            
+            val todayStr = java.time.LocalDate.now().toString()
+
             PlansScreen(
-                viewModel = hiltViewModel(),
-                workoutViewModel = hiltViewModel(),
+                currentRoutine = routine,
+                setsByDate = mapOf(todayStr to setsToday.map { (it as com.fitness.data.local.SetEntity).toModel() }),
                 onStartExercise = { exerciseId, date ->
                     navController.navigate(Screen.Workout.createRoute(exerciseId, date))
                 },
                 onDayClick = { date ->
                     navController.navigate(Screen.DayDetails.createRoute(date))
+                },
+                onUpdatePlanDay = { day, isRest, ex ->
+                    planViewModel.updatePlanDay(day, isRest, ex)
                 }
             )
         }
@@ -132,12 +143,18 @@ fun FitBotNavHost(
         }
 
         composable(Screen.Profile.route) {
+            val profileViewModel: com.fitness.ui.profile.ProfileViewModel = hiltViewModel()
+            val settingsViewModel: com.fitness.ui.profile.SettingsViewModel = hiltViewModel()
+            val heatmapData by profileViewModel.heatmapData.collectAsStateWithLifecycle()
+            val userQuote by settingsViewModel.userQuote.collectAsStateWithLifecycle()
             val hasDrivePermission = lastAccount?.let { GoogleSignIn.hasPermissions(it, driveScope) } ?: false
+            
             ProfileScreen(
-                viewModel = hiltViewModel(),
-                settingsViewModel = hiltViewModel(),
-                account = if (hasDrivePermission) lastAccount else null,
-                onLoginClick = { triggerAuthFlow() }, // 始终强制刷新流程
+                userQuote = userQuote,
+                heatmapData = heatmapData,
+                accountName = if (hasDrivePermission) lastAccount?.displayName else null,
+                accountPhotoUrl = if (hasDrivePermission) lastAccount?.photoUrl?.toString() else null,
+                onLoginClick = { triggerAuthFlow() },
                 onLogout = {
                     authManager.signOut {
                         lastAccount = null
@@ -146,14 +163,20 @@ fun FitBotNavHost(
                 },
                 onSettingsClick = {
                     navController.navigate(Screen.Settings.route)
-                }
+                },
+                onUpdateQuote = { settingsViewModel.setUserQuote(it) }
             )
         }
 
         composable(Screen.Settings.route) {
+            val settingsViewModel: com.fitness.ui.profile.SettingsViewModel = hiltViewModel()
+            val themeMode by settingsViewModel.themeMode.collectAsStateWithLifecycle()
+            val language by settingsViewModel.language.collectAsStateWithLifecycle()
             val hasDrivePermission = lastAccount?.let { GoogleSignIn.hasPermissions(it, driveScope) } ?: false
+            
             SettingsScreen(
-                settingsViewModel = hiltViewModel(),
+                themeMode = themeMode,
+                language = language,
                 isCloudConnected = lastAccount != null && hasDrivePermission,
                 isSyncing = isSyncing,
                 onSyncClick = {
@@ -162,10 +185,12 @@ fun FitBotNavHost(
                         workManager.enqueueUniqueWork("FullSync", ExistingWorkPolicy.REPLACE, syncRequest)
                         Toast.makeText(context, "Sync Started", Toast.LENGTH_SHORT).show()
                     } else {
-                        triggerAuthFlow() // 缺失权限时强制重新授权
+                        triggerAuthFlow()
                     }
                 },
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                onThemeChange = { settingsViewModel.setThemeMode(it) },
+                onLanguageChange = { settingsViewModel.setLanguage(it) }
             )
         }
 

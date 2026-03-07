@@ -8,29 +8,42 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ComposeUIViewController
 import com.fitness.ui.library.ExerciseLibraryScreen
-import com.fitness.ui.plans.DayDetailsScreen
+import com.fitness.ui.library.ExerciseDetailScreen
+import com.fitness.ui.plans.PlansScreen
+import com.fitness.ui.profile.ProfileScreen
+import com.fitness.ui.profile.SettingsScreen
 import com.fitness.ui.theme.FitnessTheme
 import com.fitness.ui.navigation.Screen
+import com.fitness.model.Exercise
 import com.fitness.util.getString
 
 fun MainViewController() = ComposeUIViewController {
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Library) }
+    var previousScreen by remember { mutableStateOf<Screen?>(null) }
+    var selectedExercise by remember { mutableStateOf<Exercise?>(null) }
     
-    FitnessTheme {
+    // Simple state for demo
+    var themeMode by remember { mutableStateOf("system") }
+    var language by remember { mutableStateOf("en") }
+    var userQuote by remember { mutableStateOf("Stay fit with FitBot") }
+
+    FitnessTheme(darkTheme = themeMode == "dark") {
         Scaffold(
             bottomBar = {
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.primary
-                ) {
-                    val items = listOf(Screen.Library, Screen.Plans, Screen.Profile)
-                    items.forEach { screen ->
-                        NavigationBarItem(
-                            icon = { Icon(screen.icon!!, contentDescription = null) },
-                            label = { Text(getString(screen.route)) },
-                            selected = currentScreen == screen,
-                            onClick = { currentScreen = screen }
-                        )
+                val items = listOf(Screen.Library, Screen.Plans, Screen.Profile)
+                if (items.any { it.route == currentScreen.route } && selectedExercise == null) {
+                    NavigationBar(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.primary
+                    ) {
+                        items.forEach { screen ->
+                            NavigationBarItem(
+                                icon = { Icon(screen.icon!!, contentDescription = null) },
+                                label = { Text(getString(screen.route)) },
+                                selected = currentScreen.route == screen.route,
+                                onClick = { currentScreen = screen }
+                            )
+                        }
                     }
                 }
             }
@@ -39,19 +52,56 @@ fun MainViewController() = ComposeUIViewController {
                 modifier = Modifier.fillMaxSize().padding(innerPadding),
                 color = MaterialTheme.colorScheme.background
             ) {
-                when (currentScreen) {
-                    Screen.Library -> {
-                        ExerciseLibraryScreen(onExerciseClick = { /* TODO: Detail */ })
+                if (selectedExercise != null) {
+                    ExerciseDetailScreen(
+                        exerciseId = selectedExercise!!.id,
+                        onBack = { selectedExercise = null }
+                    )
+                } else {
+                    when (currentScreen) {
+                        Screen.Library -> {
+                            ExerciseLibraryScreen(onExerciseClick = { selectedExercise = it })
+                        }
+                        Screen.Plans -> {
+                            PlansScreen(
+                                currentRoutine = emptyList(),
+                                setsByDate = emptyMap(),
+                                onStartExercise = { _, _ -> },
+                                onDayClick = { _ -> },
+                                onUpdatePlanDay = { _, _, _ -> }
+                            )
+                        }
+                        Screen.Profile -> {
+                            ProfileScreen(
+                                userQuote = userQuote,
+                                heatmapData = emptyMap(),
+                                accountName = "iOS User",
+                                accountPhotoUrl = null,
+                                onLoginClick = { },
+                                onLogout = { },
+                                onSettingsClick = { 
+                                    previousScreen = Screen.Profile
+                                    currentScreen = Screen.Settings 
+                                },
+                                onUpdateQuote = { userQuote = it }
+                            )
+                        }
+                        Screen.Settings -> {
+                            SettingsScreen(
+                                themeMode = themeMode,
+                                language = language,
+                                isCloudConnected = false,
+                                isSyncing = false,
+                                onSyncClick = { },
+                                onBack = { 
+                                    currentScreen = previousScreen ?: Screen.Profile 
+                                },
+                                onThemeChange = { themeMode = it },
+                                onLanguageChange = { language = it }
+                            )
+                        }
+                        else -> {}
                     }
-                    Screen.Plans -> {
-                        // Placeholder for Plans
-                        Text("Plans Screen Placeholder", modifier = Modifier.padding(16.dp))
-                    }
-                    Screen.Profile -> {
-                        // Placeholder for Profile
-                        Text("Profile Screen Placeholder", modifier = Modifier.padding(16.dp))
-                    }
-                    else -> {}
                 }
             }
         }

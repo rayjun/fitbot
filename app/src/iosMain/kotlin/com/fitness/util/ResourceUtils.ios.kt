@@ -42,7 +42,31 @@ private val stringMap = mapOf(
     "muscle_abs" to "Abs",
     "heatmap_title" to "Workout Heatmap",
     "login_drive" to "Login to Google Drive",
-    "logout" to "Logout"
+    "logout" to "Logout",
+    "settings_title" to "Settings",
+    "settings_general" to "General",
+    "settings_theme" to "Theme",
+    "settings_language" to "Language",
+    "theme_system" to "System",
+    "theme_light" to "Light",
+    "theme_dark" to "Dark",
+    "lang_zh" to "Chinese",
+    "lang_en" to "English",
+    "dialog_cancel" to "Cancel",
+    "save" to "Save",
+    "edit_quote" to "Edit Quote",
+    "cloud_sync_title" to "Cloud Sync",
+    "cloud_connected" to "Connected to Google Drive",
+    "cloud_disconnected" to "Not Connected",
+    "syncing" to "Syncing...",
+    "sync_now" to "Sync Now",
+    "rest_badge" to "Rest Day",
+    "no_plan" to "No Plan Scheduled",
+    "create_routine" to "Manage Routine",
+    "edit_day" to "Edit Day",
+    "current_tag" to "Today",
+    "detail_target_muscle" to "Target Muscle",
+    "detail_instructions" to "Instructions"
 )
 
 @Composable
