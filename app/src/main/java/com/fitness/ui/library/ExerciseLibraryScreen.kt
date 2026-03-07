@@ -115,26 +115,34 @@ fun ExerciseLibraryScreen(
 
 @Composable
 fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
+    val isDark = isSystemInDarkTheme()
+    
     Card(
         onClick = { onExerciseClick(exercise) },
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.85f),
+            .aspectRatio(0.82f),
         shape = MaterialTheme.shapes.large,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
         )
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize()
         ) {
+            // Image Container: Creates a "paper stage" for the white-bg GIF
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(12.dp),
+                    .padding(8.dp)
+                    .clip(MaterialTheme.shapes.medium)
+                    .background(
+                        if (isDark) Color(0xFFF0F2F5).copy(alpha = 0.9f) 
+                        else Color.White
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
@@ -151,15 +159,14 @@ fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
                         .build(),
                     contentDescription = stringResource(exercise.nameRes),
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize().padding(12.dp)
                 )
             }
             
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                    .padding(horizontal = 12.dp, vertical = 10.dp)
             ) {
                 Column {
                     Text(
@@ -173,7 +180,7 @@ fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
                         text = stringResource(exercise.targetMuscleRes),
                         style = MaterialTheme.typography.labelSmall,
                         fontSize = 10.sp,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary,
                         maxLines = 1
                     )
