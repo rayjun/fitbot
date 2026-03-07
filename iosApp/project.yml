@@ -9,9 +9,8 @@ targets:
     sources:
       - iosApp
     dependencies:
-      - framework: ../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)/ComposeApp.framework
-        embed: false # Gradle handles embedding and signing
-        link: true
+      - framework: ../app/build/bin/iosSimulatorArm64/debugFramework/ComposeApp.framework
+        embed: true
     settings:
       base:
         INFOPLIST_FILE: iosApp/Info.plist
@@ -20,13 +19,13 @@ targets:
         CURRENT_PROJECT_VERSION: 9
         PRODUCT_NAME: FitBot
         DEVELOPMENT_TEAM: ""
-        FRAMEWORK_SEARCH_PATHS: $(inherited) $(SRCROOT)/../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)
+        FRAMEWORK_SEARCH_PATHS: $(inherited) $(SRCROOT)/../app/build/bin/iosSimulatorArm64/debugFramework
         ENABLE_USER_SCRIPT_SANDBOXING: NO
     preBuildPhases:
       - name: "Compile Kotlin Multiplatform"
         script: |
           cd "$SRCROOT/.."
-          # This task automatically determines the target architecture and builds the framework
+          # This ensures the framework is updated before Swift compilation
           ./gradlew :app:embedAndSignAppleFrameworkForXcode
         executionPosition: beforeCompile
 
