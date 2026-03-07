@@ -17,15 +17,13 @@ targets:
         PRODUCT_NAME: FitBot
         DEVELOPMENT_TEAM: ""
         # DYNAMIC SEARCH PATHS:
-        # 1. The target path where embedAndSign places the framework
-        # 2. Architecture-specific fallbacks to ensure module map discovery during Swift compilation
+        # First priority: where embedAndSign task copies it
+        # Second priority: fallback to gradle bin directories using macros
         FRAMEWORK_SEARCH_PATHS:
           - $(inherited)
           - $(SRCROOT)/../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)
           - "$(SRCROOT)/../app/build/bin/$(PLATFORM_NAME)Arm64/debugFramework"
           - "$(SRCROOT)/../app/build/bin/$(PLATFORM_NAME)X64/debugFramework"
-        
-        # Link via library name to avoid hardcoded absolute paths in project.pbxproj
         OTHER_LDFLAGS: $(inherited) -framework ComposeApp
         ENABLE_USER_SCRIPT_SANDBOXING: NO
     preBuildPhases:
