@@ -9,8 +9,9 @@ targets:
     sources:
       - iosApp
     dependencies:
-      - framework: ../app/build/bin/iosSimulatorArm64/debugFramework/ComposeApp.framework
-        embed: true
+      - framework: ../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)/ComposeApp.framework
+        embed: false # Gradle handles embedding and signing
+        link: true
     settings:
       base:
         INFOPLIST_FILE: iosApp/Info.plist
@@ -19,19 +20,14 @@ targets:
         CURRENT_PROJECT_VERSION: 9
         PRODUCT_NAME: FitBot
         DEVELOPMENT_TEAM: ""
-        FRAMEWORK_SEARCH_PATHS: $(inherited) $(SRCROOT)/../app/build/bin/iosSimulatorArm64/debugFramework
-        # Add a flag to skip KMP build if needed
-        KMP_BUILD_ENABLED: "YES"
+        FRAMEWORK_SEARCH_PATHS: $(inherited) $(SRCROOT)/../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
     preBuildPhases:
       - name: "Compile Kotlin Multiplatform"
         script: |
-          if [ "$KMP_BUILD_ENABLED" = "NO" ]; then
-            echo "KMP Build disabled, skipping..."
-            exit 0
-          fi
           cd "$SRCROOT/.."
-          # Force the specific simulator build for now to ensure path consistency
-          ./gradlew :app:linkDebugFrameworkIosSimulatorArm64
+          # This task automatically determines the target architecture and builds the framework
+          ./gradlew :app:embedAndSignAppleFrameworkForXcode
         executionPosition: beforeCompile
 
 schemes:

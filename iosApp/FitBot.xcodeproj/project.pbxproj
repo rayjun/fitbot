@@ -14,7 +14,7 @@
 
 /* Begin PBXFileReference section */
 		6C84DF8908456403C23CA5B8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		816CC511C6A333A09FBB5306 /* ComposeApp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ComposeApp.framework; path = "../app/build/xcode-frameworks/Debug/iphonesimulator/ComposeApp.framework"; sourceTree = "<group>"; };
+		816CC511C6A333A09FBB5306 /* ComposeApp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ComposeApp.framework; path = "../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)/ComposeApp.framework"; sourceTree = "<group>"; };
 		B98E413B8D8F64A7589E48F9 /* iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iosApp.swift; sourceTree = "<group>"; };
 		BD82E34348B64107BCD3AC30 /* FitBot.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = FitBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CFC4AADDE105FDFF628364B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -144,7 +144,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited) $(SRCROOT)/../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
-					"\"../app/build/xcode-frameworks/Debug/iphonesimulator\"",
+					"\"../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)\"",
 				);
 				INFOPLIST_FILE = iosApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
@@ -287,7 +287,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited) $(SRCROOT)/../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
-					"\"../app/build/xcode-frameworks/Debug/iphonesimulator\"",
+					"\"../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)\"",
 				);
 				INFOPLIST_FILE = iosApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
