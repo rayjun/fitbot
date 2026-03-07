@@ -13,14 +13,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.fitness.data.ExerciseProvider
-import com.fitness.data.local.SetEntity
+import com.fitness.model.ExerciseSet
 import com.fitness.util.getString
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DayDetailsScreen(
     date: String,
-    sets: List<SetEntity>,
+    sets: List<ExerciseSet>,
     onBack: () -> Unit
 ) {
     Scaffold(

@@ -1,3 +1,4 @@
+@file:JvmName("ExerciseImageAndroid")
 package com.fitness.ui.components
 
 import androidx.compose.runtime.Composable
@@ -18,7 +19,7 @@ actual fun ExerciseImage(
 ) {
     AsyncImage(
         model = ImageRequest.Builder(LocalContext.current)
-            .data("file:///android_asset/compose-resources/files/$gifResPath")
+            .data("file:///android_asset/$gifResPath")
             .decoderFactory(
                 if (android.os.Build.VERSION.SDK_INT >= 28) {
                     ImageDecoderDecoder.Factory()

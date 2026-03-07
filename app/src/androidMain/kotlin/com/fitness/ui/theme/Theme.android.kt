@@ -1,3 +1,4 @@
+@file:JvmName("ThemeAndroid")
 package com.fitness.ui.theme
 
 import android.app.Activity

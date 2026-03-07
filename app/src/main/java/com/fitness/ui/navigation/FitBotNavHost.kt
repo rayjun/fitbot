@@ -21,7 +21,7 @@ import androidx.work.WorkManager
 import com.fitness.R
 import com.fitness.sync.AuthManager
 import com.fitness.sync.SyncWorker
-import com.fitness.data.local.SetEntity
+import com.fitness.util.toModel
 import com.fitness.ui.library.ExerciseDetailScreen
 import com.fitness.ui.library.ExerciseLibraryScreen
 import com.fitness.ui.plans.DayDetailsScreen
@@ -119,8 +119,10 @@ fun FitBotNavHost(
         ) { backStackEntry ->
             val date = backStackEntry.arguments?.getString("date") ?: ""
             val workoutViewModel: WorkoutViewModel = hiltViewModel()
-            val sets by produceState(initialValue = emptyList<SetEntity>(), date) {
-                workoutViewModel.getSetsByDateFlow(date).collect { value = it }
+            val sets by produceState(initialValue = emptyList<com.fitness.model.ExerciseSet>(), date) {
+                workoutViewModel.getSetsByDateFlow(date).collect { list ->
+                    value = list.map { it.toModel() }
+                }
             }
             DayDetailsScreen(
                 date = date,

@@ -5,6 +5,7 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("org.jetbrains.kotlin.plugin.serialization")
+    kotlin("native.cocoapods")
 }
 
 kotlin {
@@ -16,12 +17,16 @@ kotlin {
         }
     }
     
-    listOf(
-        iosX64(),
-        iosArm64(),
-        iosSimulatorArm64()
-    ).forEach { iosTarget ->
-        iosTarget.binaries.framework {
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
+    cocoapods {
+        summary = "FitBot Shared Module"
+        homepage = "https://github.com/rayjun/fitbot"
+        ios.deploymentTarget = "14.1"
+        podfile = project.file("../iosApp/Podfile")
+        framework {
             baseName = "ComposeApp"
             isStatic = true
         }
@@ -38,7 +43,6 @@ kotlin {
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
-                implementation("androidx.room:room-runtime:2.6.1")
             }
         }
         val androidMain by getting {
@@ -95,10 +99,14 @@ kotlin {
                 implementation("io.coil-kt:coil-gif:2.6.0")
             }
         }
+        val iosX64Main by getting
+        val iosArm64Main by getting
+        val iosSimulatorArm64Main by getting
         val iosMain by creating {
             dependsOn(commonMain)
-            dependencies {
-            }
+            iosX64Main.dependsOn(this)
+            iosArm64Main.dependsOn(this)
+            iosSimulatorArm64Main.dependsOn(this)
         }
     }
 }

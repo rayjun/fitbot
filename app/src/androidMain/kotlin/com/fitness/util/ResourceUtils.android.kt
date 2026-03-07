@@ -1,3 +1,4 @@
+@file:JvmName("ResourceUtilsAndroid")
 package com.fitness.util
 
 import androidx.compose.runtime.Composable

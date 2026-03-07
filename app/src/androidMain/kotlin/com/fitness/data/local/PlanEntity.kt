@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 )
 @Serializable
 data class PlanEntity(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
     val name: String,
     val exercisesJson: String, 
     val isCurrent: Boolean,
