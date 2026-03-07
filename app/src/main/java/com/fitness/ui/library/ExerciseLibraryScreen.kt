@@ -1,5 +1,7 @@
 package com.fitness.ui.library
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -9,6 +11,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -38,17 +42,20 @@ fun ExerciseLibraryScreen(
     }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = { 
                     Text(
-                        stringResource(R.string.nav_library),
-                        fontWeight = FontWeight.Bold
+                        stringResource(R.string.nav_library).uppercase(),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 2.sp
                     ) 
                 }, 
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background
                 )
             )
         }
@@ -59,25 +66,35 @@ fun ExerciseLibraryScreen(
             ScrollableTabRow(
                 selectedTabIndex = categories.indexOf(selectedCategoryRes).coerceAtLeast(0),
                 edgePadding = 16.dp,
-                containerColor = MaterialTheme.colorScheme.surface,
+                containerColor = Color.Transparent,
                 contentColor = MaterialTheme.colorScheme.primary,
                 divider = {},
                 indicator = { tabPositions ->
-                    TabRowDefaults.SecondaryIndicator(
-                        Modifier.tabIndicatorOffset(tabPositions[categories.indexOf(selectedCategoryRes).coerceAtLeast(0)]),
-                        color = MaterialTheme.colorScheme.primary
+                    Box(
+                        Modifier
+                            .tabIndicatorOffset(tabPositions[categories.indexOf(selectedCategoryRes).coerceAtLeast(0)])
+                            .height(4.dp)
+                            .padding(horizontal = 16.dp)
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer)
+                                ),
+                                shape = MaterialTheme.shapes.extraSmall
+                            )
                     )
                 }
             ) {
                 categories.forEach { categoryRes ->
+                    val isSelected = selectedCategoryRes == categoryRes
                     Tab(
-                        selected = selectedCategoryRes == categoryRes,
+                        selected = isSelected,
                         onClick = { selectedCategoryRes = categoryRes },
                         text = { 
                             Text(
                                 text = stringResource(categoryRes),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = if (selectedCategoryRes == categoryRes) FontWeight.Bold else FontWeight.Normal
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             ) 
                         }
                     )
@@ -85,11 +102,11 @@ fun ExerciseLibraryScreen(
             }
 
             LazyVerticalGrid(
-                columns = GridCells.Fixed(3),
+                columns = GridCells.Fixed(2),
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(12.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                contentPadding = PaddingValues(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 items(filteredExercises) { exercise ->
                     ExerciseGridItem(exercise, onExerciseClick)
@@ -101,14 +118,15 @@ fun ExerciseLibraryScreen(
 
 @Composable
 fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
-    ElevatedCard(
+    Card(
         onClick = { onExerciseClick(exercise) },
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(0.75f),
-        shape = MaterialTheme.shapes.medium,
-        colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            .aspectRatio(0.85f),
+        shape = MaterialTheme.shapes.large,
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
         )
     ) {
         Column(
@@ -119,7 +137,7 @@ fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(8.dp),
+                    .padding(12.dp),
                 contentAlignment = Alignment.Center
             ) {
                 AsyncImage(
@@ -140,22 +158,27 @@ fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
                 )
             }
             
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
             ) {
-                Column(modifier = Modifier.padding(6.dp)) {
+                Column {
                     Text(
                         text = stringResource(exercise.nameRes),
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        maxLines = 1
+                        maxLines = 1,
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = stringResource(exercise.targetMuscleRes),
+                        text = stringResource(exercise.targetMuscleRes).uppercase(),
                         style = MaterialTheme.typography.labelSmall,
-                        fontSize = 10.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp,
+                        color = MaterialTheme.colorScheme.primary,
                         maxLines = 1
                     )
                 }

@@ -57,12 +57,20 @@ fun PlansScreen(
     val weekOffset = pagerState.currentPage - initialPage
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.nav_plans), fontWeight = FontWeight.Bold) },
+                title = { 
+                    Text(
+                        stringResource(R.string.nav_plans).uppercase(), 
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.sp
+                    ) 
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(3.dp)
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background
                 )
             )
         }
@@ -96,22 +104,31 @@ fun WeekSelectorHeader(weekOffset: Int) {
         .plusWeeks(weekOffset.toLong())
     val sundayOfSelectedWeek = mondayOfSelectedWeek.plusDays(6)
     
-    val formatter = DateTimeFormatter.ofPattern("MM月dd日")
-    val rangeText = if (weekOffset == 0) {
-        stringResource(R.string.current_tag) + " (${mondayOfSelectedWeek.format(formatter)} - ${sundayOfSelectedWeek.format(formatter)})"
-    } else {
-        "${mondayOfSelectedWeek.format(formatter)} - ${sundayOfSelectedWeek.format(formatter)}"
-    }
+    val formatter = DateTimeFormatter.ofPattern("MM.dd")
+    val rangeText = "${mondayOfSelectedWeek.format(formatter)} - ${sundayOfSelectedWeek.format(formatter)}"
 
-    Surface(tonalElevation = 2.dp, modifier = Modifier.fillMaxWidth()) {
+    Surface(
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp).clip(RoundedCornerShape(12.dp))
+    ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
-            Text(text = rangeText, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
-            Icon(Icons.AutoMirrored.Filled.ArrowForward, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                if (weekOffset == 0) {
+                    Text(
+                        text = stringResource(R.string.current_tag).uppercase(),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Text(text = rangeText, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
+            }
+            Icon(Icons.AutoMirrored.Filled.ArrowForward, null, modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -163,38 +180,49 @@ fun InteractivePlanView(
             onDaySelect = { selectedDayOfWeek = it }
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(32.dp))
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.Bottom
         ) {
-            Text(
-                text = getDayName(selectedDayOfWeek) + " " + (if (weekOffset == 0 && selectedDayOfWeek == today.dayOfWeek.value) " (今天)" else ""),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.ExtraBold
-            )
+            Column {
+                Text(
+                    text = getDayName(selectedDayOfWeek).uppercase(),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Black
+                )
+                if (weekOffset == 0 && selectedDayOfWeek == today.dayOfWeek.value) {
+                    Text(
+                        text = "TODAY",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Black,
+                        color = MaterialTheme.colorScheme.primary,
+                        letterSpacing = 1.sp
+                    )
+                }
+            }
             TextButton(onClick = { onDayDetailsClick(selectedDateStr) }) {
-                Text("查看历史详情", fontSize = 12.sp)
+                Text("LOG HISTORY", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
             }
         }
 
-        HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         LazyColumn(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(bottom = 80.dp)
         ) {
             if (displayDay.isRest) {
                 item {
-                    Box(modifier = Modifier.fillParentMaxHeight(0.5f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    Box(modifier = Modifier.fillParentMaxHeight(0.4f).fillMaxWidth(), contentAlignment = Alignment.Center) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text("今天是休息日", color = Color.Gray, style = MaterialTheme.typography.bodyLarge)
+                            Text("REST DAY", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Black, letterSpacing = 2.sp)
                             if (isEditingAllowed) {
                                 TextButton(onClick = { showAddExerciseDialog = true }) {
-                                    Text("管理训练动作以取消休息")
+                                    Text("Add Exercises to Cancel Rest", style = MaterialTheme.typography.labelLarge)
                                 }
                             }
                         }
@@ -202,8 +230,8 @@ fun InteractivePlanView(
                 }
             } else if (displayDay.exercises.isEmpty()) {
                 item {
-                    Box(modifier = Modifier.fillParentMaxHeight(0.5f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                        Text("暂无动作安排", color = Color.Gray)
+                    Box(modifier = Modifier.fillParentMaxHeight(0.4f).fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Text("NO SCHEDULE", color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
                     }
                 }
             } else {
@@ -232,11 +260,12 @@ fun InteractivePlanView(
                     OutlinedButton(
                         onClick = { showAddExerciseDialog = true },
                         modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
+                        shape = RoundedCornerShape(12.dp),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f))
                     ) {
-                        Icon(Icons.Default.Add, null)
+                        Icon(Icons.Default.Add, null, modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(if (displayDay.isRest) "管理训练动作" else "管理训练动作")
+                        Text("MANAGE EXERCISES", fontWeight = FontWeight.Black, letterSpacing = 1.sp)
                     }
                 }
             }
@@ -247,19 +276,19 @@ fun InteractivePlanView(
         val exercise = ExerciseProvider.exercises.find { it.id == exerciseToDelete!!.id }
         AlertDialog(
             onDismissRequest = { exerciseToDelete = null },
-            title = { Text("确认删除动作") },
-            text = { Text("确定要将“${exercise?.let { stringResource(it.nameRes) } ?: exerciseToDelete!!.id}”从当天的计划中移除吗？") },
+            title = { Text("REMOVE EXERCISE", fontWeight = FontWeight.Black) },
+            text = { Text("Are you sure you want to remove “${exercise?.let { stringResource(it.nameRes) } ?: exerciseToDelete!!.id}” from today's plan?") },
             confirmButton = {
                 TextButton(onClick = {
                     val updatedExercises = displayDay.exercises.filter { it.id != exerciseToDelete!!.id }
                     viewModel.updatePlanDay(selectedDayOfWeek, updatedExercises.isEmpty(), updatedExercises)
                     exerciseToDelete = null
                 }) {
-                    Text("删除", color = MaterialTheme.colorScheme.error)
+                    Text("REMOVE", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Black)
                 }
             },
             dismissButton = {
-                TextButton(onClick = { exerciseToDelete = null }) { Text("取消") }
+                TextButton(onClick = { exerciseToDelete = null }) { Text("CANCEL") }
             }
         )
     }
@@ -285,11 +314,11 @@ fun WeeklyProgressBarNavigation(
     workoutViewModel: WorkoutViewModel,
     onDaySelect: (Int) -> Unit
 ) {
-    val days = listOf("一", "二", "三", "四", "五", "六", "日")
+    val days = listOf("M", "T", "W", "T", "F", "S", "S")
     val today = LocalDate.now()
     val todayDayOfWeek = today.dayOfWeek.value
 
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         (1..7).forEach { dayNum ->
             val dayPlan = currentRoutine.find { it.dayOfWeek == dayNum }
             val isRest = dayPlan?.isRest ?: (dayNum == 3 || dayNum == 7)
@@ -309,29 +338,41 @@ fun WeeklyProgressBarNavigation(
             val isSelected = selectedDayOfWeek == dayNum
             val isActualToday = weekOffset == 0 && dayNum == todayDayOfWeek
 
-            val color = when {
-                isSelected -> MaterialTheme.colorScheme.primary
-                isRest -> Color.Transparent
-                isFullyCompleted -> MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                isActualToday -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                else -> MaterialTheme.colorScheme.surfaceVariant
-            }
-            val borderColor = if (isSelected) MaterialTheme.colorScheme.primary else if (isRest) MaterialTheme.colorScheme.outline else Color.Transparent
-
-            Box(
-                contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(color)
-                    .border(2.dp, borderColor, CircleShape)
-                    .clickable { onDaySelect(dayNum) }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.clickable { onDaySelect(dayNum) }
             ) {
                 Text(
                     text = days[dayNum - 1],
-                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface,
-                    fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Bold
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Spacer(modifier = Modifier.height(8.dp))
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(38.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(
+                            when {
+                                isSelected -> MaterialTheme.colorScheme.primary
+                                isActualToday -> MaterialTheme.colorScheme.primaryContainer
+                                else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            }
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else if (isRest) MaterialTheme.colorScheme.outline else Color.Transparent,
+                            shape = RoundedCornerShape(10.dp)
+                        )
+                ) {
+                    if (isFullyCompleted && !isRest) {
+                        Icon(Icons.Default.CheckCircle, null, modifier = Modifier.size(16.dp), tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary)
+                    } else if (isRest) {
+                        Box(modifier = Modifier.size(4.dp).clip(CircleShape).background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)))
+                    }
+                }
             }
         }
     }
@@ -350,10 +391,12 @@ fun ExerciseActionCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isFinished) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f) 
-                             else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+            containerColor = if (isFinished) MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.2f) 
+                             else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        ),
+        border = if (isFinished) BorderStroke(1.dp, MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)) else null
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -363,29 +406,51 @@ fun ExerciseActionCard(
                 modifier = Modifier.weight(1f).clickable(enabled = isTrainingAllowed) { onStart() }
             ) {
                 Text(
+                    stringResource(exercise.targetMuscleRes).uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.primary,
+                    letterSpacing = 1.sp
+                )
+                Text(
                     stringResource(exercise.nameRes), 
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = if (isFinished) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                Text(
-                    "${stringResource(exercise.targetMuscleRes)} • $completedCount / ${planned.targetSets} 组",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    LinearProgressIndicator(
+                        progress = { (completedCount.toFloat() / planned.targetSets).coerceIn(0f, 1f) },
+                        modifier = Modifier.width(60.dp).height(4.dp).clip(CircleShape),
+                        color = if (isFinished) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        "$completedCount / ${planned.targetSets} SETS",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
             
             if (isFinished) {
-                Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(horizontal = 8.dp))
+                Icon(Icons.Default.CheckCircle, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(28.dp))
             } else if (isTrainingAllowed) {
-                IconButton(onClick = onStart) {
-                    Icon(Icons.Default.PlayArrow, null, tint = MaterialTheme.colorScheme.primary)
+                FilledIconButton(
+                    onClick = onStart,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primary)
+                ) {
+                    Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(20.dp))
                 }
             }
 
             if (isEditable) {
-                IconButton(onClick = onDelete) {
-                    Icon(Icons.Default.DeleteOutline, null, tint = MaterialTheme.colorScheme.error.copy(alpha = 0.6f))
+                IconButton(onClick = onDelete, modifier = Modifier.padding(start = 4.dp)) {
+                    Icon(Icons.Default.DeleteOutline, null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
                 }
             }
         }
@@ -400,7 +465,6 @@ fun QuickAddExerciseDialog(
     onSave: (List<PlannedExercise>, Boolean) -> Unit
 ) {
     var isRest by remember { mutableStateOf(isInitiallyRest) }
-    // 使用 Map 存储 ID 到 PlannedExercise 的映射，方便管理组数
     val selectedMap = remember { 
         mutableStateMapOf<String, Int>().apply {
             currentExercises.forEach { put(it.id, it.targetSets) }
@@ -409,7 +473,7 @@ fun QuickAddExerciseDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("管理训练动作") },
+        title = { Text("MANAGE EXERCISES", fontWeight = FontWeight.Black) },
         text = {
             Column {
                 Row(
@@ -417,12 +481,12 @@ fun QuickAddExerciseDialog(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text("设为休息日", fontWeight = FontWeight.Bold)
+                    Text("SET AS REST DAY", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Bold)
                     Switch(checked = isRest, onCheckedChange = { isRest = it })
                 }
                 
                 if (!isRest) {
-                    HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp))
+                    HorizontalDivider(modifier = Modifier.padding(bottom = 8.dp), color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f))
                     LazyColumn(modifier = Modifier.heightIn(max = 350.dp)) {
                         items(ExerciseProvider.exercises) { exercise ->
                             val currentSets = selectedMap[exercise.id]
@@ -431,14 +495,14 @@ fun QuickAddExerciseDialog(
                             Row(
                                 modifier = Modifier.fillMaxWidth().clickable { 
                                     if (isChecked) selectedMap.remove(exercise.id) else selectedMap[exercise.id] = 3
-                                }.padding(vertical = 4.dp),
+                                }.padding(vertical = 6.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Checkbox(checked = isChecked, onCheckedChange = null)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Column(modifier = Modifier.weight(1f)) {
-                                    Text(stringResource(exercise.nameRes), fontWeight = FontWeight.Medium)
-                                    Text(stringResource(exercise.targetMuscleRes), style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                                    Text(stringResource(exercise.nameRes), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold)
+                                    Text(stringResource(exercise.targetMuscleRes).uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Black)
                                 }
                                 
                                 if (isChecked) {
@@ -448,11 +512,12 @@ fun QuickAddExerciseDialog(
                                                 val s = selectedMap[exercise.id] ?: 3
                                                 if (s > 1) selectedMap[exercise.id] = s - 1
                                             },
-                                            modifier = Modifier.size(32.dp)
-                                        ) { Icon(Icons.Default.Remove, null, modifier = Modifier.size(16.dp)) }
+                                            modifier = Modifier.size(28.dp)
+                                        ) { Icon(Icons.Default.Remove, null, modifier = Modifier.size(14.dp)) }
                                         Text(
                                             text = "${selectedMap[exercise.id]}", 
-                                            style = MaterialTheme.typography.bodyMedium,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            fontWeight = FontWeight.Black,
                                             modifier = Modifier.padding(horizontal = 4.dp)
                                         )
                                         IconButton(
@@ -460,8 +525,8 @@ fun QuickAddExerciseDialog(
                                                 val s = selectedMap[exercise.id] ?: 3
                                                 selectedMap[exercise.id] = s + 1
                                             },
-                                            modifier = Modifier.size(32.dp)
-                                        ) { Icon(Icons.Default.Add, null, modifier = Modifier.size(16.dp)) }
+                                            modifier = Modifier.size(28.dp)
+                                        ) { Icon(Icons.Default.Add, null, modifier = Modifier.size(14.dp)) }
                                     }
                                 }
                             }
@@ -471,13 +536,16 @@ fun QuickAddExerciseDialog(
             }
         },
         confirmButton = {
-            Button(onClick = { 
-                val updatedList = selectedMap.map { PlannedExercise(it.key, it.value) }
-                onSave(updatedList, isRest) 
-            }) { Text("保存修改") }
+            Button(
+                onClick = { 
+                    val updatedList = selectedMap.map { PlannedExercise(it.key, it.value) }
+                    onSave(updatedList, isRest) 
+                },
+                shape = RoundedCornerShape(12.dp)
+            ) { Text("SAVE CHANGES", fontWeight = FontWeight.Black) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.dialog_cancel)) }
+            TextButton(onClick = onDismiss) { Text("CANCEL") }
         }
     )
 }

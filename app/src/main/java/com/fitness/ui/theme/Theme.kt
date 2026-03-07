@@ -15,20 +15,22 @@ import androidx.core.view.WindowCompat
 private val DarkColorScheme = darkColorScheme(
     primary = SportyOrange,
     onPrimary = PureWhite,
-    primaryContainer = OnSportyOrangeContainer,
-    onPrimaryContainer = SportyOrangeContainer,
+    primaryContainer = SportyOrangeContainer,
+    onPrimaryContainer = OnSportyOrangeContainer,
     
-    // Tab selection color
-    secondaryContainer = SportyOrange,
-    onSecondaryContainer = PureWhite,
+    secondary = CoolGray,
+    onSecondary = PureWhite,
+    secondaryContainer = Graphite,
+    onSecondaryContainer = CoolGray,
     
-    background = PureBlack,
-    surface = PureBlack,
-    surfaceVariant = DarkGray,
+    background = DeepSpace,
+    surface = DeepSpace,
+    surfaceVariant = MidnightSurface,
     onBackground = PureWhite,
     onSurface = PureWhite,
-    onSurfaceVariant = Color.Gray,
+    onSurfaceVariant = CoolGray,
     
+    outline = Graphite,
     error = SportyRed,
     tertiary = SuccessGreen,
     tertiaryContainer = SuccessGreenContainer
@@ -38,19 +40,21 @@ private val LightColorScheme = lightColorScheme(
     primary = SportyOrange,
     onPrimary = PureWhite,
     primaryContainer = SportyOrangeContainer,
-    onPrimaryContainer = OnSportyOrangeContainer,
+    onPrimaryContainer = SportyOrange,
     
-    // Tab selection color
-    secondaryContainer = SportyOrange,
-    onSecondaryContainer = PureWhite,
+    secondary = WarmGray,
+    onSecondary = PureWhite,
+    secondaryContainer = GhostWhite,
+    onSecondaryContainer = WarmGray,
     
-    background = PureWhite,
+    background = SoftCloud,
     surface = PureWhite,
-    surfaceVariant = LightGray,
-    onBackground = PureBlack,
-    onSurface = PureBlack,
-    onSurfaceVariant = Color.Gray,
+    surfaceVariant = GhostWhite,
+    onBackground = DeepSpace,
+    onSurface = DeepSpace,
+    onSurfaceVariant = WarmGray,
 
+    outline = GhostWhite,
     error = SportyRed,
     tertiary = SuccessGreen,
     tertiaryContainer = SuccessGreenContainer
@@ -75,8 +79,8 @@ fun FitnessTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-            window.statusBarColor = colorScheme.surface.toArgb()
-            window.navigationBarColor = colorScheme.surface.toArgb()
+            window.statusBarColor = colorScheme.background.toArgb()
+            window.navigationBarColor = colorScheme.background.toArgb()
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
             WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
         }
