@@ -20,6 +20,7 @@ import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.fitness.R
+import com.fitness.model.PlannedExercise
 import com.fitness.sync.AuthManager
 import com.fitness.sync.SyncWorker
 import com.fitness.util.toModel

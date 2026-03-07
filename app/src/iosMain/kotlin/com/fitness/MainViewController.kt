@@ -1,13 +1,16 @@
 package com.fitness
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ComposeUIViewController
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.core.okio.OkioStorage
+import androidx.datastore.core.okio.OkioSerializer
 import com.fitness.ui.library.ExerciseLibraryScreen
 import com.fitness.ui.library.ExerciseDetailScreen
 import com.fitness.ui.plans.PlansScreen
@@ -16,20 +19,63 @@ import com.fitness.ui.profile.SettingsScreen
 import com.fitness.ui.theme.FitnessTheme
 import com.fitness.ui.navigation.Screen
 import com.fitness.model.Exercise
+import com.fitness.data.DataStoreRepository
+import com.fitness.auth.AuthManager
 import com.fitness.util.getString
+import kotlinx.coroutines.launch
+import okio.Path.Companion.toPath
+import okio.FileSystem
+import platform.Foundation.NSDocumentDirectory
+import platform.Foundation.NSFileManager
+import platform.Foundation.NSURL
+import platform.Foundation.NSUserDomainMask
+import kotlinx.cinterop.ExperimentalForeignApi
 
+@OptIn(ExperimentalForeignApi::class)
 fun MainViewController() = ComposeUIViewController {
-    LaunchedEffect(Unit) {
-        println("FitBotDebug: App started. ExerciseProvider size: ${com.fitness.data.ExerciseProvider.exercises.size}")
+    val scope = rememberCoroutineScope()
+    
+    // --- Data Layer Initialization (iOS) ---
+    val repository = remember {
+        val fileManager = NSFileManager.defaultManager
+        val documentDirectory: NSURL? = fileManager.URLForDirectory(
+            directory = NSDocumentDirectory,
+            inDomain = NSUserDomainMask,
+            appropriateForURL = null,
+            create = false,
+            error = null
+        )
+        val path = (documentDirectory?.path ?: "") + "/fitness_settings.preferences_pb"
+        
+        val dataStore = PreferenceDataStoreFactory.create(
+            storage = OkioStorage(
+                fileSystem = FileSystem.SYSTEM,
+                serializer = androidx.datastore.preferences.core.PreferencesSerializer,
+                producePath = { path.toPath() }
+            )
+        )
+        DataStoreRepository(dataStore)
     }
+    
+    val authManager = remember { AuthManager() }
+    
+    // --- UI State ---
     var currentScreen by remember { mutableStateOf<Screen>(Screen.Library) }
     var previousScreen by remember { mutableStateOf<Screen?>(null) }
     var selectedExercise by remember { mutableStateOf<Exercise?>(null) }
     
-    // Simple state for demo
+    // Observable Logic Data
+    val routine by repository.getCurrentRoutine().collectAsState(initial = emptyList())
+    val userProfile by authManager.currentUser.collectAsState()
+    val isSyncing by authManager.isSyncing.collectAsState()
+    
+    // Settings State
     var themeMode by remember { mutableStateOf("system") }
     var language by remember { mutableStateOf("en") }
     var userQuote by remember { mutableStateOf("Stay fit with FitBot") }
+
+    val todayStr = "2026-03-07"
+    val setsToday by repository.getSetsByDate(todayStr).collectAsState(initial = emptyList())
 
     val isDark = when (themeMode) {
         "dark" -> true
@@ -41,7 +87,6 @@ fun MainViewController() = ComposeUIViewController {
         Scaffold(
             bottomBar = {
                 val items = listOf(Screen.Library, Screen.Plans, Screen.Profile)
-                // Only show bottom bar on main screens and when not in detail view
                 if (items.any { it.route == currentScreen.route } && selectedExercise == null) {
                     NavigationBar(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -75,24 +120,32 @@ fun MainViewController() = ComposeUIViewController {
                         }
                         Screen.Plans -> {
                             PlansScreen(
-                                currentRoutine = emptyList(),
-                                setsByDate = emptyMap(),
-                                onStartExercise = { _, _ -> },
-                                onDayClick = { _ -> },
-                                onUpdatePlanDay = { _, _, _ -> }
+                                currentRoutine = routine,
+                                setsByDate = mapOf(todayStr to setsToday),
+                                onStartExercise = { exId, _ ->
+                                    val ex = com.fitness.data.ExerciseProvider.exercises.find { it.id == exId }
+                                    if (ex != null) selectedExercise = ex
+                                },
+                                onDayClick = { /* TODO: Day Details */ },
+                                onUpdatePlanDay = { day, isRest, exList ->
+                                    scope.launch {
+                                        repository.updateRoutineDay(day, isRest, exList)
+                                    }
+                                }
                             )
                         }
                         Screen.Profile -> {
                             ProfileScreen(
                                 userQuote = userQuote,
                                 heatmapData = emptyMap(),
-                                accountName = "iOS User",
-                                accountPhotoUrl = null,
+                                accountName = userProfile?.name,
+                                accountPhotoUrl = userProfile?.photoUrl,
                                 onLoginClick = { 
-                                    // Mock Login
-                                    // In a real app, this would trigger the iOS Google Sign In
+                                    scope.launch { authManager.signIn() }
                                 },
-                                onLogout = { },
+                                onLogout = { 
+                                    scope.launch { authManager.signOut() }
+                                },
                                 onSettingsClick = { 
                                     previousScreen = Screen.Profile
                                     currentScreen = Screen.Settings 
@@ -104,8 +157,8 @@ fun MainViewController() = ComposeUIViewController {
                             SettingsScreen(
                                 themeMode = themeMode,
                                 language = language,
-                                isCloudConnected = false,
-                                isSyncing = false,
+                                isCloudConnected = userProfile != null,
+                                isSyncing = isSyncing,
                                 onSyncClick = { },
                                 onBack = { 
                                     currentScreen = previousScreen ?: Screen.Profile 
