@@ -5,7 +5,6 @@ plugins {
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("org.jetbrains.kotlin.plugin.serialization")
-    kotlin("native.cocoapods")
 }
 
 kotlin {
@@ -17,18 +16,12 @@ kotlin {
         }
     }
     
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
-
-    cocoapods {
-        name = "ComposeApp"
-        summary = "FitBot Shared Module"
-        homepage = "https://github.com/rayjun/fitbot"
-        version = "0.4.1"
-        ios.deploymentTarget = "14.1"
-        podfile = project.file("../iosApp/Podfile")
-        framework {
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach { iosTarget ->
+        iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
         }
@@ -190,4 +183,3 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
-

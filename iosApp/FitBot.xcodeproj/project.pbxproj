@@ -7,27 +7,25 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2F741753342700D2EE05F430 /* Pods_FitBot.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6F0E8A2261A03EDA3A08451A /* Pods_FitBot.framework */; };
 		3A27F77C781E3C5ED69BDCD3 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C84DF8908456403C23CA5B8 /* ContentView.swift */; };
+		769A6219A7453D5B3B2DF1EB /* ComposeApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 816CC511C6A333A09FBB5306 /* ComposeApp.framework */; };
 		98E27E8818ABAFF9733BDCF0 /* iosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B98E413B8D8F64A7589E48F9 /* iosApp.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		3BB64314FF7852D52453DC87 /* Pods-FitBot.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FitBot.debug.xcconfig"; path = "Target Support Files/Pods-FitBot/Pods-FitBot.debug.xcconfig"; sourceTree = "<group>"; };
 		6C84DF8908456403C23CA5B8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		6F0E8A2261A03EDA3A08451A /* Pods_FitBot.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FitBot.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		A207CA6839CB0AE4D117EEAA /* Pods-FitBot.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FitBot.release.xcconfig"; path = "Target Support Files/Pods-FitBot/Pods-FitBot.release.xcconfig"; sourceTree = "<group>"; };
+		816CC511C6A333A09FBB5306 /* ComposeApp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ComposeApp.framework; path = "../app/build/xcode-frameworks/Debug/iphonesimulator/ComposeApp.framework"; sourceTree = "<group>"; };
 		B98E413B8D8F64A7589E48F9 /* iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iosApp.swift; sourceTree = "<group>"; };
-		BD82E34348B64107BCD3AC30 /* FitBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FitBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD82E34348B64107BCD3AC30 /* FitBot.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = FitBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CFC4AADDE105FDFF628364B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		B78CE92550C4E2D16FE14D98 /* Frameworks */ = {
+		DD261FC07AF7B039C8431D00 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2F741753342700D2EE05F430 /* Pods_FitBot.framework in Frameworks */,
+				769A6219A7453D5B3B2DF1EB /* ComposeApp.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -42,21 +40,12 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		21A9FF025744A4CEBD147E34 /* Frameworks */ = {
+		55501B1AE0F2E2D566ED1557 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				6F0E8A2261A03EDA3A08451A /* Pods_FitBot.framework */,
+				816CC511C6A333A09FBB5306 /* ComposeApp.framework */,
 			);
 			name = Frameworks;
-			sourceTree = "<group>";
-		};
-		689CF0CAD6AEBCEDAFF158E7 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				3BB64314FF7852D52453DC87 /* Pods-FitBot.debug.xcconfig */,
-				A207CA6839CB0AE4D117EEAA /* Pods-FitBot.release.xcconfig */,
-			);
-			path = Pods;
 			sourceTree = "<group>";
 		};
 		972C10637CF8F487F07E068F /* iosApp */ = {
@@ -73,9 +62,8 @@
 			isa = PBXGroup;
 			children = (
 				972C10637CF8F487F07E068F /* iosApp */,
+				55501B1AE0F2E2D566ED1557 /* Frameworks */,
 				21928D6364B6B2644B43DF51 /* Products */,
-				689CF0CAD6AEBCEDAFF158E7 /* Pods */,
-				21A9FF025744A4CEBD147E34 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -86,16 +74,16 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = B9E17100DCDBF693718EC5C9 /* Build configuration list for PBXNativeTarget "FitBot" */;
 			buildPhases = (
-				5014C5BFB4AAA3C53C05E36F /* [CP] Check Pods Manifest.lock */,
 				0CC81F3CA094F87399B8E863 /* Sources */,
-				B78CE92550C4E2D16FE14D98 /* Frameworks */,
-				8595D7682AD27C712CBEBC3E /* [CP] Copy Pods Resources */,
+				DD261FC07AF7B039C8431D00 /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = FitBot;
+			packageProductDependencies = (
+			);
 			productName = FitBot;
 			productReference = BD82E34348B64107BCD3AC30 /* FitBot.app */;
 			productType = "com.apple.product-type.application";
@@ -108,6 +96,11 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					6BE98B0655095954058B984E = {
+						DevelopmentTeam = "";
+					};
+				};
 			};
 			buildConfigurationList = 1D6F5641674950A97097ACE4 /* Build configuration list for PBXProject "FitBot" */;
 			developmentRegion = en;
@@ -128,52 +121,6 @@
 		};
 /* End PBXProject section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		5014C5BFB4AAA3C53C05E36F /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-FitBot-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		8595D7682AD27C712CBEBC3E /* [CP] Copy Pods Resources */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FitBot/Pods-FitBot-resources-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
-			);
-			name = "[CP] Copy Pods Resources";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-FitBot/Pods-FitBot-resources-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-FitBot/Pods-FitBot-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXSourcesBuildPhase section */
 		0CC81F3CA094F87399B8E863 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -189,12 +136,16 @@
 /* Begin XCBuildConfiguration section */
 		2A8765A23E862ED3511C5360 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = A207CA6839CB0AE4D117EEAA /* Pods-FitBot.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 9;
-				DEVELOPMENT_TEAM = E9M73F85W6;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited) $(SRCROOT)/../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
+					"\"../app/build/xcode-frameworks/Debug/iphonesimulator\"",
+				);
 				INFOPLIST_FILE = iosApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -328,12 +279,16 @@
 		};
 		DB4BEFDB0CCA3B48F7BEDF2A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3BB64314FF7852D52453DC87 /* Pods-FitBot.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 9;
-				DEVELOPMENT_TEAM = E9M73F85W6;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited) $(SRCROOT)/../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)",
+					"\"../app/build/xcode-frameworks/Debug/iphonesimulator\"",
+				);
 				INFOPLIST_FILE = iosApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.1;
 				LD_RUNPATH_SEARCH_PATHS = (

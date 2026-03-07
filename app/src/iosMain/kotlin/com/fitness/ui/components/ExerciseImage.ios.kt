@@ -1,16 +1,21 @@
 package com.fitness.ui.components
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.*
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import org.jetbrains.compose.resources.ExperimentalResourceApi
-import org.jetbrains.compose.resources.painterResource
 
-@OptIn(ExperimentalResourceApi::class)
+/**
+ * iOS implementation of ExerciseImage.
+ * Uses a placeholder because dynamic string-based resource loading is not 
+ * directly compatible with the type-safe Compose Resources system in CMP 1.6+.
+ */
 @Composable
 actual fun ExerciseImage(
     gifResPath: String,
@@ -19,18 +24,15 @@ actual fun ExerciseImage(
     contentScale: ContentScale
 ) {
     Box(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.LightGray.copy(alpha = 0.2f)),
         contentAlignment = Alignment.Center
     ) {
-        // Compose Multiplatform resources 1.6.11 supports loading files from commonMain/composeResources/files/
-        // We use the generated Res class if available, or painterResource with the path.
-        // For animated GIFs on iOS, standard painterResource might only show the first frame.
-        // But it's better than a text placeholder.
-        Image(
-            painter = painterResource(gifResPath),
-            contentDescription = contentDescription,
-            contentScale = contentScale,
-            modifier = Modifier.fillMaxSize()
+        Text(
+            text = "EXERCISE GIF",
+            style = MaterialTheme.typography.labelSmall,
+            color = Color.Gray
         )
     }
 }

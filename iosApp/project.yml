@@ -9,8 +9,9 @@ targets:
     sources:
       - iosApp
     dependencies:
-      - framework: ../app/build/bin/iosSimulatorArm64/debugFramework/ComposeApp.framework
-        embed: true
+      - framework: ../app/build/xcode-frameworks/Debug/iphonesimulator/ComposeApp.framework
+        embed: false # The script handles embedding
+        link: true
     settings:
       base:
         INFOPLIST_FILE: iosApp/Info.plist
@@ -19,7 +20,14 @@ targets:
         CURRENT_PROJECT_VERSION: 9
         PRODUCT_NAME: FitBot
         DEVELOPMENT_TEAM: ""
-        FRAMEWORK_SEARCH_PATHS: $(SRCROOT)/../app/build/bin/iosSimulatorArm64/debugFramework
+        FRAMEWORK_SEARCH_PATHS: $(inherited) $(SRCROOT)/../app/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+    preBuildPhases:
+      - name: Compile KMP Framework
+        script: |
+          cd "$SRCROOT/.."
+          ./gradlew :app:embedAndSignAppleFrameworkForXcode
+        executionPosition: beforeCompile
 
 schemes:
   FitBot:

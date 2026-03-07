@@ -1,7 +1,0 @@
-project 'FitBot.xcodeproj'
-
-target 'FitBot' do
-  use_frameworks!
-  platform :ios, '14.1'
-  pod 'ComposeApp', :path => '../app'
-end
