@@ -127,6 +127,14 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"
     }
+
+    sourceSets["main"].apply {
+        manifest.srcFile("src/main/AndroidManifest.xml")
+        java.srcDirs("src/main/java")
+        res.srcDirs("src/main/res")
+        assets.srcDirs("src/main/assets")
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
