@@ -48,14 +48,25 @@ fun ProfileScreen(
     var showQuoteDialog by remember { mutableStateOf(false) }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = { 
             TopAppBar(
-                title = { Text(stringResource(R.string.nav_profile), fontWeight = FontWeight.Bold) },
+                title = { 
+                    Text(
+                        stringResource(R.string.nav_profile), 
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
+                    ) 
+                },
                 actions = {
                     IconButton(onClick = onSettingsClick) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings")
+                        Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background,
+                    scrolledContainerColor = MaterialTheme.colorScheme.background
+                )
             ) 
         }
     ) { padding ->
@@ -66,16 +77,30 @@ fun ProfileScreen(
                 .padding(16.dp)
         ) {
             // User Info Card
-            Card(modifier = Modifier.fillMaxWidth()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                )
+            ) {
                 if (account == null) {
                     Column(
-                        modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                        modifier = Modifier.padding(24.dp).fillMaxWidth(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Icon(Icons.Default.AccountCircle, contentDescription = null, modifier = Modifier.size(64.dp), tint = Color.Gray)
+                        Icon(
+                            Icons.Default.AccountCircle, 
+                            contentDescription = null, 
+                            modifier = Modifier.size(64.dp), 
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = onLoginClick) {
-                            Text(stringResource(R.string.login_drive))
+                        Button(
+                            onClick = onLoginClick,
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(stringResource(R.string.login_drive), fontWeight = FontWeight.Bold)
                         }
                     }
                 } else {
@@ -90,52 +115,77 @@ fun ProfileScreen(
                             Surface(
                                 modifier = Modifier.size(64.dp),
                                 shape = CircleShape,
-                                color = MaterialTheme.colorScheme.secondaryContainer
+                                color = MaterialTheme.colorScheme.primaryContainer
                             ) {
                                 Box(contentAlignment = Alignment.Center) {
-                                    Text(account.displayName?.firstOrNull()?.toString() ?: "U", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                                    Text(
+                                        account.displayName?.firstOrNull()?.toString() ?: "U", 
+                                        fontSize = 24.sp, 
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
                                 }
                             }
                         }
                         Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
-                            Text(account.displayName ?: "User", fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                            Text(account.displayName ?: "User", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier.clickable { showQuoteDialog = true }.padding(top = 4.dp)
                             ) {
-                                Text(userQuote, style = MaterialTheme.typography.bodyMedium)
+                                Text(
+                                    userQuote, 
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit_quote), modifier = Modifier.size(16.dp))
+                                Icon(
+                                    Icons.Default.Edit, 
+                                    contentDescription = stringResource(R.string.edit_quote), 
+                                    modifier = Modifier.size(14.dp),
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
                             }
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(stringResource(R.string.heatmap_title), fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(32.dp))
+            Text(
+                stringResource(R.string.heatmap_title), 
+                style = MaterialTheme.typography.labelLarge, 
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Heatmap
-            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
+                    .padding(12.dp), 
+                contentAlignment = Alignment.CenterEnd
+            ) {
                 WorkoutHeatMap(heatmapData)
             }
 
             Spacer(modifier = Modifier.weight(1f))
             
             if (account != null) {
-                Button(
+                TextButton(
                     onClick = onLogout,
                     modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer, 
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
                     )
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.Logout, null)
+                    Icon(Icons.AutoMirrored.Filled.Logout, null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(stringResource(R.string.logout))
+                    Text(stringResource(R.string.logout), fontWeight = FontWeight.Bold)
                 }
             }
         }
@@ -145,19 +195,20 @@ fun ProfileScreen(
         var tempQuote by remember { mutableStateOf(userQuote) }
         AlertDialog(
             onDismissRequest = { showQuoteDialog = false },
-            title = { Text(stringResource(R.string.edit_quote)) },
+            title = { Text(stringResource(R.string.edit_quote), fontWeight = FontWeight.Bold) },
             text = {
                 OutlinedTextField(
                     value = tempQuote,
                     onValueChange = { tempQuote = it },
-                    singleLine = true
+                    singleLine = true,
+                    shape = RoundedCornerShape(12.dp)
                 )
             },
             confirmButton = {
                 TextButton(onClick = { 
                     settingsViewModel.setUserQuote(tempQuote)
                     showQuoteDialog = false 
-                }) { Text(stringResource(R.string.save)) }
+                }) { Text(stringResource(R.string.save), fontWeight = FontWeight.Bold) }
             },
             dismissButton = {
                 TextButton(onClick = { showQuoteDialog = false }) { Text(stringResource(R.string.dialog_cancel)) }
@@ -185,7 +236,6 @@ fun WorkoutHeatMap(data: Map<String, Int>) {
             list.reversed()
         }
         
-        // 强制使用 Locale.US 确保与数据库中的日期字符串格式 (yyyy-MM-dd) 完全匹配
         val df = remember { SimpleDateFormat("yyyy-MM-dd", Locale.US) }
 
         Row(
@@ -200,9 +250,9 @@ fun WorkoutHeatMap(data: Map<String, Int>) {
                         val count = data[dateStr] ?: 0
                         val color = when {
                             count == 0 -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
-                            count < 5 -> Color(0xFF40C463) // 只要有健身，就直接使用明显的绿色
+                            count < 5 -> Color(0xFF40C463) 
                             count < 15 -> Color(0xFF30A14E)
-                            else -> Color(0xFF216E39) // 极高强度使用深绿色
+                            else -> Color(0xFF216E39) 
                         }
                         Box(
                             modifier = Modifier

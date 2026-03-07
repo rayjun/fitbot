@@ -44,16 +44,15 @@ fun ExerciseLibraryScreen(
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
-            CenterAlignedTopAppBar(
+            TopAppBar(
                 title = { 
                     Text(
-                        stringResource(R.string.nav_library).uppercase(),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 2.sp
+                        stringResource(R.string.nav_library),
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold
                     ) 
                 }, 
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     scrolledContainerColor = MaterialTheme.colorScheme.background
                 )
@@ -73,13 +72,11 @@ fun ExerciseLibraryScreen(
                     Box(
                         Modifier
                             .tabIndicatorOffset(tabPositions[categories.indexOf(selectedCategoryRes).coerceAtLeast(0)])
-                            .height(4.dp)
+                            .height(3.dp)
                             .padding(horizontal = 16.dp)
                             .background(
-                                brush = Brush.horizontalGradient(
-                                    listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primaryContainer)
-                                ),
-                                shape = MaterialTheme.shapes.extraSmall
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = MaterialTheme.shapes.small
                             )
                     )
                 }
@@ -92,8 +89,8 @@ fun ExerciseLibraryScreen(
                         text = { 
                             Text(
                                 text = stringResource(categoryRes),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                 color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             ) 
                         }
@@ -173,11 +170,10 @@ fun ExerciseGridItem(exercise: Exercise, onExerciseClick: (Exercise) -> Unit) {
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = stringResource(exercise.targetMuscleRes).uppercase(),
+                        text = stringResource(exercise.targetMuscleRes),
                         style = MaterialTheme.typography.labelSmall,
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.sp,
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.primary,
                         maxLines = 1
                     )
