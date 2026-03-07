@@ -28,6 +28,10 @@ import com.fitness.util.getString
 fun ExerciseLibraryScreen(
     onExerciseClick: (Exercise) -> Unit
 ) {
+    LaunchedEffect(Unit) {
+        println("FitBotDebug: Total exercises in provider: ${ExerciseProvider.exercises.size}")
+    }
+    
     val allLabelKey = "category_all"
     var selectedCategoryKey by remember { mutableStateOf(allLabelKey) }
 

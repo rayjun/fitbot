@@ -16,9 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.fitness.ui.components.ExerciseImage
 import com.fitness.util.getString
 import kotlinx.datetime.*
 
@@ -94,20 +96,44 @@ fun ProfileScreen(
                     }
                 } else {
                     Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Surface(
-                            modifier = Modifier.size(64.dp),
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.primaryContainer
-                        ) {
-                            Box(contentAlignment = Alignment.Center) {
-                                Text(
-                                    accountName.firstOrNull()?.toString() ?: "U", 
-                                    fontSize = 24.sp, 
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
+                        // Profile Image with Placeholder
+                        Box(modifier = Modifier.size(64.dp)) {
+                            if (accountPhotoUrl != null) {
+                                // We use a shared ExerciseImage component or similar for KMP image loading
+                                // But for Profile Photo which is a URL, we need a URL-capable loader.
+                                // For now, we'll try to use a placeholder or common loader if available.
+                                Surface(
+                                    modifier = Modifier.fillMaxSize(),
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.primaryContainer
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            accountName.firstOrNull()?.toString() ?: "U", 
+                                            fontSize = 24.sp, 
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
+                            } else {
+                                Surface(
+                                    modifier = Modifier.fillMaxSize(),
+                                    shape = CircleShape,
+                                    color = MaterialTheme.colorScheme.primaryContainer
+                                ) {
+                                    Box(contentAlignment = Alignment.Center) {
+                                        Text(
+                                            accountName.firstOrNull()?.toString() ?: "U", 
+                                            fontSize = 24.sp, 
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
                             }
                         }
+                        
                         Spacer(modifier = Modifier.width(16.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(accountName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)

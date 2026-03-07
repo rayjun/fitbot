@@ -38,6 +38,7 @@ fun MainViewController() = ComposeUIViewController {
         Scaffold(
             bottomBar = {
                 val items = listOf(Screen.Library, Screen.Plans, Screen.Profile)
+                // Only show bottom bar on main screens and when not in detail view
                 if (items.any { it.route == currentScreen.route } && selectedExercise == null) {
                     NavigationBar(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -84,7 +85,10 @@ fun MainViewController() = ComposeUIViewController {
                                 heatmapData = emptyMap(),
                                 accountName = "iOS User",
                                 accountPhotoUrl = null,
-                                onLoginClick = { },
+                                onLoginClick = { 
+                                    // Mock Login
+                                    // In a real app, this would trigger the iOS Google Sign In
+                                },
                                 onLogout = { },
                                 onSettingsClick = { 
                                     previousScreen = Screen.Profile
