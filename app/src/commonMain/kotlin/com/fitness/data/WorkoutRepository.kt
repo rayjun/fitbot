@@ -14,4 +14,6 @@ interface WorkoutRepository {
     fun getHeatmapData(): Flow<Map<String, Int>>
     fun getSetsByDate(date: String): Flow<List<ExerciseSet>>
     suspend fun addExerciseSet(set: ExerciseSet)
+    suspend fun updateExerciseSet(set: ExerciseSet)
+    suspend fun deleteExerciseSet(setId: Long, date: String)
 }

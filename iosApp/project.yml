@@ -10,7 +10,9 @@ targets:
       - iosApp
     dependencies:
       - framework: ../app/build/bin/iosSimulatorArm64/debugFramework/ComposeApp.framework
-        embed: true
+        embed: false
+        link: false
+        implicit: true
     settings:
       base:
         INFOPLIST_FILE: iosApp/Info.plist
@@ -19,11 +21,15 @@ targets:
         CURRENT_PROJECT_VERSION: 9
         PRODUCT_NAME: FitBot
         DEVELOPMENT_TEAM: ""
-        FRAMEWORK_SEARCH_PATHS: 
-          - $(inherited)
-          - $(SRCROOT)/../app/build/bin/iosSimulatorArm64/debugFramework
-          - $(SRCROOT)/../app/build/bin/iosArm64/debugFramework
         ENABLE_USER_SCRIPT_SANDBOXING: NO
+        OTHER_LDFLAGS: $(inherited) -framework ComposeApp
+      configs:
+        Debug:
+          "FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]": "$(inherited) $(SRCROOT)/../app/build/bin/iosSimulatorArm64/debugFramework"
+          "FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]": "$(inherited) $(SRCROOT)/../app/build/bin/iosArm64/debugFramework"
+        Release:
+          "FRAMEWORK_SEARCH_PATHS[sdk=iphonesimulator*]": "$(inherited) $(SRCROOT)/../app/build/bin/iosSimulatorArm64/releaseFramework"
+          "FRAMEWORK_SEARCH_PATHS[sdk=iphoneos*]": "$(inherited) $(SRCROOT)/../app/build/bin/iosArm64/releaseFramework"
     preBuildPhases:
       - name: "Compile Kotlin Multiplatform"
         script: |

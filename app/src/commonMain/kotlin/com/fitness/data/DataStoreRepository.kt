@@ -89,8 +89,40 @@ class DataStoreRepository(
             } else {
                 mutableListOf()
             }
-            currentList.add(set)
+            val newSet = if (set.id == 0L) set.copy(id = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()) else set
+            currentList.add(newSet)
             preferences[key] = json.encodeToString(currentList)
+        }
+    }
+
+    override suspend fun updateExerciseSet(set: ExerciseSet) {
+        val key = stringPreferencesKey(HISTORY_KEY_PREFIX + set.date)
+        dataStore.edit { preferences ->
+            val currentJson = preferences[key]
+            if (currentJson != null) {
+                try { 
+                    val currentList = json.decodeFromString<List<ExerciseSet>>(currentJson).toMutableList()
+                    val index = currentList.indexOfFirst { it.id == set.id }
+                    if (index != -1) {
+                        currentList[index] = set
+                        preferences[key] = json.encodeToString(currentList)
+                    }
+                } catch(e: Exception) {}
+            }
+        }
+    }
+
+    override suspend fun deleteExerciseSet(setId: Long, date: String) {
+        val key = stringPreferencesKey(HISTORY_KEY_PREFIX + date)
+        dataStore.edit { preferences ->
+            val currentJson = preferences[key]
+            if (currentJson != null) {
+                try { 
+                    val currentList = json.decodeFromString<List<ExerciseSet>>(currentJson).toMutableList()
+                    currentList.removeAll { it.id == setId }
+                    preferences[key] = json.encodeToString(currentList)
+                } catch(e: Exception) {}
+            }
         }
     }
 }

@@ -13,6 +13,7 @@
 
 /* Begin PBXFileReference section */
 		6C84DF8908456403C23CA5B8 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		816CC511C6A333A09FBB5306 /* ComposeApp.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ComposeApp.framework; path = ../app/build/bin/iosSimulatorArm64/debugFramework/ComposeApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B98E413B8D8F64A7589E48F9 /* iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iosApp.swift; sourceTree = "<group>"; };
 		BD82E34348B64107BCD3AC30 /* FitBot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FitBot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CFC4AADDE105FDFF628364B7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -25,6 +26,14 @@
 				BD82E34348B64107BCD3AC30 /* FitBot.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		55501B1AE0F2E2D566ED1557 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				816CC511C6A333A09FBB5306 /* ComposeApp.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		972C10637CF8F487F07E068F /* iosApp */ = {
@@ -41,6 +50,7 @@
 			isa = PBXGroup;
 			children = (
 				972C10637CF8F487F07E068F /* iosApp */,
+				55501B1AE0F2E2D566ED1557 /* Frameworks */,
 				21928D6364B6B2644B43DF51 /* Products */,
 			);
 			sourceTree = "<group>";

@@ -39,6 +39,7 @@ kotlin {
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
                 implementation("androidx.datastore:datastore-preferences-core:1.1.0")
                 implementation("androidx.datastore:datastore-preferences:1.1.0")
+                implementation("com.squareup.okio:okio:3.9.0")
             }
         }
         val androidMain by getting {
