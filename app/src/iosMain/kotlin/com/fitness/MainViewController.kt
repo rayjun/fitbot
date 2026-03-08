@@ -22,6 +22,7 @@ import com.fitness.model.Exercise
 import com.fitness.data.DataStoreRepository
 import com.fitness.auth.AuthManager
 import com.fitness.util.getString
+import com.fitness.util.IosLanguageManager
 import kotlinx.coroutines.launch
 import kotlinx.datetime.toLocalDateTime
 import okio.Path.Companion.toPath
@@ -77,6 +78,10 @@ fun MainViewController() = ComposeUIViewController {
     var themeMode by remember { mutableStateOf("system") }
     var language by remember { mutableStateOf("en") }
     var userQuote by remember { mutableStateOf("Stay fit with FitBot") }
+
+    LaunchedEffect(language) {
+        IosLanguageManager.currentLanguage = language
+    }
 
     val todayStr = kotlinx.datetime.Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date.toString()
     val setsToday by repository.getSetsByDate(todayStr).collectAsState(initial = emptyList())

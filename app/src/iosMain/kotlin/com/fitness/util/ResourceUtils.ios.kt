@@ -1,8 +1,15 @@
 package com.fitness.util
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 
-private val stringMap = mapOf(
+object IosLanguageManager {
+    var currentLanguage by mutableStateOf("en")
+}
+
+private val stringMapEn = mapOf(
     "app_name" to "FitBot",
     "nav_library" to "Library",
     "nav_plans" to "Plans",
@@ -72,10 +79,116 @@ private val stringMap = mapOf(
     "edit_day" to "Edit Day",
     "current_tag" to "Today",
     "detail_target_muscle" to "Target Muscle",
-    "detail_instructions" to "Instructions"
+    "detail_instructions" to "Instructions",
+    "weight_kg" to "Weight (kg)",
+    "reps" to "Reps",
+    "session_history" to "Session History",
+    "history_empty" to "No records yet",
+    "add_record" to "Add Record",
+    "edit_record" to "Edit Record",
+    "delete" to "Delete",
+    "kg" to "kg",
+    "back" to "Back",
+    "day_mon" to "Mon",
+    "day_tue" to "Tue",
+    "day_wed" to "Wed",
+    "day_thu" to "Thu",
+    "day_fri" to "Fri",
+    "day_sat" to "Sat",
+    "day_sun" to "Sun"
+)
+
+private val stringMapZh = mapOf(
+    "app_name" to "FitBot",
+    "nav_library" to "动作库",
+    "nav_plans" to "训练计划",
+    "nav_profile" to "我的",
+    "category_all" to "全部",
+    "cat_chest" to "胸部",
+    "cat_back" to "背部",
+    "cat_legs" to "腿部",
+    "cat_shoulders" to "肩部",
+    "cat_arms" to "手臂",
+    "cat_core" to "核心",
+    "cat_full_body" to "全身",
+    "ex_benchpress_name" to "杠铃卧推",
+    "ex_pushup_name" to "俯卧撑",
+    "ex_incline_press_name" to "上斜杠铃卧推",
+    "ex_pullup_name" to "引体向上",
+    "ex_row_name" to "杠铃划船",
+    "ex_deadlift_name" to "硬拉",
+    "ex_squat_name" to "深蹲",
+    "ex_lunge_name" to "弓步蹲",
+    "ex_calf_raise_name" to "提踵",
+    "ex_overhead_press_name" to "站姿推举",
+    "ex_lateral_raise_name" to "哑铃侧平举",
+    "ex_bicep_curl_name" to "哑铃弯举",
+    "ex_tricep_dips_name" to "臂屈伸",
+    "ex_situp_name" to "仰卧起坐",
+    "ex_crunches_name" to "卷腹",
+    "ex_russian_twist_name" to "俄罗斯转体",
+    "ex_plank_name" to "平板支撑",
+    "ex_burpee_name" to "波比跳",
+    "muscle_chest" to "胸大肌",
+    "muscle_upper_chest" to "上胸",
+    "muscle_lats" to "背阔肌",
+    "muscle_mid_back" to "中背部",
+    "muscle_lower_back" to "下背部",
+    "muscle_quads" to "股四头肌",
+    "muscle_glutes_legs" to "臀部及腿部",
+    "muscle_calves" to "小腿",
+    "muscle_shoulders" to "三角肌",
+    "muscle_biceps" to "肱二头肌",
+    "muscle_triceps" to "肱三头肌",
+    "muscle_abs" to "腹肌",
+    "muscle_full_body" to "全身肌群",
+    "heatmap_title" to "训练热力图",
+    "login_drive" to "登录 Google Drive",
+    "logout" to "退出登录",
+    "settings_title" to "设置",
+    "settings_general" to "通用设置",
+    "settings_theme" to "主题外观",
+    "settings_language" to "语言 (Language)",
+    "theme_system" to "跟随系统",
+    "theme_light" to "浅色",
+    "theme_dark" to "深色",
+    "lang_zh" to "简体中文",
+    "lang_en" to "English",
+    "dialog_cancel" to "取消",
+    "save" to "保存",
+    "edit_quote" to "编辑个性签名",
+    "cloud_sync_title" to "云端同步",
+    "cloud_connected" to "已连接 Google Drive",
+    "cloud_disconnected" to "未连接云端",
+    "syncing" to "正在同步...",
+    "sync_now" to "立即同步",
+    "rest_badge" to "休息日",
+    "no_plan" to "暂无训练计划",
+    "create_routine" to "管理训练计划",
+    "edit_day" to "编辑当日计划",
+    "current_tag" to "今天",
+    "detail_target_muscle" to "目标肌群",
+    "detail_instructions" to "动作要领",
+    "weight_kg" to "重量 (kg)",
+    "reps" to "次数",
+    "session_history" to "当前训练记录",
+    "history_empty" to "暂无记录",
+    "add_record" to "添加记录",
+    "edit_record" to "编辑记录",
+    "delete" to "删除",
+    "kg" to "kg",
+    "back" to "返回",
+    "day_mon" to "周一",
+    "day_tue" to "周二",
+    "day_wed" to "周三",
+    "day_thu" to "周四",
+    "day_fri" to "周五",
+    "day_sat" to "周六",
+    "day_sun" to "周日"
 )
 
 @Composable
 actual fun getString(key: String): String {
-    return stringMap[key] ?: key
+    val map = if (IosLanguageManager.currentLanguage == "zh") stringMapZh else stringMapEn
+    return map[key] ?: key
 }
