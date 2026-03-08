@@ -6,10 +6,10 @@ import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.ui.graphics.vector.ImageVector
 
-sealed class Screen(val route: String, val title: String? = null, val icon: ImageVector? = null) {
-    object Library : Screen("library", "Library", Icons.Default.FitnessCenter)
-    object Plans : Screen("plans", "Plans", Icons.Default.ListAlt)
-    object Profile : Screen("profile", "Profile", Icons.Default.Person)
+sealed class Screen(val route: String, val labelKey: String? = null, val icon: ImageVector? = null) {
+    object Library : Screen("library", "nav_library", Icons.Default.FitnessCenter)
+    object Plans : Screen("plans", "nav_plans", Icons.Default.ListAlt)
+    object Profile : Screen("profile", "nav_profile", Icons.Default.Person)
     object Workout : Screen("workout/{exerciseId}/{date}") {
         fun createRoute(exerciseId: String, date: String) = "workout/$exerciseId/$date"
     }

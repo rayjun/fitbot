@@ -22,6 +22,9 @@ interface PlanDao {
     @Query("SELECT * FROM training_plans WHERE isCurrent = 1 LIMIT 1")
     suspend fun getCurrentPlan(): PlanEntity?
 
+    @Query("SELECT * FROM training_plans WHERE isCurrent = 1 LIMIT 1")
+    fun getCurrentPlanFlow(): kotlinx.coroutines.flow.Flow<PlanEntity?>
+
     @Query("SELECT * FROM training_plans WHERE createdAt <= :timestamp ORDER BY createdAt DESC LIMIT 1")
     suspend fun getPlanForTimestamp(timestamp: Long): PlanEntity?
 

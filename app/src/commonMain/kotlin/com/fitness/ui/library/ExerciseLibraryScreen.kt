@@ -32,13 +32,11 @@ fun ExerciseLibraryScreen(
     var selectedCategoryKey by remember { mutableStateOf(allLabelKey) }
 
     val filteredExercises = remember(selectedCategoryKey) {
-        val list = if (selectedCategoryKey == allLabelKey) {
+        if (selectedCategoryKey == allLabelKey) {
             ExerciseProvider.exercises
         } else {
             ExerciseProvider.exercises.filter { it.categoryKey == selectedCategoryKey }
         }
-        println("FitBotDebug: Filtered list size for $selectedCategoryKey is ${list.size}")
-        list
     }
 
     Scaffold(
@@ -110,14 +108,6 @@ fun ExerciseLibraryScreen(
                     }
                 }
             } else {
-                // Debug indicator to prove list is not empty
-                Text(
-                    text = "Displaying ${filteredExercises.size} exercises", 
-                    style = MaterialTheme.typography.labelSmall,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-                )
-                
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.weight(1f).fillMaxWidth(),

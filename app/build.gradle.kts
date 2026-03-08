@@ -35,12 +35,25 @@ kotlin {
                 implementation(compose.components.resources)
                 implementation(compose.components.uiToolingPreview)
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
                 implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.5.0")
                 implementation("androidx.datastore:datastore-preferences-core:1.1.0")
                 implementation("androidx.datastore:datastore-preferences:1.1.0")
                 implementation("com.squareup.okio:okio:3.9.0")
-            }
+
+                // Koin
+                implementation("io.insert-koin:koin-core:3.5.3")
+                implementation("io.insert-koin:koin-compose:1.1.2")
+                implementation("io.insert-koin:koin-compose-viewmodel:1.2.0-Beta4")
+
+                // ViewModel
+                implementation("org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
+                implementation("org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose:2.8.0")
+
+                // Ktor (shared HTTP client for iOS Drive sync)
+                implementation("io.ktor:ktor-client-core:2.3.7")
+                implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+                implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+                }
         }
         val androidMain by getting {
             kotlin.srcDir("src/main/java")
@@ -53,6 +66,10 @@ kotlin {
                 implementation("com.google.dagger:hilt-android:$hilt_version")
                 implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
                 implementation("androidx.hilt:hilt-work:1.1.0")
+                
+                // Koin Android
+                implementation("io.insert-koin:koin-android:3.5.3")
+                implementation("io.insert-koin:koin-androidx-compose:3.5.3")
 
                 // Core
                 implementation("androidx.core:core-ktx:1.12.0")
@@ -104,6 +121,9 @@ kotlin {
             iosX64Main.dependsOn(this)
             iosArm64Main.dependsOn(this)
             iosSimulatorArm64Main.dependsOn(this)
+            dependencies {
+                implementation("io.ktor:ktor-client-darwin:2.3.7")
+            }
         }
     }
 }
@@ -116,8 +136,8 @@ android {
         applicationId = "com.fitness"
         minSdk = 26
         targetSdk = 34
-        versionCode = 9
-        versionName = "0.4.1"
+        versionCode = 10
+        versionName = "0.5.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

@@ -1,16 +1,11 @@
 package com.fitness.ui.navigation
 
-import android.util.Log
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -19,22 +14,32 @@ import androidx.navigation.navArgument
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
-import com.fitness.R
 import com.fitness.model.PlannedExercise
 import com.fitness.sync.AuthManager
 import com.fitness.sync.SyncWorker
-import com.fitness.util.toModel
 import com.fitness.ui.library.ExerciseDetailScreen
 import com.fitness.ui.library.ExerciseLibraryScreen
 import com.fitness.ui.plans.DayDetailsScreen
 import com.fitness.ui.plans.PlansScreen
 import com.fitness.ui.profile.ProfileScreen
 import com.fitness.ui.profile.SettingsScreen
-import com.fitness.ui.workout.WorkoutRecordingScreen
+import com.fitness.ui.plans.PlanViewModel
 import com.fitness.ui.workout.WorkoutViewModel
+import com.fitness.ui.profile.SettingsViewModel
+import com.fitness.ui.profile.ProfileViewModel
+import com.fitness.util.getString
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.Scope
 import com.google.api.services.drive.DriveScopes
+import org.koin.androidx.compose.koinViewModel
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.fitness.R
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 @Composable
 fun FitBotNavHost(
@@ -48,7 +53,6 @@ fun FitBotNavHost(
     var lastAccount by remember { mutableStateOf(authManager.getSignedInAccount()) }
     val driveScope = Scope(DriveScopes.DRIVE_FILE)
 
-    // 统一的登录结果处理器
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -57,29 +61,31 @@ fun FitBotNavHost(
             val account = task.result
             lastAccount = account
             val hasPerm = GoogleSignIn.hasPermissions(account, driveScope)
-            Log.d("FitBotSync", "Login successful. Drive permission: $hasPerm")
             if (hasPerm) {
-                Toast.makeText(context, context.getString(R.string.cloud_success), Toast.LENGTH_SHORT).show()
                 val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
                 workManager.enqueueUniqueWork("FullSync", ExistingWorkPolicy.REPLACE, syncRequest)
-            } else {
-                Toast.makeText(context, "同步失败：您必须勾选并允许 Drive 访问权限才能使用云同步功能。", Toast.LENGTH_LONG).show()
             }
-        } else {
-            Log.e("FitBotSync", "Login failed: ${task.exception?.message}")
-            Toast.makeText(context, context.getString(R.string.cloud_failed, task.exception?.message), Toast.LENGTH_LONG).show()
         }
     }
 
-    // 彻底强制重新授权：撤销权限并退出，确保下次登录显示完整勾选框
     val triggerAuthFlow = {
         authManager.revokeAccess {
             googleSignInLauncher.launch(authManager.getSignInIntent())
         }
     }
 
+    // Auto-sync on startup if already signed in with Drive permission
+    LaunchedEffect(Unit) {
+        val account = authManager.getSignedInAccount()
+        if (account != null && GoogleSignIn.hasPermissions(account, driveScope)) {
+            Log.d("FitBotSync", "Auto-sync on startup for ${account.email}")
+            val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
+            workManager.enqueueUniqueWork("FullSync", ExistingWorkPolicy.REPLACE, syncRequest)
+        }
+    }
+
     NavHost(
-        navController = navController, 
+        navController = navController,
         startDestination = Screen.Library.route,
         modifier = Modifier.padding(innerPadding)
     ) {
@@ -103,16 +109,16 @@ fun FitBotNavHost(
         }
 
         composable(Screen.Plans.route) {
-            val planViewModel: com.fitness.ui.plans.PlanViewModel = hiltViewModel()
-            val workoutViewModel: com.fitness.ui.workout.WorkoutViewModel = hiltViewModel()
-            val routine by planViewModel.currentRoutine.collectAsStateWithLifecycle()
-            val setsToday by workoutViewModel.setsToday.collectAsStateWithLifecycle()
+            val planViewModel: PlanViewModel = koinViewModel()
+            val workoutViewModel: WorkoutViewModel = koinViewModel()
+            val routine by planViewModel.currentRoutine.collectAsState()
+            val setsToday by workoutViewModel.setsToday.collectAsState()
             
-            val todayStr = java.time.LocalDate.now().toString()
+            val todayStr = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
 
             PlansScreen(
                 currentRoutine = routine,
-                setsByDate = mapOf(todayStr to setsToday.map { (it as com.fitness.data.local.SetEntity).toModel() }),
+                setsByDate = mapOf(todayStr to setsToday),
                 onStartExercise = { exerciseId, date ->
                     navController.navigate(Screen.Workout.createRoute(exerciseId, date))
                 },
@@ -130,12 +136,11 @@ fun FitBotNavHost(
             arguments = listOf(navArgument("date") { type = NavType.StringType })
         ) { backStackEntry ->
             val date = backStackEntry.arguments?.getString("date") ?: ""
-            val workoutViewModel: WorkoutViewModel = hiltViewModel()
-            val sets by produceState(initialValue = emptyList<com.fitness.model.ExerciseSet>(), date) {
-                workoutViewModel.getSetsByDateFlow(date).collect { list ->
-                    value = list.map { it.toModel() }
-                }
+            val workoutViewModel: WorkoutViewModel = koinViewModel()
+            LaunchedEffect(date) {
+                workoutViewModel.setDate(date)
             }
+            val sets by workoutViewModel.setsToday.collectAsState()
             DayDetailsScreen(
                 date = date,
                 sets = sets,
@@ -144,11 +149,10 @@ fun FitBotNavHost(
         }
 
         composable(Screen.Profile.route) {
-            val profileViewModel: com.fitness.ui.profile.ProfileViewModel = hiltViewModel()
-            val settingsViewModel: com.fitness.ui.profile.SettingsViewModel = hiltViewModel()
-            val heatmapData by profileViewModel.heatmapData.collectAsStateWithLifecycle()
-            val userQuote by settingsViewModel.userQuote.collectAsStateWithLifecycle()
-            val hasDrivePermission = lastAccount?.let { GoogleSignIn.hasPermissions(it, driveScope) } ?: false
+            val settingsViewModel: SettingsViewModel = koinViewModel()
+            val profileViewModel: ProfileViewModel = koinViewModel()
+            val userQuote by settingsViewModel.userQuote.collectAsState()
+            val heatmapData by profileViewModel.heatmapData.collectAsState()
             
             ProfileScreen(
                 userQuote = userQuote,
@@ -159,7 +163,6 @@ fun FitBotNavHost(
                 onLogout = {
                     authManager.signOut {
                         lastAccount = null
-                        Toast.makeText(context, context.getString(R.string.logout_success), Toast.LENGTH_SHORT).show()
                     }
                 },
                 onSettingsClick = {
@@ -170,9 +173,9 @@ fun FitBotNavHost(
         }
 
         composable(Screen.Settings.route) {
-            val settingsViewModel: com.fitness.ui.profile.SettingsViewModel = hiltViewModel()
-            val themeMode by settingsViewModel.themeMode.collectAsStateWithLifecycle()
-            val language by settingsViewModel.language.collectAsStateWithLifecycle()
+            val settingsViewModel: SettingsViewModel = koinViewModel()
+            val themeMode by settingsViewModel.themeMode.collectAsState()
+            val language by settingsViewModel.language.collectAsState()
             val hasDrivePermission = lastAccount?.let { GoogleSignIn.hasPermissions(it, driveScope) } ?: false
             
             SettingsScreen(
@@ -184,7 +187,6 @@ fun FitBotNavHost(
                     if (lastAccount != null && hasDrivePermission) {
                         val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
                         workManager.enqueueUniqueWork("FullSync", ExistingWorkPolicy.REPLACE, syncRequest)
-                        Toast.makeText(context, "Sync Started", Toast.LENGTH_SHORT).show()
                     } else {
                         triggerAuthFlow()
                     }
@@ -203,9 +205,12 @@ fun FitBotNavHost(
             )
         ) { backStackEntry ->
             val exerciseId = backStackEntry.arguments?.getString("exerciseId") ?: ""
-            WorkoutRecordingScreen(
+            val date = backStackEntry.arguments?.getString("date") ?: ""
+            
+            com.fitness.ui.workout.WorkoutRecordingScreen(
                 exerciseId = exerciseId,
-                viewModel = hiltViewModel(),
+                date = date,
+                repository = org.koin.compose.getKoin().get(),
                 onBack = { navController.popBackStack() }
             )
         }

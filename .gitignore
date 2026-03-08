@@ -1,8 +1,21 @@
-# Android
+# Android build artifacts
 build/
+**/build/
 .gradle/
 local.properties
 *.apk
+*.aab
+
+# Sensitive / credentials
+google-services.json
+GoogleService-Info.plist
+*.jks
+keystore.properties
+secrets.properties
+
+# macOS
+.DS_Store
+**/.DS_Store
 
 # iOS
 iosApp/Pods/

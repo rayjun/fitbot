@@ -13,9 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -28,9 +26,12 @@ import com.fitness.ui.navigation.Screen
 import com.fitness.ui.profile.SettingsViewModel
 import com.fitness.ui.theme.FitnessTheme
 import com.fitness.sync.AuthManager
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.collectAsState
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+import org.koin.androidx.compose.koinViewModel
+import com.fitness.util.getString
+import com.fitness.util.LocalAppLanguage
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -42,9 +43,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         
         setContent {
-            val settingsViewModel: SettingsViewModel = hiltViewModel()
-            val themeMode by settingsViewModel.themeMode.collectAsStateWithLifecycle()
-            val language by settingsViewModel.language.collectAsStateWithLifecycle()
+            val settingsViewModel: SettingsViewModel = koinViewModel()
+            val themeMode by settingsViewModel.themeMode.collectAsState()
+            val language by settingsViewModel.language.collectAsState()
 
             // 核心修复：监听语言变化并实时应用到 Activity 句柄
             LaunchedEffect(language) {
@@ -59,6 +60,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             FitnessTheme(darkTheme = isDark) {
+                CompositionLocalProvider(LocalAppLanguage provides language) {
                 val navController = rememberNavController()
                 val context = LocalContext.current
                 val workManager = remember { WorkManager.getInstance(applicationContext) }
@@ -92,16 +94,7 @@ class MainActivity : AppCompatActivity() {
                                 items.forEach { screen ->
                                     NavigationBarItem(
                                         icon = { Icon(screen.icon!!, contentDescription = null) },
-                                        label = { 
-                                            Text(
-                                                when(screen) {
-                                                    Screen.Library -> stringResource(R.string.nav_library)
-                                                    Screen.Plans -> stringResource(R.string.nav_plans)
-                                                    Screen.Profile -> stringResource(R.string.nav_profile)
-                                                    else -> ""
-                                                }
-                                            ) 
-                                        },
+                                        label = { Text(getString(screen.labelKey ?: screen.route)) },
                                         selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                                         onClick = {
                                             navController.navigate(screen.route) {
@@ -133,7 +126,8 @@ class MainActivity : AppCompatActivity() {
                         workManager = workManager
                     )
                 }
-            }
+            } // end CompositionLocalProvider
+            } // end FitnessTheme
         }
     }
 }

@@ -13,7 +13,7 @@ import com.fitness.data.local.PlanDao
 import com.fitness.data.local.PlanEntity
 import com.fitness.data.local.SetEntity
 import com.fitness.model.*
-import com.fitness.ui.profile.dataStore
+import com.fitness.util.dataStore
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.coroutines.Dispatchers
@@ -103,48 +103,44 @@ class SyncWorker @AssistedInject constructor(
     }
 
     private suspend fun syncSetsLogic(helper: DriveServiceHelper, folderId: String, remoteMap: Map<String, com.google.api.services.drive.model.File>, lastSync: Long) {
-        val dbDates = exerciseDao.getDistinctDates().toMutableSet()
-        val today = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
-        dbDates.add(today)
-        
-        // 合并远程存在的日期
-        remoteMap.keys.filter { it.matches(Regex("\\d{4}-\\d{2}-\\d{2}\\.json")) }.forEach { 
-            dbDates.add(it.substringBefore(".json"))
-        }
-
         val existingIds = exerciseDao.getAllRemoteIds().toSet()
 
-        dbDates.forEach { date ->
+        // --- Download pass: remote files newer than lastSync ---
+        val remoteSetFiles = remoteMap.keys.filter { it.matches(Regex("\\d{4}-\\d{2}-\\d{2}\\.json")) }
+        for (fileName in remoteSetFiles) {
+            val remoteFile = remoteMap[fileName] ?: continue
+            val shouldDownload = lastSync == 0L || remoteFile.modifiedTime.value > lastSync
+            if (!shouldDownload) continue
+
+            try {
+                val remoteJson = helper.downloadFileById(remoteFile.id)
+                val remoteDay = json.decodeFromString<TrainingDay>(remoteJson)
+                transformToSetEntities(remoteDay).forEach { entity ->
+                    if (!existingIds.contains(entity.remoteId)) exerciseDao.insertSet(entity)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Parse error for $fileName: ${e.message}")
+            }
+        }
+
+        // --- Upload pass: only dates with local changes since lastSync ---
+        val locallyModifiedDates: Set<String> = if (lastSync == 0L) {
+            exerciseDao.getDistinctDates().toSet()
+        } else {
+            exerciseDao.getDistinctDatesModifiedSince(lastSync).toSet()
+        }
+
+        for (date in locallyModifiedDates) {
+            val localSets = exerciseDao.getSetsByDate(date)
+            if (localSets.isEmpty()) continue
+            val localDay = transformToTrainingDay(date, localSets)
+            val jsonStr = json.encodeToString(localDay)
             val fileName = "$date.json"
             val remoteFile = remoteMap[fileName]
-            var remoteJson: String? = null
-
-            // 仅当远程有更新或本地缺失该日期数据时下载
-            val shouldDownload = remoteFile != null && (remoteFile.modifiedTime.value > lastSync || !exerciseDao.getDistinctDates().contains(date))
-
-            if (shouldDownload && remoteFile != null) {
-                remoteJson = helper.downloadFileById(remoteFile.id)
-                try {
-                    val remoteDay = json.decodeFromString<TrainingDay>(remoteJson)
-                    transformToSetEntities(remoteDay).forEach { 
-                        if (!existingIds.contains(it.remoteId)) exerciseDao.insertSet(it) 
-                    }
-                } catch (e: Exception) { Log.e(TAG, "Parse error for $date") }
-            }
-
-            val localSets = exerciseDao.getSetsByDate(date)
-            if (localSets.isNotEmpty()) {
-                val currentLocalDay = transformToTrainingDay(date, localSets)
-                val jsonStr = json.encodeToString(currentLocalDay)
-                
-                // 如果没有下载 remoteJson (因为没变)，但本地有数据，我们需要确保远程存在且一致
-                if (jsonStr != remoteJson) {
-                    if (remoteFile != null) {
-                        helper.updateFile(remoteFile.id, jsonStr)
-                    } else {
-                        helper.createFile(folderId, fileName, jsonStr)
-                    }
-                }
+            if (remoteFile != null) {
+                helper.updateFile(remoteFile.id, jsonStr)
+            } else {
+                helper.createFile(folderId, fileName, jsonStr)
             }
         }
     }
@@ -173,8 +169,29 @@ class SyncWorker @AssistedInject constructor(
         val currentPlanFile = remoteMap["plans.json"]
         if (currentPlanFile != null && currentPlanFile.modifiedTime.value > lastSync) {
             val content = helper.downloadFileById(currentPlanFile.id)
-            val remotePlans = json.decodeFromString<List<PlanEntity>>(content)
-            remotePlans.firstOrNull()?.let { planDao.insertPlan(it.copy(id = 0)) }
+            // Handle both Android format (List<PlanEntity>) and iOS format (List<RoutineDay>)
+            val planToInsert: PlanEntity? = try {
+                val remotePlans = json.decodeFromString<List<PlanEntity>>(content)
+                remotePlans.firstOrNull { it.isCurrent } ?: remotePlans.maxByOrNull { it.createdAt }
+            } catch (e: Exception) {
+                // iOS writes plain List<RoutineDay> — wrap it into a PlanEntity
+                try {
+                    val routineDays = json.decodeFromString<List<com.fitness.model.RoutineDay>>(content)
+                    if (routineDays.isNotEmpty()) {
+                        PlanEntity(
+                            name = "Synced Routine",
+                            exercisesJson = json.encodeToString(routineDays),
+                            isCurrent = true,
+                            version = 1,
+                            createdAt = currentPlanFile.modifiedTime.value
+                        )
+                    } else null
+                } catch (e2: Exception) {
+                    Log.e(TAG, "plans.json parse failed: ${e2.message}")
+                    null
+                }
+            }
+            planToInsert?.let { planDao.insertPlan(it.copy(id = 0)) }
         } else {
             planDao.getCurrentPlan()?.let { 
                 val jsonStr = json.encodeToString(listOf(it))

@@ -19,3 +19,15 @@ data class SetEntity(
     val timeStr: String,       // 格式: 09:05，方便序列化
     val remoteId: String = "" // 用于跨设备唯一标识
 )
+
+fun SetEntity.toModel() = com.fitness.model.ExerciseSet(
+    id = id,
+    date = date,
+    sessionId = sessionId,
+    exerciseName = exerciseName,
+    reps = reps,
+    weight = weight,
+    timestamp = timestamp,
+    timeStr = timeStr,
+    remoteId = remoteId
+)

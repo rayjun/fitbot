@@ -12,7 +12,8 @@ data class UserProfile(
 expect class AuthManager {
     val currentUser: StateFlow<UserProfile?>
     val isSyncing: StateFlow<Boolean>
-    
+
     suspend fun signIn()
     suspend fun signOut()
+    suspend fun sync()
 }

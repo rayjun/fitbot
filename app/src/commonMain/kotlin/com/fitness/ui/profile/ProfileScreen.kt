@@ -21,6 +21,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fitness.ui.components.ExerciseImage
+import com.fitness.ui.components.RemoteImage
 import com.fitness.util.getString
 import kotlinx.datetime.*
 
@@ -96,26 +97,17 @@ fun ProfileScreen(
                     }
                 } else {
                     Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        // Profile Image with Placeholder
-                        Box(modifier = Modifier.size(64.dp)) {
+                        // Profile Image
+                        Box(
+                            modifier = Modifier.size(64.dp).clip(CircleShape)
+                        ) {
                             if (accountPhotoUrl != null) {
-                                // We use a shared ExerciseImage component or similar for KMP image loading
-                                // But for Profile Photo which is a URL, we need a URL-capable loader.
-                                // For now, we'll try to use a placeholder or common loader if available.
-                                Surface(
+                                RemoteImage(
+                                    url = accountPhotoUrl,
+                                    contentDescription = null,
                                     modifier = Modifier.fillMaxSize(),
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.primaryContainer
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Text(
-                                            accountName.firstOrNull()?.toString() ?: "U", 
-                                            fontSize = 24.sp, 
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                }
+                                    contentScale = ContentScale.Crop
+                                )
                             } else {
                                 Surface(
                                     modifier = Modifier.fillMaxSize(),
@@ -124,8 +116,8 @@ fun ProfileScreen(
                                 ) {
                                     Box(contentAlignment = Alignment.Center) {
                                         Text(
-                                            accountName.firstOrNull()?.toString() ?: "U", 
-                                            fontSize = 24.sp, 
+                                            accountName.firstOrNull()?.toString() ?: "U",
+                                            fontSize = 24.sp,
                                             fontWeight = FontWeight.Bold,
                                             color = MaterialTheme.colorScheme.primary
                                         )

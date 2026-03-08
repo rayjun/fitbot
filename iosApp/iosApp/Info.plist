@@ -41,5 +41,16 @@
 	</array>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<key>GIDClientID</key>
+	<string>1065156283555-rd4u52pj3e0nid1av7almjgk5r6mme19.apps.googleusercontent.com</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.1065156283555-rd4u52pj3e0nid1av7almjgk5r6mme19</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

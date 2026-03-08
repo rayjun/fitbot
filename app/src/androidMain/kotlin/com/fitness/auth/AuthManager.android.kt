@@ -37,4 +37,8 @@ actual class AuthManager(private val context: Context) {
     fun updateProfile(profile: UserProfile?) {
         _currentUser.value = profile
     }
+
+    actual suspend fun sync() {
+        // Android sync is handled by WorkManager SyncWorker triggered from FitBotNavHost.
+    }
 }

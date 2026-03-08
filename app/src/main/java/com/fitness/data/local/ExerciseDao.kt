@@ -22,6 +22,9 @@ interface ExerciseDao {
     @Query("SELECT DISTINCT date FROM exercise_sets")
     suspend fun getDistinctDates(): List<String>
 
+    @Query("SELECT DISTINCT date FROM exercise_sets WHERE timestamp > :since")
+    suspend fun getDistinctDatesModifiedSince(since: Long): List<String>
+
     @Query("DELETE FROM exercise_sets WHERE id = :id")
     suspend fun deleteSet(id: Long)
 
