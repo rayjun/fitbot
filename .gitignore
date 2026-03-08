@@ -35,3 +35,4 @@ jdk17.tar.gz
 # IDE
 .idea/
 *.iml
+iosApp/xcode-frameworks/
