@@ -9,6 +9,7 @@ import UIKit
 class GoogleSignInBridge {
 
     static func register(_ authManager: AuthManager) {
+        // Normal Sign In
         authManager.signInLauncher = { callback in
             guard let rootVC = UIApplication.shared
                     .connectedScenes
@@ -23,33 +24,57 @@ class GoogleSignInBridge {
                 hint: nil,
                 additionalScopes: ["https://www.googleapis.com/auth/drive.file"]
             ) { result, error in
+                handleSignInResult(result: result, error: error, callback: callback)
+            }
+        }
+
+        // Restore Previous Sign In (Silent)
+        authManager.restoreSignInLauncher = { callback in
+            GIDSignIn.sharedInstance.restorePreviousSignIn { user, error in
                 if let error = error {
                     callback.onSignInFailed(error: error.localizedDescription)
                     return
                 }
-                guard let user = result?.user else {
-                    callback.onSignInFailed(error: "No user returned by Google Sign-In")
+                guard let user = user else {
+                    callback.onSignInFailed(error: "No user to restore")
                     return
                 }
-                // Refresh token to ensure it is valid before passing to Kotlin.
-                user.refreshTokensIfNeeded { refreshedUser, refreshError in
-                    if let refreshError = refreshError {
-                        callback.onSignInFailed(error: refreshError.localizedDescription)
-                        return
-                    }
-                    guard let token = refreshedUser?.accessToken.tokenString else {
-                        callback.onSignInFailed(error: "Could not obtain access token")
-                        return
-                    }
-                    callback.onSignInSuccess(
-                        userId: refreshedUser?.userID ?? "",
-                        userName: refreshedUser?.profile?.name,
-                        userEmail: refreshedUser?.profile?.email,
-                        photoUrl: refreshedUser?.profile?.imageURL(withDimension: 200)?.absoluteString,
-                        accessToken: token
-                    )
-                }
+                refreshAndReturn(user: user, callback: callback)
             }
+        }
+    }
+
+    private static func handleSignInResult(result: GIDSignInResult?, error: Error?, callback: GoogleAuthCallback) {
+        if let error = error {
+            callback.onSignInFailed(error: error.localizedDescription)
+            return
+        }
+        guard let user = result?.user else {
+            callback.onSignInFailed(error: "No user returned by Google Sign-In")
+            return
+        }
+        refreshAndReturn(user: user, callback: callback)
+    }
+
+    private static func refreshAndReturn(user: GIDGoogleUser, callback: GoogleAuthCallback) {
+        user.refreshTokensIfNeeded { refreshedUser, refreshError in
+            if let refreshError = refreshError {
+                callback.onSignInFailed(error: refreshError.localizedDescription)
+                return
+            }
+            guard let validUser = refreshedUser else {
+                callback.onSignInFailed(error: "Could not obtain user after refresh")
+                return
+            }
+            
+            let token = validUser.accessToken.tokenString
+            callback.onSignInSuccess(
+                userId: validUser.userID ?? "",
+                userName: validUser.profile?.name,
+                userEmail: validUser.profile?.email,
+                photoUrl: validUser.profile?.imageURL(withDimension: 200)?.absoluteString,
+                accessToken: token
+            )
         }
     }
 }

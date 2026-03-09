@@ -53,6 +53,10 @@ fun MainViewController() = ComposeUIViewController {
         val workoutViewModel: WorkoutViewModel = koinViewModel()
         val profileViewModel: ProfileViewModel = koinViewModel()
 
+        LaunchedEffect(Unit) {
+            authManager.restoreSignIn()
+        }
+
         // --- UI State ---
         var currentScreen by remember { mutableStateOf<Screen>(Screen.Library) }
         var previousScreen by remember { mutableStateOf<Screen?>(null) }

@@ -127,21 +127,26 @@ fun WorkoutRecordingScreen(
     }
 
     if (editingSet != null) {
+        val set = editingSet!!
         RecordSetDialog(
-            initialWeight = editingSet!!.weight.toString(),
-            initialReps = editingSet!!.reps.toString(),
+            initialWeight = set.weight.toString(),
+            initialReps = set.reps.toString(),
             isBodyweight = isBodyweight,
             isEdit = true,
             onDismiss = { editingSet = null },
             onSave = { weight, reps ->
-                scope.launch {
-                    repository.updateExerciseSet(editingSet!!.copy(weight = weight, reps = reps))
+                editingSet?.let { currentSet ->
+                    scope.launch {
+                        repository.updateExerciseSet(currentSet.copy(weight = weight, reps = reps))
+                    }
                 }
                 editingSet = null
             },
             onDelete = {
-                scope.launch {
-                    repository.deleteExerciseSet(editingSet!!.id, editingSet!!.date)
+                editingSet?.let { currentSet ->
+                    scope.launch {
+                        repository.deleteExerciseSet(currentSet.id, currentSet.date)
+                    }
                 }
                 editingSet = null
             }

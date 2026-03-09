@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.fitness.data.ExerciseProvider
 import com.fitness.model.PlannedExercise
 import com.fitness.model.RoutineDay
+import com.fitness.util.DateUtils
 import com.fitness.util.getString
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DateTimeUnit
@@ -99,9 +100,7 @@ fun PlansScreen(
 /** Returns the Monday of the week that is [weekOffset] weeks away from today. */
 private fun mondayOfWeek(weekOffset: Int): LocalDate {
     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-    val daysSinceMonday = (today.dayOfWeek.ordinal) // Mon=0 … Sun=6
-    val thisMonday = today.minus(daysSinceMonday, DateTimeUnit.DAY)
-    return thisMonday.plus(weekOffset * 7, DateTimeUnit.DAY)
+    return DateUtils.getMondayOfWeek(today, weekOffset)
 }
 
 @Composable

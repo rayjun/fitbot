@@ -1,12 +1,12 @@
 > **最后更新**: 2026-03-08
 > **当前阶段**: 功能完善期
-> **整体进度**: 核心功能完成，iOS 认证与云同步待实现
+> **整体进度**: 核心功能已全部完成，Android 与 iOS 均支持云同步与热力图
 
 ---
 
 ## 当前目标
 
-维护可运行的跨平台健身追踪应用（Android + iOS 真机），下一步补全 iOS 认证和云同步后端。
+维护可运行的跨平台健身追踪应用（Android + iOS 真机），确保双端数据一致性与同步稳定性。
 
 ---
 
@@ -21,26 +21,18 @@
 | 运动记录 | ✅ | ✅ | 组数增删改查 |
 | 主题切换 | ✅ | ✅ | system / light / dark |
 | 多语言 | ✅ | ✅ | 中文 + 英文 |
-| 本地持久化 | ✅ Room + DataStore | ✅ DataStore | Android 用 Room，iOS 用 DataStore |
-| 用户认证 | ✅ Google Sign-In | ⚠️ Mock | iOS 认证为开发占位，不可上线 |
-| 热力图 | ✅ | ⚠️ 返回空 | iOS 的 `getHeatmapData()` 有 TODO |
-| 云同步 | ⚠️ UI 骨架 | ⚠️ UI 骨架 | 后端逻辑未实现 |
+| 本地持久化 | ✅ Room + DataStore | ✅ DataStore | iOS 端使用 DataStore + HISTORY_KEY_PREFIX 实现 |
+| 用户认证 | ✅ Google Sign-In | ✅ Google Sign-In | 双端均支持静默登录 (Silent Sign-In)，重启 App 不再掉线 |
+| 热力图 | ✅ | ✅ | 已通过单元测试验证逻辑准确性 |
+| 云同步 | ✅ | ✅ | 实现 Google Drive 增量双向同步，Android 支持启动自动触发 |
 
-### 待实现
+### 待优化
 
-#### iOS Google Sign-In
-**目标**: 用真实 GIDSignIn SDK 替换 `AuthManager.ios.kt` 中的 Mock 实现
-**文件**: `app/src/iosMain/kotlin/com/fitness/auth/AuthManager.ios.kt`
-**标记**: `FIXME: Replace with native Google Sign-In SDK (GIDSignIn)`
+#### 同步冲突处理
+**目标**: 细化合并逻辑，当前为“远程更新合并”和“最新覆盖”策略。
 
-#### iOS 热力图
-**目标**: 实现 `DataStoreRepository.getHeatmapData()`，扫描所有 `history_` 前缀键
-**文件**: `app/src/commonMain/kotlin/com/fitness/data/DataStoreRepository.kt`
-**标记**: `TODO: Implement by scanning all history_ prefixed keys in DataStore`
-
-#### 云同步后端
-**目标**: 实现 Google Drive 同步逻辑，接通 `isSyncing` StateFlow
-**参考**: `docs/GOOGLE_DRIVE_SYNC.md`
+#### 性能优化
+**目标**: 减少 DataStore 频繁序列化/反序列化大 JSON 字符串的开销。
 
 ---
 
@@ -64,14 +56,22 @@
 **理由**: iOS 静态框架本身不包含资源文件，资源需作为 `compose-resources/` 目录放在 app bundle 根目录
 **影响**: 每次 xcodebuild 构建自动执行，无需手动操作；资源来源为 `app/build/generated/compose/resourceGenerator/preparedResources/commonMain/composeResources`
 
+### 决策 #4: iOS 使用 DataStore 存储训练历史
+**日期**: 2026-03-08
+**决策**: iOS 端不使用 SQLDelight/Room，而是通过 DataStore 以 `history_YYYY-MM-DD` 为键存储 JSON 字符串
+**理由**: 简化初期跨平台数据同步逻辑，iOS 端无需处理复杂的数据库迁移
+**影响**: `DataStoreRepository.kt` 中实现了扫描所有 `history_` 前缀键以生成热力图数据的功能
+
 ---
 
 ## 最近修改
 
-- **2026-03-08** 新增 `docs/README_IOS.md`：完整记录 iOS 编译、真机安装流程及所有踩坑
-- **2026-03-08** 修复 Compose Resources 缺失崩溃：pbxproj 添加 Run Script
-- **2026-03-08** 修复 Koin 未初始化崩溃：`iosApp.swift` 添加 `setupKoin()` 调用
-- **2026-03-08** 分离 `SettingsRepository` 接口；删除调试代码；修复 DayDetailsScreen 数据竞争
+- **2026-03-08** 实现 iOS Google Sign-In 原生集成（通过 `GoogleSignInBridge` 与 `AuthManager` 协作）。
+- **2026-03-08** 实现 iOS 云同步引擎 `IosDriveSyncEngine`，支持与 Android 端的数据互通。
+- **2026-03-08** 实现 iOS 热力图扫描逻辑，补全 `DataStoreRepository.getHeatmapData()`。
+- **2026-03-08** 新增 `docs/README_IOS.md`：完整记录 iOS 编译、真机安装流程及所有踩坑。
+- **2026-03-08** 修复 Compose Resources 缺失崩溃：pbxproj 添加 Run Script。
+- **2026-03-08** 修复 Koin 未初始化崩溃：`iosApp.swift` 添加 `setupKoin()` 调用。
 
 ---
 
@@ -79,26 +79,7 @@
 
 ### 无阻塞
 
-当前 Android 与 iOS 真机均可正常编译、安装、运行。
-
----
-
-## 下次从这里开始
-
-### 恢复上下文
-1. 读取本文件
-2. 读取 `docs/README_IOS.md` 了解 iOS 构建命令
-
-### 推荐下一步
-
-**A（推荐）— 实现 iOS 热力图**
-修改 `DataStoreRepository.getHeatmapData()`，扫描 DataStore 中所有 `history_` 前缀键，统计每日组数。改动范围小，收益明显。
-
-**B — 实现 iOS Google Sign-In**
-需集成 `GoogleSignIn` CocoaPods/SPM 依赖，修改 `AuthManager.ios.kt`。改动涉及 Xcode 项目配置。
-
-**C — 实现云同步后端**
-参考 `docs/GOOGLE_DRIVE_SYNC.md`，改动范围最大。
+当前 Android 与 iOS 真机均可正常编译、安装、运行，核心功能全量通过。
 
 ---
 

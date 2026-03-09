@@ -26,8 +26,18 @@ actual class AuthManager(private val context: Context) {
     }
 
     actual suspend fun signIn() {
-        // Android specific: handled by ActivityResultLauncher in NavHost for now
-        // But we can trigger it here if we pass the launcher
+        // Android specific: handled by ActivityResultLauncher in NavHost
+    }
+
+    actual suspend fun restoreSignIn() {
+        GoogleSignIn.getLastSignedInAccount(context)?.let { account ->
+            _currentUser.value = UserProfile(
+                id = account.id ?: "",
+                name = account.displayName,
+                email = account.email,
+                photoUrl = account.photoUrl?.toString()
+            )
+        }
     }
 
     actual suspend fun signOut() {
@@ -39,6 +49,6 @@ actual class AuthManager(private val context: Context) {
     }
 
     actual suspend fun sync() {
-        // Android sync is handled by WorkManager SyncWorker triggered from FitBotNavHost.
+        // Android sync is handled by WorkManager SyncWorker
     }
 }

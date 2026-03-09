@@ -235,6 +235,21 @@ defaults read com.apple.dt.Xcode IDEProvisioningTeams
 
 ---
 
+### 问题 6：Google 登录态频繁失效（重启 App 需重新登录）
+
+**现象：** 用户登录 Google 后，关闭并重新打开 App，登录态丢失，个人中心显示未登录，云同步失效。
+
+**原因：** 之前的实现仅将 `accessToken` 存储在内存中，未在应用启动时调用 Google SDK 的静默登录接口。
+
+**修复：** 实现了 **Silent Sign-In (静默登录)** 逻辑：
+1. **Kotlin 层**：在 `AuthManager` 中新增 `restoreSignIn()` 挂起函数。
+2. **Swift 桥接层**：在 `GoogleSignInBridge.swift` 中实现 `restoreSignInLauncher`，调用原生 `GIDSignIn.sharedInstance.restorePreviousSignIn`。
+3. **自动恢复**：在 `MainViewController.kt` 的根 Composable 中使用 `LaunchedEffect(Unit)` 触发 `authManager.restoreSignIn()`。
+
+这样，只要用户未手动退出，App 每次启动都会自动恢复之前的 Google 账号授权并刷新 Token。
+
+---
+
 ## 五、架构说明
 
 ```

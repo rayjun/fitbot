@@ -14,6 +14,7 @@ expect class AuthManager {
     val isSyncing: StateFlow<Boolean>
 
     suspend fun signIn()
+    suspend fun restoreSignIn()
     suspend fun signOut()
     suspend fun sync()
 }

@@ -276,3 +276,29 @@ var dayDetailsDate: String?      // 覆盖显示 DayDetailsScreen
 2. dayDetailsDate != null → DayDetailsScreen
 3. selectedExercise != null → ExerciseDetailScreen
 4. currentScreen → Library / Plans / Profile / Settings
+
+---
+
+## 测试策略
+
+本项目通过 Kotlin Multiplatform 的 `commonTest` 源集实现了一套高度可复用的单元测试体系，确保核心业务逻辑在 Android 和 iOS 上行为一致。
+
+### 测试环境
+*   **共享测试源集**: `app/src/commonTest/kotlin`。
+*   **模拟依赖 (Mocking)**: 由于 KMP 缺乏成熟的跨平台 Mock 框架，项目采用 **Manual Fake** 模式。
+    *   `FakeWorkoutRepository`: 同时实现 `WorkoutRepository` 和 `SettingsRepository` 接口，使用 `StateFlow` 在内存中维护模拟数据。
+
+### 测试覆盖范围
+1.  **ViewModel 状态机**:
+    *   `PlanViewModelTest`: 验证周计划的增删改查逻辑。
+    *   `WorkoutViewModelTest`: 验证训练记录的完整生命周期（添加、更新、删除及边界条件处理）。
+    *   `SettingsViewModelTest`: 验证主题、语言及个人座右铭的持久化逻辑。
+    *   `ProfileViewModelTest`: 验证热力图统计数据的聚合算法。
+2.  **工具类逻辑**:
+    *   `DateUtilsTest`: 深度测试“获取偏移周周一”等涉及 `kotlinx-datetime` 的复杂日期计算。
+3.  **静态数据验证**:
+    *   `ExerciseProviderTest`: 确保 18 个内置动作的分类及属性配置正确。
+
+### 运行测试
+*   运行 Android 侧单元测试（包含 commonTest）: `./gradlew :app:testDebugUnitTest`
+*   运行所有平台测试: `./gradlew :app:allTests`

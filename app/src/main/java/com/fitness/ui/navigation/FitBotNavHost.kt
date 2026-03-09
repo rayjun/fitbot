@@ -68,20 +68,21 @@ fun FitBotNavHost(
         }
     }
 
-    val triggerAuthFlow = {
-        authManager.revokeAccess {
-            googleSignInLauncher.launch(authManager.getSignInIntent())
+    // Silent sign in on launch
+    LaunchedEffect(Unit) {
+        val account = authManager.getSignedInAccount()
+        if (account != null) {
+            lastAccount = account
+            if (GoogleSignIn.hasPermissions(account, driveScope)) {
+                Log.d("FitBotSync", "Auto-sync on startup for ${account.email}")
+                val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
+                workManager.enqueueUniqueWork("FullSync", ExistingWorkPolicy.REPLACE, syncRequest)
+            }
         }
     }
 
-    // Auto-sync on startup if already signed in with Drive permission
-    LaunchedEffect(Unit) {
-        val account = authManager.getSignedInAccount()
-        if (account != null && GoogleSignIn.hasPermissions(account, driveScope)) {
-            Log.d("FitBotSync", "Auto-sync on startup for ${account.email}")
-            val syncRequest = OneTimeWorkRequestBuilder<SyncWorker>().build()
-            workManager.enqueueUniqueWork("FullSync", ExistingWorkPolicy.REPLACE, syncRequest)
-        }
+    val triggerAuthFlow = {
+        googleSignInLauncher.launch(authManager.getSignInIntent())
     }
 
     NavHost(

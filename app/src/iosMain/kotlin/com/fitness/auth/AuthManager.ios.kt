@@ -22,10 +22,43 @@ actual class AuthManager(private val repository: DataStoreRepository) {
      * The launcher invokes the callback on the main thread.
      */
     var signInLauncher: ((GoogleAuthCallback) -> Unit)? = null
+    var restoreSignInLauncher: ((GoogleAuthCallback) -> Unit)? = null
 
     actual suspend fun signIn() {
         suspendCancellableCoroutine { cont ->
             val launcher = signInLauncher
+            if (launcher == null) {
+                cont.resume(Unit)
+                return@suspendCancellableCoroutine
+            }
+            launcher(object : GoogleAuthCallback {
+                override fun onSignInSuccess(
+                    userId: String,
+                    userName: String?,
+                    userEmail: String?,
+                    photoUrl: String?,
+                    accessToken: String
+                ) {
+                    currentAccessToken = accessToken
+                    _currentUser.value = UserProfile(
+                        id = userId,
+                        name = userName,
+                        email = userEmail,
+                        photoUrl = photoUrl
+                    )
+                    cont.resume(Unit)
+                }
+
+                override fun onSignInFailed(error: String) {
+                    cont.resume(Unit)
+                }
+            })
+        }
+    }
+
+    actual suspend fun restoreSignIn() {
+        suspendCancellableCoroutine { cont ->
+            val launcher = restoreSignInLauncher
             if (launcher == null) {
                 cont.resume(Unit)
                 return@suspendCancellableCoroutine
