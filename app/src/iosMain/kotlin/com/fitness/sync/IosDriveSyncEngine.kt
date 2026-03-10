@@ -42,7 +42,7 @@ class IosDriveSyncEngine(
     private val json = Json { ignoreUnknownKeys = true }
     private val FOLDER_NAME = "FitBot"
     private val LAST_SYNC_KEY = longPreferencesKey("last_sync_time")
-    private val LOCAL_MODIFIED_KEY_PREFIX = "local_modified_"
+    private val DIRTY_DATES_KEY = stringPreferencesKey("dirty_dates")
 
     suspend fun sync() {
         val folderId = drive.getOrCreateFolder(FOLDER_NAME)
@@ -55,7 +55,11 @@ class IosDriveSyncEngine(
         syncPlansLogic(folderId, remoteMap, lastSyncTime)
         syncPrefs(folderId, remoteMap, lastSyncTime)
 
-        repository.dataStore.edit { it[LAST_SYNC_KEY] = Clock.System.now().toEpochMilliseconds() }
+        repository.dataStore.edit { 
+            it[LAST_SYNC_KEY] = Clock.System.now().toEpochMilliseconds() 
+            // Clear dirty dates after successful sync
+            it.remove(DIRTY_DATES_KEY)
+        }
         drive.close()
     }
 
@@ -87,10 +91,19 @@ class IosDriveSyncEngine(
 
         // --- Upload pass: only dates modified locally since lastSync ---
         val locallyModifiedDates = mutableSetOf<String>()
+        val dirtyJson = allPrefs[DIRTY_DATES_KEY]
+        if (dirtyJson != null) {
+            try {
+                locallyModifiedDates.addAll(json.decodeFromString<Set<String>>(dirtyJson))
+            } catch (e: Exception) {}
+        }
+        
+        // Backwards compatibility with old LOCAL_MODIFIED_KEY_PREFIX approach
+        val localModifiedPrefix = "local_modified_"
         allPrefs.asMap().forEach { (key, value) ->
-            if (key.name.startsWith(LOCAL_MODIFIED_KEY_PREFIX) && value is Long) {
+            if (key.name.startsWith(localModifiedPrefix) && value is Long) {
                 if (lastSync == 0L || value > lastSync) {
-                    locallyModifiedDates.add(key.name.removePrefix(LOCAL_MODIFIED_KEY_PREFIX))
+                    locallyModifiedDates.add(key.name.removePrefix(localModifiedPrefix))
                 }
             }
         }

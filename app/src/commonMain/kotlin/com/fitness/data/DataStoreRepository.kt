@@ -115,6 +115,20 @@ class DataStoreRepository(
         }
     }
 
+    // Add a new property to maintain dirty state
+    private val DIRTY_DATES_KEY = stringPreferencesKey("dirty_dates")
+
+    /** Track a date as locally modified for efficient syncing. */
+    private suspend fun markDateDirty(date: String) {
+        dataStore.edit { prefs ->
+            val dirtySet = try {
+                prefs[DIRTY_DATES_KEY]?.let { json.decodeFromString<Set<String>>(it) } ?: emptySet()
+            } catch (e: Exception) { emptySet() }
+            val newSet = dirtySet + date
+            prefs[DIRTY_DATES_KEY] = json.encodeToString(newSet)
+        }
+    }
+
     override suspend fun addExerciseSet(set: ExerciseSet) {
         val key = stringPreferencesKey(HISTORY_KEY_PREFIX + set.date)
         val modifiedKey = longPreferencesKey(LOCAL_MODIFIED_KEY_PREFIX + set.date)
@@ -132,6 +146,7 @@ class DataStoreRepository(
             preferences[key] = json.encodeToString(currentList)
             preferences[modifiedKey] = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
         }
+        markDateDirty(set.date)
     }
 
     override suspend fun updateExerciseSet(set: ExerciseSet) {
@@ -151,6 +166,7 @@ class DataStoreRepository(
                 } catch (e: Exception) {}
             }
         }
+        markDateDirty(set.date)
     }
 
     override suspend fun deleteExerciseSet(setId: Long, date: String) {
@@ -170,6 +186,7 @@ class DataStoreRepository(
                 } catch (e: Exception) {}
             }
         }
+        markDateDirty(date)
     }
 
     // --- SettingsRepository ---
