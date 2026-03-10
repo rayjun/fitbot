@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.Hotel
@@ -186,6 +187,8 @@ fun InteractivePlanView(
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         WeeklyProgressBarNavigation(
             weekOffset = weekOffset,
+            monday = monday,
+            setsByDate = setsByDate,
             selectedDayOfWeek = selectedDayOfWeek,
             currentRoutine = currentRoutine,
             onDaySelect = { selectedDayOfWeek = it }
@@ -389,6 +392,8 @@ fun InteractivePlanView(
 @Composable
 fun WeeklyProgressBarNavigation(
     weekOffset: Int,
+    monday: LocalDate,
+    setsByDate: Map<String, List<com.fitness.model.ExerciseSet>>,
     selectedDayOfWeek: Int,
     currentRoutine: List<RoutineDay>,
     onDaySelect: (Int) -> Unit
@@ -401,6 +406,20 @@ fun WeeklyProgressBarNavigation(
         (1..7).forEach { dayNum ->
             val dayPlan = currentRoutine.find { it.dayOfWeek == dayNum }
             val isRest = dayPlan?.isRest ?: false
+
+            val dayDateStr = monday.plus(dayNum - 1, DateTimeUnit.DAY).toString()
+            val recordedSets = setsByDate[dayDateStr] ?: emptyList()
+
+            var completionRatio = 0f
+            if (!isRest && dayPlan != null && dayPlan.exercises.isNotEmpty()) {
+                val totalPlanned = dayPlan.exercises.sumOf { it.targetSets }
+                val totalCompleted = recordedSets.size
+                if (totalPlanned > 0) {
+                    completionRatio = (totalCompleted.toFloat() / totalPlanned.toFloat()).coerceIn(0f, 1f)
+                }
+            } else if (!isRest && recordedSets.isNotEmpty()) {
+                completionRatio = 1f
+            }
 
             val isSelected = selectedDayOfWeek == dayNum
             val isActualToday = weekOffset == 0 && dayNum == todayDayOfWeek
@@ -424,6 +443,7 @@ fun WeeklyProgressBarNavigation(
                         .background(
                             when {
                                 isSelected -> MaterialTheme.colorScheme.primary
+                                completionRatio > 0f -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f + 0.8f * completionRatio)
                                 isActualToday -> MaterialTheme.colorScheme.primaryContainer
                                 else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                             }
@@ -443,6 +463,14 @@ fun WeeklyProgressBarNavigation(
                                     if (isSelected) MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
                                     else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                                 )
+                        )
+                    } else if (completionRatio >= 1f && !isSelected) {
+                        // Show a small indicator that it's fully complete if not selected
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
