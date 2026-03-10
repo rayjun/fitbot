@@ -24,15 +24,12 @@
 | 本地持久化 | ✅ Room + DataStore | ✅ DataStore | iOS 端使用 DataStore + HISTORY_KEY_PREFIX 实现 |
 | 用户认证 | ✅ Google Sign-In | ✅ Google Sign-In | 双端均支持静默登录 (Silent Sign-In)，重启 App 不再掉线 |
 | 热力图 | ✅ | ✅ | 已通过单元测试验证逻辑准确性 |
-| 云同步 | ✅ | ✅ | 实现 Google Drive 增量双向同步，Android 支持启动自动触发 |
+| 云同步 | ✅ | ✅ | 实现 Fetch-Merge-Upload 防覆盖闭环、软删除及 iOS Datastore 性能优化 |
 
 ### 待优化
 
-#### 同步冲突处理
-**目标**: 细化合并逻辑，当前为“远程更新合并”和“最新覆盖”策略。
-
-#### 性能优化
-**目标**: 减少 DataStore 频繁序列化/反序列化大 JSON 字符串的开销。
+#### DataStore 数据量长期积压
+**目标**: 虽然通过分离 `dirty_dates` 解决了单次修改扫描的性能瓶颈，但在 iOS 侧长期累积数年的 `HISTORY_KEY_PREFIX` 数据依然会随着时间使 `Preferences` 文件臃肿。需考虑引入分页加载或 SQLDelight 数据库化。
 
 ---
 

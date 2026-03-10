@@ -118,20 +118,17 @@ if (shouldDownload) {
 
 同步完成后更新 `last_sync_time`（DataStore key：`last_sync_time`）。
 
-### 训练组数据去重（SetRecord 合并）
+### 训练组数据去重与冲突合并 (Fetch-Merge-Upload)
 
-避免重复插入，使用双重去重机制：
+为防止多设备离线修改在同时连网时导致的数据相互覆盖，系统采用 **Fetch-Merge-Upload (下载-合并-上传)** 的闭环机制和**软删除 (Tombstone)**：
 
-```kotlin
-// 优先：remoteId 精确匹配（Android 端写入的 UUID）
-val byRemoteId = existingRemoteIds.contains(setRecord.remoteId)
-// 回退：exerciseName + timeStr 组合键（兼容旧格式或 remoteId 为空的记录）
-val byComposite = existingKeys.contains("${exercise.name}|${setRecord.time}")
-
-if (!byRemoteId && !byComposite) {
-    repository.addExerciseSet(...)
-}
-```
+1. **软删除支持**：`ExerciseSet` 具有 `isDeleted: Boolean` 属性（兼容处理旧数据默认为 false）。在用户执行删除操作时，数据库仅修改标记为 true，保留该记录以便跨设备同步这一“删除意图”。
+2. **下载远端**：在尝试将本地修改推送到远端之前，首先调用 `drive.downloadFile(id)` 获取最新的远端版本。
+3. **在内存合并 (`mergeTrainingDays` 纯函数)**：
+   - 优先通过 `remoteId` 进行精确去重（确保修改行为作用于同一实体）。
+   - 若 `remoteId` 缺失，降级使用 `exerciseName + timeStr` 组合键比对。
+   - 当两条记录相遇时，如果有一侧标记为 `isDeleted = true`，则最终合并版本也会标记为删除（Tombstone 优先）。
+4. **安全覆盖**：将融合了双方所有独立记录（保留增量修改与删除标记）的最终版本序列化，通过 `drive.updateFile()` 写入云端。
 
 ---
 
