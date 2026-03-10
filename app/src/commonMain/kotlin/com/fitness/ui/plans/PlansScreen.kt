@@ -283,12 +283,14 @@ fun InteractivePlanView(
                         if (exercise != null) {
                             val completedCount = recordedSetsForSelectedDay.count { it.exerciseName == planned.id }
                             val isFinished = completedCount >= planned.targetSets
+                            val isToday = selectedDateStr == DateUtils.getTodayString()
 
                             ExerciseActionCard(
                                 exercise = exercise,
                                 planned = planned,
                                 completedCount = completedCount,
                                 isFinished = isFinished,
+                                isToday = isToday,
                                 onStart = { onStartExercise(exercise.id, selectedDateStr) },
                                 onDelete = { exerciseToDelete = planned },
                                 onEditSets = { exerciseToEditSets = planned }
@@ -485,6 +487,7 @@ fun ExerciseActionCard(
     planned: PlannedExercise,
     completedCount: Int,
     isFinished: Boolean,
+    isToday: Boolean,
     onStart: () -> Unit,
     onDelete: () -> Unit,
     onEditSets: () -> Unit
@@ -504,7 +507,9 @@ fun ExerciseActionCard(
         ) {
             // Exercise info + progress — tap to start
             Column(
-                modifier = Modifier.weight(1f).clickable { onStart() }
+                modifier = Modifier.weight(1f).let { 
+                    if (isToday) it.clickable { onStart() } else it 
+                }
             ) {
                 Text(
                     getString(exercise.targetMuscleKey),
@@ -544,21 +549,22 @@ fun ExerciseActionCard(
                     tint = MaterialTheme.colorScheme.tertiary,
                     modifier = Modifier.size(28.dp)
                 )
-            } else {
+            } else if (isToday) {
                 FilledIconButton(
                     onClick = onStart,
-                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.size(32.dp),
+                    shape = RoundedCornerShape(10.dp),
                     colors = IconButtonDefaults.filledIconButtonColors(containerColor = MaterialTheme.colorScheme.primary)
                 ) {
-                    Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.PlayArrow, null, modifier = Modifier.size(16.dp))
                 }
             }
 
-            IconButton(onClick = onDelete, modifier = Modifier.padding(start = 4.dp)) {
+            IconButton(onClick = onDelete, modifier = Modifier.padding(start = 4.dp).size(32.dp)) {
                 Icon(
                     Icons.Default.DeleteOutline, null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 )
             }
         }
