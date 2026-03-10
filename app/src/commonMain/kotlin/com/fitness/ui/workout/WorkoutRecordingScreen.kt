@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Delete
 import com.fitness.data.ExerciseProvider
 import com.fitness.data.WorkoutRepository
 import com.fitness.model.ExerciseSet
+import com.fitness.util.DateUtils
 import com.fitness.util.getString
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
@@ -39,6 +40,7 @@ fun WorkoutRecordingScreen(
     val exercise = remember(exerciseId) { ExerciseProvider.exercises.find { it.id == exerciseId } }
     val localizedName = exercise?.let { getString(it.nameKey) } ?: exerciseId
     val isBodyweight = exercise?.isBodyweight ?: false
+    val isToday = remember(date) { date == DateUtils.getTodayString() }
 
     val setsFlow = remember(repository, date) { repository.getSetsByDate(date) }
     val sets by setsFlow.collectAsState(initial = emptyList())
@@ -58,11 +60,13 @@ fun WorkoutRecordingScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showAddDialog = true },
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Set")
+            if (isToday) {
+                FloatingActionButton(
+                    onClick = { showAddDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primary
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Set")
+                }
             }
         }
     ) { padding ->
@@ -93,7 +97,7 @@ fun WorkoutRecordingScreen(
                         SetItemRow(
                             set = set, 
                             isBodyweight = isBodyweight,
-                            onClick = { editingSet = set }
+                            onClick = if (isToday) { { editingSet = set } } else null
                         )
                     }
                 }
@@ -155,9 +159,11 @@ fun WorkoutRecordingScreen(
 }
 
 @Composable
-private fun SetItemRow(set: ExerciseSet, isBodyweight: Boolean, onClick: () -> Unit) {
+private fun SetItemRow(set: ExerciseSet, isBodyweight: Boolean, onClick: (() -> Unit)?) {
     Card(
-        modifier = Modifier.fillMaxWidth().clickable { onClick() },
+        modifier = Modifier.fillMaxWidth().let {
+            if (onClick != null) it.clickable { onClick() } else it
+        },
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
     ) {
         ListItem(
