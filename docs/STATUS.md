@@ -66,6 +66,8 @@
 
 ## 最近修改
 
+- **2026-03-10** 优化 `PlansScreen` 用户体验：非当天日期的训练记录变为只读，防止篡改历史记录；周历卡片根据当天完成组数比例动态加深颜色。
+- **2026-03-10** 修复非当天日期的训练记录在 `PlansScreen` 中无法正确展示及历史打勾状态丢失的问题，补充了 `allSetsByDate` 映射逻辑及单测。
 - **2026-03-08** 实现 iOS Google Sign-In 原生集成（通过 `GoogleSignInBridge` 与 `AuthManager` 协作）。
 - **2026-03-08** 实现 iOS 云同步引擎 `IosDriveSyncEngine`，支持与 Android 端的数据互通。
 - **2026-03-08** 实现 iOS 热力图扫描逻辑，补全 `DataStoreRepository.getHeatmapData()`。
