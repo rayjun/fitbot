@@ -17,7 +17,8 @@ data class SetEntity(
     val weight: Double,
     val timestamp: Long,       // 用于记录和排序
     val timeStr: String,       // 格式: 09:05，方便序列化
-    val remoteId: String = "" // 用于跨设备唯一标识
+    val remoteId: String = "", // 用于跨设备唯一标识
+    val isDeleted: Boolean = false
 )
 
 fun SetEntity.toModel() = com.fitness.model.ExerciseSet(
@@ -29,5 +30,6 @@ fun SetEntity.toModel() = com.fitness.model.ExerciseSet(
     weight = weight,
     timestamp = timestamp,
     timeStr = timeStr,
-    remoteId = remoteId
+    remoteId = remoteId,
+    isDeleted = isDeleted
 )

@@ -15,5 +15,6 @@ data class ExerciseSet(
     val weight: Double,
     val timestamp: Long,
     val timeStr: String,
-    val remoteId: String = ""
+    val remoteId: String = "",
+    val isDeleted: Boolean = false
 )

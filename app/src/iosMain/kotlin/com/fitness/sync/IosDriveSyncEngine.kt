@@ -140,7 +140,8 @@ class IosDriveSyncEngine(
                                 weight = setRecord.weight,
                                 timestamp = ts,
                                 timeStr = setRecord.time,
-                                remoteId = setRecord.remoteId
+                                remoteId = setRecord.remoteId,
+                                isDeleted = setRecord.isDeleted
                             )
                         )
                     }
@@ -153,7 +154,7 @@ class IosDriveSyncEngine(
         val sessions = sets.groupBy { it.sessionId }.map { (sessionId, sessionSets) ->
             val exercises = sessionSets.groupBy { it.exerciseName }.map { (name, exSets) ->
                 val setRecords = exSets.map {
-                    SetRecord(reps = it.reps, weight = it.weight, time = it.timeStr, remoteId = it.remoteId)
+                    SetRecord(reps = it.reps, weight = it.weight, time = it.timeStr, remoteId = it.remoteId, isDeleted = it.isDeleted)
                 }
                 ExerciseRecord(name = name, sets = setRecords)
             }

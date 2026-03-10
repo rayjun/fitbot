@@ -232,7 +232,7 @@ class SyncWorker @AssistedInject constructor(
                     val time = try {
                         SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.US).parse("${day.date} ${setRecord.time}")?.time ?: System.currentTimeMillis()
                     } catch (e: Exception) { System.currentTimeMillis() }
-                    result.add(SetEntity(date = day.date, sessionId = session.sessionId, exerciseName = exercise.name, reps = setRecord.reps, weight = setRecord.weight, timestamp = time, timeStr = setRecord.time, remoteId = setRecord.remoteId))
+                    result.add(SetEntity(date = day.date, sessionId = session.sessionId, exerciseName = exercise.name, reps = setRecord.reps, weight = setRecord.weight, timestamp = time, timeStr = setRecord.time, remoteId = setRecord.remoteId, isDeleted = setRecord.isDeleted))
                 }
             }
         }
@@ -242,7 +242,7 @@ class SyncWorker @AssistedInject constructor(
     private fun transformToTrainingDay(date: String, sets: List<SetEntity>): TrainingDay {
         val sessions = sets.groupBy { it.sessionId }.map { (sessionId, sessionSets) ->
             val exercises = sessionSets.groupBy { it.exerciseName }.map { (exerciseName, exerciseSets) ->
-                val setRecords = exerciseSets.map { SetRecord(reps = it.reps, weight = it.weight, time = it.timeStr, remoteId = it.remoteId) }
+                val setRecords = exerciseSets.map { SetRecord(reps = it.reps, weight = it.weight, time = it.timeStr, remoteId = it.remoteId, isDeleted = it.isDeleted) }
                 ExerciseRecord(name = exerciseName, sets = setRecords)
             }
             TrainingSession(sessionId = sessionId, startTime = sessionSets.firstOrNull()?.timeStr ?: "00:00", endTime = sessionSets.lastOrNull()?.timeStr ?: "23:59", exercises = exercises)

@@ -30,5 +30,6 @@ data class SetRecord(
     val reps: Int,
     val weight: Double,
     val time: String,
-    val remoteId: String
+    val remoteId: String,
+    val isDeleted: Boolean = false
 )
