@@ -134,13 +134,23 @@ class SyncWorker @AssistedInject constructor(
             val localSets = exerciseDao.getSetsByDate(date)
             if (localSets.isEmpty()) continue
             val localDay = transformToTrainingDay(date, localSets)
-            val jsonStr = json.encodeToString(localDay)
+            
             val fileName = "$date.json"
             val remoteFile = remoteMap[fileName]
+            
             if (remoteFile != null) {
-                helper.updateFile(remoteFile.id, jsonStr)
+                try {
+                    // Fetch-Merge-Upload to prevent data loss
+                    val remoteJson = helper.downloadFileById(remoteFile.id)
+                    val remoteDay = json.decodeFromString<TrainingDay>(remoteJson)
+                    val mergedDay = mergeTrainingDays(localDay, remoteDay)
+                    helper.updateFile(remoteFile.id, json.encodeToString(mergedDay))
+                } catch (e: Exception) {
+                    // Fallback to overwrite if remote parsing fails
+                    helper.updateFile(remoteFile.id, json.encodeToString(localDay))
+                }
             } else {
-                helper.createFile(folderId, fileName, jsonStr)
+                helper.createFile(folderId, fileName, json.encodeToString(localDay))
             }
         }
     }

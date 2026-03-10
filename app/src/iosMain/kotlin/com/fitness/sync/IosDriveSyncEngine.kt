@@ -101,13 +101,22 @@ class IosDriveSyncEngine(
             val localSets = repository.getSetsByDate(date).first()
             if (localSets.isEmpty()) continue
             val localDay = buildTrainingDay(date, localSets)
-            val localJsonStr = json.encodeToString(localDay)
+            
             val fileName = "$date.json"
             val remoteFile = remoteMap[fileName]
+            
             if (remoteFile != null) {
-                drive.updateFile(remoteFile.id, localJsonStr)
+                try {
+                    // Fetch-Merge-Upload
+                    val remoteJson = drive.downloadFile(remoteFile.id)
+                    val remoteDay = json.decodeFromString<TrainingDay>(remoteJson)
+                    val mergedDay = mergeTrainingDays(localDay, remoteDay)
+                    drive.updateFile(remoteFile.id, json.encodeToString(mergedDay))
+                } catch (e: Exception) {
+                    drive.updateFile(remoteFile.id, json.encodeToString(localDay))
+                }
             } else {
-                drive.createFile(folderId, fileName, localJsonStr)
+                drive.createFile(folderId, fileName, json.encodeToString(localDay))
             }
         }
     }
