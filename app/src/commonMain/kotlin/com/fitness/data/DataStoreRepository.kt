@@ -79,7 +79,7 @@ class DataStoreRepository(
                 if (key.name.startsWith(HISTORY_KEY_PREFIX) && value is String) {
                     val date = key.name.removePrefix(HISTORY_KEY_PREFIX)
                     try {
-                        val sets = json.decodeFromString<List<ExerciseSet>>(value)
+                        val sets = json.decodeFromString<List<ExerciseSet>>(value).filter { !it.isDeleted }
                         if (sets.isNotEmpty()) result[date] = sets.size
                     } catch (_: Exception) {}
                 }
@@ -108,7 +108,7 @@ class DataStoreRepository(
         return dataStore.data.map { preferences ->
             val jsonStr = preferences[key]
             if (jsonStr != null) {
-                try { json.decodeFromString<List<ExerciseSet>>(jsonStr) } catch(e: Exception) { emptyList() }
+                try { json.decodeFromString<List<ExerciseSet>>(jsonStr).filter { !it.isDeleted } } catch(e: Exception) { emptyList() }
             } else {
                 emptyList()
             }
@@ -125,7 +125,9 @@ class DataStoreRepository(
             } else {
                 mutableListOf()
             }
-            val newSet = if (set.id == 0L) set.copy(id = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()) else set
+            // Use UUID for robust distributed sync. If remoteId is already set, keep it.
+            val finalRemoteId = if (set.remoteId.isEmpty()) "ios-${kotlinx.datetime.Clock.System.now().toEpochMilliseconds()}" else set.remoteId
+            val newSet = if (set.id == 0L) set.copy(id = kotlinx.datetime.Clock.System.now().toEpochMilliseconds(), remoteId = finalRemoteId) else set.copy(remoteId = finalRemoteId)
             currentList.add(newSet)
             preferences[key] = json.encodeToString(currentList)
             preferences[modifiedKey] = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
@@ -146,7 +148,7 @@ class DataStoreRepository(
                         preferences[key] = json.encodeToString(currentList)
                         preferences[modifiedKey] = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
                     }
-                } catch(e: Exception) {}
+                } catch (e: Exception) {}
             }
         }
     }
@@ -159,10 +161,13 @@ class DataStoreRepository(
             if (currentJson != null) {
                 try {
                     val currentList = json.decodeFromString<List<ExerciseSet>>(currentJson).toMutableList()
-                    currentList.removeAll { it.id == setId }
-                    preferences[key] = json.encodeToString(currentList)
-                    preferences[modifiedKey] = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
-                } catch(e: Exception) {}
+                    val index = currentList.indexOfFirst { it.id == setId }
+                    if (index != -1) {
+                        currentList[index] = currentList[index].copy(isDeleted = true)
+                        preferences[key] = json.encodeToString(currentList)
+                        preferences[modifiedKey] = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
+                    }
+                } catch (e: Exception) {}
             }
         }
     }

@@ -5,6 +5,7 @@ import com.fitness.model.ExerciseSet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.*
 import kotlin.test.*
@@ -52,7 +53,7 @@ class WorkoutViewModelTest {
     }
 
     @Test
-    fun testDeleteSet() = runTest {
+    fun testDeleteSetIsSoftDelete() = runTest {
         backgroundScope.launch { viewModel.setsToday.collect() }
         val date = "2024-03-09"
         viewModel.setDate(date)
@@ -61,12 +62,15 @@ class WorkoutViewModelTest {
         repository.addExerciseSet(set)
         advanceUntilIdle()
         
-        assertEquals(1, viewModel.setsToday.value.size)
-        
         viewModel.deleteSet(1L, date)
         advanceUntilIdle()
         
+        // Active sets should be empty
         assertEquals(0, viewModel.setsToday.value.size)
+        
+        // But repository should still have it as deleted
+        val allSets = repository.getAllSets().first()
+        assertTrue(allSets.any { it.id == 1L && it.isDeleted })
     }
 
     @Test

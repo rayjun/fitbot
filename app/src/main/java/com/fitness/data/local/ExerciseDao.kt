@@ -25,6 +25,9 @@ interface ExerciseDao {
     @Query("SELECT DISTINCT date FROM exercise_sets WHERE timestamp > :since")
     suspend fun getDistinctDatesModifiedSince(since: Long): List<String>
 
+    @Query("SELECT * FROM exercise_sets WHERE id = :id LIMIT 1")
+    suspend fun getSetById(id: Long): SetEntity?
+
     @Query("DELETE FROM exercise_sets WHERE id = :id")
     suspend fun deleteSet(id: Long)
 

@@ -64,7 +64,7 @@ class RoomWorkoutRepository(
     }
 
     override fun getHeatmapData(): Flow<Map<String, Int>> = exerciseDao.getAllSetsFlow().map { sets ->
-        sets.groupBy { it.date }.mapValues { it.value.size }
+        sets.filter { !it.isDeleted }.groupBy { it.date }.mapValues { it.value.size }
     }
 
     override fun getAllSets(): Flow<List<ExerciseSet>> = exerciseDao.getAllSetsFlow().map { list ->
@@ -72,10 +72,11 @@ class RoomWorkoutRepository(
     }
 
     override fun getSetsByDate(date: String): Flow<List<ExerciseSet>> = exerciseDao.getSetsByDateFlow(date).map { list ->
-        list.map { it.toModel() }
+        list.filter { !it.isDeleted }.map { it.toModel() }
     }
 
     override suspend fun addExerciseSet(set: ExerciseSet) {
+        val remoteId = if (set.remoteId.isEmpty()) java.util.UUID.randomUUID().toString() else set.remoteId
         exerciseDao.insertSet(SetEntity(
             date = set.date,
             sessionId = set.sessionId,
@@ -83,7 +84,9 @@ class RoomWorkoutRepository(
             reps = set.reps,
             weight = set.weight,
             timestamp = set.timestamp,
-            timeStr = set.timeStr
+            timeStr = set.timeStr,
+            remoteId = remoteId,
+            isDeleted = set.isDeleted
         ))
     }
 
@@ -96,12 +99,17 @@ class RoomWorkoutRepository(
             reps = set.reps,
             weight = set.weight,
             timestamp = set.timestamp,
-            timeStr = set.timeStr
+            timeStr = set.timeStr,
+            remoteId = set.remoteId,
+            isDeleted = set.isDeleted
         ))
     }
 
     override suspend fun deleteExerciseSet(setId: Long, date: String) {
-        exerciseDao.deleteSet(setId)
+        val existing = exerciseDao.getSetById(setId)
+        if (existing != null) {
+            exerciseDao.updateSet(existing.copy(isDeleted = true))
+        }
     }
 
     private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")

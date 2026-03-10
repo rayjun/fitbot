@@ -36,7 +36,7 @@ class FakeWorkoutRepository : WorkoutRepository, SettingsRepository {
     override fun getAllSets(): Flow<List<ExerciseSet>> = sets
 
     override fun getSetsByDate(date: String): Flow<List<ExerciseSet>> = sets.map { list ->
-        list.filter { it.date == date }
+        list.filter { it.date == date && !it.isDeleted }
     }
 
     override suspend fun addExerciseSet(set: ExerciseSet) {
@@ -48,7 +48,7 @@ class FakeWorkoutRepository : WorkoutRepository, SettingsRepository {
     }
 
     override suspend fun deleteExerciseSet(setId: Long, date: String) {
-        sets.value = sets.value.filter { it.id != setId }
+        sets.value = sets.value.map { if (it.id == setId) it.copy(isDeleted = true) else it }
     }
 
     // SettingsRepository implementation
