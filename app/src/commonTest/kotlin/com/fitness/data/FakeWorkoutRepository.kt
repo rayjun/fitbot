@@ -33,6 +33,8 @@ class FakeWorkoutRepository : WorkoutRepository, SettingsRepository {
         list.groupBy { it.date }.mapValues { it.value.size }
     }
 
+    override fun getAllSets(): Flow<List<ExerciseSet>> = sets
+
     override fun getSetsByDate(date: String): Flow<List<ExerciseSet>> = sets.map { list ->
         list.filter { it.date == date }
     }

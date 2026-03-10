@@ -67,6 +67,7 @@ fun MainViewController() = ComposeUIViewController {
 
         // Observable Logic Data
         val routine by planViewModel.currentRoutine.collectAsState()
+        val allSetsByDate by planViewModel.allSetsByDate.collectAsState()
         val heatmapData by profileViewModel.heatmapData.collectAsState()
         val userProfile by authManager.currentUser.collectAsState()
         val isSyncing by authManager.isSyncing.collectAsState()
@@ -75,9 +76,6 @@ fun MainViewController() = ComposeUIViewController {
         val themeMode by settingsViewModel.themeMode.collectAsState()
         val language by settingsViewModel.language.collectAsState()
         val userQuote by settingsViewModel.userQuote.collectAsState()
-
-        val todayStr = kotlinx.datetime.Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date.toString()
-        val setsToday by workoutViewModel.setsToday.collectAsState()
 
         val isDark = when (themeMode) {
             "dark" -> true
@@ -154,7 +152,7 @@ fun MainViewController() = ComposeUIViewController {
                                 Screen.Plans -> {
                                     PlansScreen(
                                         currentRoutine = routine,
-                                        setsByDate = mapOf(todayStr to setsToday),
+                                        setsByDate = allSetsByDate,
                                         onStartExercise = { exId, date ->
                                             workoutExerciseId = exId
                                             workoutDate = date

@@ -67,6 +67,10 @@ class RoomWorkoutRepository(
         sets.groupBy { it.date }.mapValues { it.value.size }
     }
 
+    override fun getAllSets(): Flow<List<ExerciseSet>> = exerciseDao.getAllSetsFlow().map { list ->
+        list.map { it.toModel() }
+    }
+
     override fun getSetsByDate(date: String): Flow<List<ExerciseSet>> = exerciseDao.getSetsByDateFlow(date).map { list ->
         list.map { it.toModel() }
     }

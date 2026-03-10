@@ -13,6 +13,7 @@ interface WorkoutRepository {
     // History / Heatmap logic
     fun getHeatmapData(): Flow<Map<String, Int>>
     fun getSetsByDate(date: String): Flow<List<ExerciseSet>>
+    fun getAllSets(): Flow<List<ExerciseSet>>
     suspend fun addExerciseSet(set: ExerciseSet)
     suspend fun updateExerciseSet(set: ExerciseSet)
     suspend fun deleteExerciseSet(setId: Long, date: String)

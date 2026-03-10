@@ -48,4 +48,25 @@ class PlanViewModelTest {
         val routine = viewModel.currentRoutine.value
         assertTrue(routine.isEmpty())
     }
+
+    @Test
+    fun testAllSetsByDate() = runTest {
+        backgroundScope.launch { viewModel.allSetsByDate.collect() }
+
+        // Initial should be empty
+        assertTrue(viewModel.allSetsByDate.value.isEmpty())
+
+        // Add some sets across different dates
+        repository.addExerciseSet(com.fitness.model.ExerciseSet(1, "2024-03-01", "s1", "squat", 10, 50.0, 0, "10:00"))
+        repository.addExerciseSet(com.fitness.model.ExerciseSet(2, "2024-03-01", "s1", "squat", 10, 50.0, 0, "10:05"))
+        repository.addExerciseSet(com.fitness.model.ExerciseSet(3, "2024-03-02", "s2", "benchpress", 8, 60.0, 0, "11:00"))
+        
+        advanceUntilIdle()
+
+        val groupedSets = viewModel.allSetsByDate.value
+        assertEquals(2, groupedSets.size)
+        assertEquals(2, groupedSets["2024-03-01"]?.size)
+        assertEquals(1, groupedSets["2024-03-02"]?.size)
+        assertEquals("benchpress", groupedSets["2024-03-02"]?.get(0)?.exerciseName)
+    }
 }

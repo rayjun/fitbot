@@ -111,15 +111,12 @@ fun FitBotNavHost(
 
         composable(Screen.Plans.route) {
             val planViewModel: PlanViewModel = koinViewModel()
-            val workoutViewModel: WorkoutViewModel = koinViewModel()
             val routine by planViewModel.currentRoutine.collectAsState()
-            val setsToday by workoutViewModel.setsToday.collectAsState()
-            
-            val todayStr = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.toString()
+            val allSetsByDate by planViewModel.allSetsByDate.collectAsState()
 
             PlansScreen(
                 currentRoutine = routine,
-                setsByDate = mapOf(todayStr to setsToday),
+                setsByDate = allSetsByDate,
                 onStartExercise = { exerciseId, date ->
                     navController.navigate(Screen.Workout.createRoute(exerciseId, date))
                 },

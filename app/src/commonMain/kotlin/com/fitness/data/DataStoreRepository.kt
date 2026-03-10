@@ -88,6 +88,21 @@ class DataStoreRepository(
         }
     }
 
+    override fun getAllSets(): Flow<List<ExerciseSet>> {
+        return dataStore.data.map { preferences ->
+            val result = mutableListOf<ExerciseSet>()
+            preferences.asMap().forEach { (key, value) ->
+                if (key.name.startsWith(HISTORY_KEY_PREFIX) && value is String) {
+                    try {
+                        val sets = json.decodeFromString<List<ExerciseSet>>(value)
+                        result.addAll(sets)
+                    } catch (_: Exception) {}
+                }
+            }
+            result
+        }
+    }
+
     override fun getSetsByDate(date: String): Flow<List<ExerciseSet>> {
         val key = stringPreferencesKey(HISTORY_KEY_PREFIX + date)
         return dataStore.data.map { preferences ->
