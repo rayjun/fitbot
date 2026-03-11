@@ -9,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -36,6 +37,7 @@ fun ProfileScreen(
     onLoginClick: () -> Unit,
     onLogout: () -> Unit,
     onSettingsClick: () -> Unit,
+    onAnalyticsClick: () -> Unit,
     onUpdateQuote: (String) -> Unit
 ) {
     var showQuoteDialog by remember { mutableStateOf(false) }
@@ -45,12 +47,7 @@ fun ProfileScreen(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = { 
             CompactTopAppBar(
-                title = getString("nav_profile"),
-                actions = {
-                    IconButton(onClick = onSettingsClick) {
-                        Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
-                    }
-                }
+                title = getString("nav_profile")
             ) 
         }
     ) { padding ->
@@ -143,7 +140,32 @@ fun ProfileScreen(
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Menu Items
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
+            ) {
+                Column {
+                    ListItem(
+                        headlineContent = { Text(getString("analytics_title") ?: "Data Analytics", fontWeight = FontWeight.SemiBold) },
+                        leadingContent = { Icon(Icons.Default.ListAlt, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                        modifier = Modifier.clickable { onAnalyticsClick() },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                    ListItem(
+                        headlineContent = { Text(getString("settings_title"), fontWeight = FontWeight.SemiBold) },
+                        leadingContent = { Icon(Icons.Default.Settings, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                        modifier = Modifier.clickable { onSettingsClick() },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
             Text(
                 getString("heatmap_title"), 
                 style = MaterialTheme.typography.labelLarge, 
