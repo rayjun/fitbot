@@ -23,4 +23,5 @@ sealed class Screen(val route: String, val labelKey: String? = null, val icon: I
         fun createRoute(date: String) = "day_details/$date"
     }
     object Settings : Screen("settings")
+    object Analytics : Screen("analytics")
 }

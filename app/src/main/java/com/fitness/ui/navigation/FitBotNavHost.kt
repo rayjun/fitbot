@@ -166,6 +166,9 @@ fun FitBotNavHost(
                 onSettingsClick = {
                     navController.navigate(Screen.Settings.route)
                 },
+                onAnalyticsClick = {
+                    navController.navigate(Screen.Analytics.route)
+                },
                 onUpdateQuote = { settingsViewModel.setUserQuote(it) }
             )
         }
@@ -192,6 +195,16 @@ fun FitBotNavHost(
                 onBack = { navController.popBackStack() },
                 onThemeChange = { settingsViewModel.setThemeMode(it) },
                 onLanguageChange = { settingsViewModel.setLanguage(it) }
+            )
+        }
+
+        composable(Screen.Analytics.route) {
+            val profileViewModel: ProfileViewModel = koinViewModel()
+            val muscleVolumeData by profileViewModel.muscleVolumeData.collectAsState(initial = emptyMap())
+            
+            com.fitness.ui.profile.AnalyticsScreen(
+                muscleVolumeData = muscleVolumeData,
+                onBack = { navController.popBackStack() }
             )
         }
 

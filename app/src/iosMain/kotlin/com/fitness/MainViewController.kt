@@ -191,6 +191,10 @@ fun MainViewController() = ComposeUIViewController {
                                             previousScreen = Screen.Profile
                                             currentScreen = Screen.Settings
                                         },
+                                        onAnalyticsClick = {
+                                            previousScreen = Screen.Profile
+                                            currentScreen = Screen.Analytics
+                                        },
                                         onUpdateQuote = { settingsViewModel.setUserQuote(it) }
                                     )
                                 }
@@ -206,6 +210,14 @@ fun MainViewController() = ComposeUIViewController {
                                         },
                                         onThemeChange = { settingsViewModel.setThemeMode(it) },
                                         onLanguageChange = { settingsViewModel.setLanguage(it) }
+                                    )
+                                }
+                                Screen.Analytics -> {
+                                    com.fitness.ui.profile.AnalyticsScreen(
+                                        muscleVolumeData = muscleVolumeData,
+                                        onBack = {
+                                            currentScreen = previousScreen ?: Screen.Profile
+                                        }
                                     )
                                 }
                                 else -> {}
