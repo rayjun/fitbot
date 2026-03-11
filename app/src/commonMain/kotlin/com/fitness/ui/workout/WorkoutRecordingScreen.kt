@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Delete
 import com.fitness.data.ExerciseProvider
 import com.fitness.data.WorkoutRepository
 import com.fitness.model.ExerciseSet
+import com.fitness.ui.components.CompactTopAppBar
 import com.fitness.util.DateUtils
 import com.fitness.util.getString
 import kotlinx.coroutines.launch
@@ -49,14 +50,12 @@ fun WorkoutRecordingScreen(
     var editingSet by remember { mutableStateOf<ExerciseSet?>(null) }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = { Text(localizedName, fontSize = 18.sp, fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
+            CompactTopAppBar(
+                title = localizedName,
+                onBack = onBack
             )
         },
         floatingActionButton = {

@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import com.fitness.data.ExerciseProvider
 import com.fitness.model.Exercise
 import com.fitness.ui.components.ExerciseImage
+import com.fitness.ui.components.CompactTopAppBar
 import com.fitness.util.getString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -41,16 +42,9 @@ fun ExerciseLibraryScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = { 
-                    Text(
-                        getString("nav_library"),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    ) 
-                }
-            )
+            CompactTopAppBar(title = getString("nav_library"))
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {

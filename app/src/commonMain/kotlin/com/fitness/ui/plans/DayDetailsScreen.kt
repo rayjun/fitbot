@@ -14,6 +14,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.fitness.data.ExerciseProvider
 import com.fitness.model.ExerciseSet
+import com.fitness.ui.components.CompactTopAppBar
 import com.fitness.util.getString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -24,14 +25,12 @@ fun DayDetailsScreen(
     onBack: () -> Unit
 ) {
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = { Text(date) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = getString("back"))
-                    }
-                }
+            CompactTopAppBar(
+                title = date,
+                onBack = onBack
             )
         }
     ) { padding ->

@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.fitness.ui.components.CompactTopAppBar
 import com.fitness.util.getString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,14 +48,12 @@ fun SettingsScreen(
     )
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = { Text(getString("settings_title"), fontWeight = FontWeight.Bold) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
+            CompactTopAppBar(
+                title = getString("settings_title"),
+                onBack = onBack
             )
         }
     ) { padding ->

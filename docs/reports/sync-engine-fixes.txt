@@ -1,0 +1,99 @@
+
+> Configure project :app
+WARNING: The option setting 'android.defaults.buildfeatures.buildconfig=true' is deprecated.
+The current default is 'false'.
+It will be removed in version 9.0 of the Android Gradle plugin.
+You can resolve this warning in Android Studio via `Refactor` > `Migrate BuildConfig to Gradle Build Files`
+The 'ksp' configuration is deprecated in Kotlin Multiplatform projects. Please use target-specific configurations like 'kspJvm' instead.
+w: Kotlin Multiplatform <-> Android Gradle Plugin compatibility issue:
+The applied Android Gradle Plugin version (8.3.0) is higher 
+than the maximum known to the Kotlin Gradle Plugin.
+Tooling stability in such configuration isn't tested, please report encountered issues to https://kotl.in/issue"
+
+Minimum supported Android Gradle Plugin version: 7.0
+Maximum tested Android Gradle Plugin version: 8.2
+
+To suppress this message add 'kotlin.mpp.androidGradlePluginCompatibility.nowarn=true' to your gradle.properties
+
+w: The Default Kotlin Hierarchy Template was not applied to 'project ':app'':
+Explicit .dependsOn() edges were configured for the following source sets:
+[iosArm64Main, iosMain, iosSimulatorArm64Main, iosX64Main]
+
+Consider removing dependsOn-calls or disabling the default template by adding
+    'kotlin.mpp.applyDefaultHierarchyTemplate=false'
+to your gradle.properties
+
+Learn more about hierarchy templates: https://kotl.in/hierarchy-template
+
+
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors
+> Task :app:generateComposeResClass UP-TO-DATE
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:convertXmlValueResourcesForAndroidDebug NO-SOURCE
+> Task :app:copyNonXmlValueResourcesForAndroidDebug NO-SOURCE
+> Task :app:prepareComposeResourcesTaskForAndroidDebug NO-SOURCE
+> Task :app:generateResourceAccessorsForAndroidDebug NO-SOURCE
+> Task :app:convertXmlValueResourcesForAndroidMain NO-SOURCE
+> Task :app:copyNonXmlValueResourcesForAndroidMain NO-SOURCE
+> Task :app:prepareComposeResourcesTaskForAndroidMain NO-SOURCE
+> Task :app:generateResourceAccessorsForAndroidMain NO-SOURCE
+> Task :app:convertXmlValueResourcesForCommonMain UP-TO-DATE
+> Task :app:copyNonXmlValueResourcesForCommonMain UP-TO-DATE
+> Task :app:prepareComposeResourcesTaskForCommonMain UP-TO-DATE
+> Task :app:generateResourceAccessorsForCommonMain UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:processDebugResources UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:preDebugUnitTestBuild UP-TO-DATE
+> Task :app:convertXmlValueResourcesForAndroidUnitTest NO-SOURCE
+> Task :app:copyNonXmlValueResourcesForAndroidUnitTest NO-SOURCE
+> Task :app:prepareComposeResourcesTaskForAndroidUnitTest NO-SOURCE
+> Task :app:generateResourceAccessorsForAndroidUnitTest NO-SOURCE
+> Task :app:convertXmlValueResourcesForAndroidUnitTestDebug NO-SOURCE
+> Task :app:copyNonXmlValueResourcesForAndroidUnitTestDebug NO-SOURCE
+> Task :app:prepareComposeResourcesTaskForAndroidUnitTestDebug NO-SOURCE
+> Task :app:generateResourceAccessorsForAndroidUnitTestDebug NO-SOURCE
+> Task :app:convertXmlValueResourcesForCommonTest NO-SOURCE
+> Task :app:copyNonXmlValueResourcesForCommonTest NO-SOURCE
+> Task :app:prepareComposeResourcesTaskForCommonTest NO-SOURCE
+> Task :app:generateResourceAccessorsForCommonTest NO-SOURCE
+> Task :app:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :app:kspDebugKotlinAndroid
+> Task :app:compileDebugKotlinAndroid
+> Task :app:compileDebugJavaWithJavac
+> Task :app:hiltAggregateDepsDebug UP-TO-DATE
+> Task :app:hiltJavaCompileDebug
+> Task :app:processDebugJavaRes
+> Task :app:bundleDebugClassesToCompileJar
+> Task :app:transformDebugClassesWithAsm
+> Task :app:bundleDebugClassesToRuntimeJar
+> Task :app:kspDebugUnitTestKotlinAndroid
+> Task :app:compileDebugUnitTestKotlinAndroid
+> Task :app:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :app:hiltAggregateDepsDebugUnitTest UP-TO-DATE
+> Task :app:hiltJavaCompileDebugUnitTest NO-SOURCE
+> Task :app:processDebugUnitTestJavaRes UP-TO-DATE
+> Task :app:transformDebugUnitTestClassesWithAsm
+> Task :app:testDebugUnitTest
+
+Deprecated Gradle features were used in this build, making it incompatible with Gradle 9.0.
+
+You can use '--warning-mode all' to show the individual deprecation warnings and determine if they come from your own scripts or plugins.
+
+For more on this, please refer to https://docs.gradle.org/8.4/userguide/command_line_interface.html#sec:command_line_warnings in the Gradle documentation.
+
+BUILD SUCCESSFUL in 5s
+37 actionable tasks: 13 executed, 24 up-to-date

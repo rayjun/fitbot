@@ -1,10 +1,15 @@
 package com.fitness
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.ComposeUIViewController
 import com.fitness.ui.library.ExerciseLibraryScreen
@@ -92,27 +97,32 @@ fun MainViewController() = ComposeUIViewController {
                     bottomBar = {
                         val items = listOf(Screen.Library, Screen.Plans, Screen.Profile)
                         if (items.any { it.route == currentScreen.route } && selectedExercise == null && workoutExerciseId == null && dayDetailsDate == null) {
-                            NavigationBar(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                contentColor = MaterialTheme.colorScheme.primary,
-                                tonalElevation = 0.dp,
-                                windowInsets = WindowInsets(0.dp)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .windowInsetsPadding(WindowInsets.navigationBars)
+                                    .height(48.dp),
+                                horizontalArrangement = Arrangement.SpaceAround,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
                                 items.forEach { screen ->
                                     val selected = currentScreen.route == screen.route
-                                    NavigationBarItem(
-                                        icon = { Icon(screen.icon!!, contentDescription = null) },
-                                        label = { Text(getString(screen.labelKey ?: screen.route)) },
-                                        selected = selected,
-                                        onClick = { currentScreen = screen },
-                                        colors = NavigationBarItemDefaults.colors(
-                                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                                            indicatorColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                                        )
-                                    )
+                                    val color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .clickable(
+                                                interactionSource = remember { MutableInteractionSource() },
+                                                indication = null
+                                            ) { currentScreen = screen }
+                                            .padding(vertical = 4.dp)
+                                    ) {
+                                        Icon(screen.icon!!, contentDescription = null, modifier = Modifier.size(24.dp), tint = color)
+                                        Spacer(modifier = Modifier.height(2.dp))
+                                        Text(getString(screen.labelKey ?: screen.route), style = MaterialTheme.typography.labelSmall, color = color, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
+                                    }
                                 }
                             }
                         }

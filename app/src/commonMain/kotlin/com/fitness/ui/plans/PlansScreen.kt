@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.fitness.data.ExerciseProvider
 import com.fitness.model.PlannedExercise
 import com.fitness.model.RoutineDay
+import com.fitness.ui.components.CompactTopAppBar
 import com.fitness.util.DateUtils
 import com.fitness.util.getString
 import kotlinx.datetime.Clock
@@ -60,20 +61,9 @@ fun PlansScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        getString("nav_plans"),
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.background
-                )
-            )
+            CompactTopAppBar(title = getString("nav_plans"))
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.fitness.ui.components.ExerciseImage
 import com.fitness.ui.components.RemoteImage
+import com.fitness.ui.components.CompactTopAppBar
 import com.fitness.util.getString
 import kotlinx.datetime.*
 
@@ -41,24 +42,15 @@ fun ProfileScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = { 
-            TopAppBar(
-                title = { 
-                    Text(
-                        getString("nav_profile"), 
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold
-                    ) 
-                },
+            CompactTopAppBar(
+                title = getString("nav_profile"),
                 actions = {
                     IconButton(onClick = onSettingsClick) {
                         Icon(Icons.Default.Settings, contentDescription = "Settings", tint = MaterialTheme.colorScheme.primary)
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.background
-                )
+                }
             ) 
         }
     ) { padding ->

@@ -13,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.fitness.data.ExerciseProvider
 import com.fitness.ui.components.ExerciseImage
+import com.fitness.ui.components.CompactTopAppBar
 import com.fitness.util.getString
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -24,14 +25,12 @@ fun ExerciseDetailScreen(
     val exercise = remember(exerciseId) { ExerciseProvider.exercises.find { it.id == exerciseId } }
 
     Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            TopAppBar(
-                title = { Text(exercise?.let { getString(it.nameKey) } ?: "Detail") },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                    }
-                }
+            CompactTopAppBar(
+                title = exercise?.let { getString(it.nameKey) } ?: "Detail",
+                onBack = onBack
             )
         }
     ) { padding ->
