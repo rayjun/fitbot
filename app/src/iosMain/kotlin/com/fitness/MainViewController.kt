@@ -76,6 +76,8 @@ fun MainViewController() = ComposeUIViewController {
         val allSetsByDate by planViewModel.allSetsByDate.collectAsState()
         val heatmapData by profileViewModel.heatmapData.collectAsState()
         val muscleVolumeData by profileViewModel.muscleVolumeData.collectAsState(initial = emptyMap())
+        val selectedCategory by profileViewModel.selectedCategory.collectAsState()
+        val selectedTimeRange by profileViewModel.selectedTimeRange.collectAsState()
         val userProfile by authManager.currentUser.collectAsState()
         val isSyncing by authManager.isSyncing.collectAsState()
 
@@ -227,6 +229,10 @@ fun MainViewController() = ComposeUIViewController {
                                 Screen.Analytics -> {
                                     com.fitness.ui.profile.AnalyticsScreen(
                                         muscleVolumeData = muscleVolumeData,
+                                        selectedCategory = selectedCategory,
+                                        selectedTimeRange = selectedTimeRange,
+                                        onCategoryClick = { profileViewModel.setSelectedCategory(it) },
+                                        onTimeRangeClick = { profileViewModel.setSelectedTimeRange(it) },
                                         onBack = {
                                             currentScreen = previousScreen ?: Screen.Profile
                                         }

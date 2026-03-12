@@ -234,3 +234,8 @@ val isSyncing by authManager.isSyncing.collectAsState()
 - 通过 `CompositionLocal` `LocalAppLanguage` 在整棵 Compose 树中透传当前语言
 - 所有界面使用 `getString(key)` 获取当前语言字符串
 - 语言切换即时生效，无需重启
+
+### Advanced Analytics (v0.6.12)
+- **Time-series Filtering**: View workout volume aggregated by Week, Month, or Year.
+- **Muscle Category Drill-down**: Filter all charts by specific muscle groups (Chest, Back, etc.) using a streamlined tab interface.
+- **Pure Canvas Charts**: Responsive Radar and Bar charts built with zero dependencies.

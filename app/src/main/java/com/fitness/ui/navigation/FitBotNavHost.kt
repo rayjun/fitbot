@@ -207,9 +207,15 @@ fun FitBotNavHost(
         composable(Screen.Analytics.route) {
             val profileViewModel: ProfileViewModel = koinViewModel()
             val muscleVolumeData by profileViewModel.muscleVolumeData.collectAsState(initial = emptyMap())
+            val selectedCategory by profileViewModel.selectedCategory.collectAsState()
+            val selectedTimeRange by profileViewModel.selectedTimeRange.collectAsState()
             
             com.fitness.ui.profile.AnalyticsScreen(
                 muscleVolumeData = muscleVolumeData,
+                selectedCategory = selectedCategory,
+                selectedTimeRange = selectedTimeRange,
+                onCategoryClick = { profileViewModel.setSelectedCategory(it) },
+                onTimeRangeClick = { profileViewModel.setSelectedTimeRange(it) },
                 onBack = { navController.popBackStack() }
             )
         }
