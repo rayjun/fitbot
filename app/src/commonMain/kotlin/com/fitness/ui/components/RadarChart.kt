@@ -24,6 +24,7 @@ import kotlin.math.PI
 @Composable
 fun RadarChart(
     data: Map<String, Double>,
+    labels: Map<String, String>,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.primary,
     gridColor: Color = MaterialTheme.colorScheme.outlineVariant
@@ -126,11 +127,9 @@ fun RadarChart(
             val x = center.x + labelRadius * cos(angle).toFloat()
             val y = center.y + labelRadius * sin(angle).toFloat()
 
-            // 我们需要调用 getString()，但这在 Canvas 里不能直接调用 Composable。
-            // 为了简化，我们需要在外部翻译好传进来，或者暂时用 key。
-            // 稍后我们会在调用方翻译并传入，这里先暂时直接绘制。
+            val labelText = labels[cat] ?: cat
             val textLayoutResult = textMeasurer.measure(
-                text = cat, // 这里先放原始 key，稍后通过参数传入 map
+                text = labelText,
                 style = labelStyle
             )
             

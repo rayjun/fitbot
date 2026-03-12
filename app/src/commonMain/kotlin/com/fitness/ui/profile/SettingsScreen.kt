@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Language
@@ -16,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.fitness.ui.components.CompactTopAppBar
@@ -29,6 +31,7 @@ fun SettingsScreen(
     isCloudConnected: Boolean,
     isSyncing: Boolean,
     onSyncClick: () -> Unit,
+    onLogout: () -> Unit,
     onBack: () -> Unit,
     onThemeChange: (String) -> Unit,
     onLanguageChange: (String) -> Unit
@@ -128,6 +131,31 @@ fun SettingsScreen(
                 ) {
                     showLanguageDialog = true
                 }
+
+                if (isCloudConnected) {
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                    
+                    ListItem(
+                        headlineContent = { 
+                            Text(
+                                getString("logout"), 
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.error
+                            ) 
+                        },
+                        leadingContent = { 
+                            Icon(
+                                Icons.AutoMirrored.Filled.Logout, 
+                                contentDescription = null, 
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(24.dp)
+                            ) 
+                        },
+                        modifier = Modifier.clickable { onLogout() },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+                }
             }
         }
     }
@@ -194,4 +222,20 @@ fun SettingsScreen(
             }
         )
     }
+}
+
+@Composable
+fun SettingsItem(
+    icon: ImageVector,
+    title: String,
+    supportingText: String,
+    onClick: () -> Unit
+) {
+    ListItem(
+        headlineContent = { Text(title, fontWeight = FontWeight.SemiBold) },
+        supportingContent = { Text(supportingText) },
+        leadingContent = { Icon(icon, null, tint = MaterialTheme.colorScheme.primary) },
+        modifier = Modifier.clickable { onClick() },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+    )
 }

@@ -20,6 +20,7 @@ import kotlin.math.roundToInt
 @Composable
 fun VolumeBarChart(
     data: Map<String, Double>,
+    labels: Map<String, String>,
     modifier: Modifier = Modifier,
     barColor: Color = MaterialTheme.colorScheme.primary,
     trackColor: Color = MaterialTheme.colorScheme.surfaceVariant
@@ -58,7 +59,8 @@ fun VolumeBarChart(
             val barWidth = maxBarWidth * ratio
 
             // Draw Category Label
-            val labelLayout = textMeasurer.measure(category, style = labelStyle)
+            val labelText = labels[category] ?: category
+            val labelLayout = textMeasurer.measure(labelText, style = labelStyle)
             drawText(
                 textLayoutResult = labelLayout,
                 topLeft = Offset(0f, currentY + (barHeight - labelLayout.size.height) / 2f)

@@ -11,6 +11,12 @@ val LocalAppLanguage = compositionLocalOf { "en" }
 
 // English string table — mirrors values/strings.xml
 private val stringsEn: Map<String, String> = mapOf(
+    "analytics_title" to "Data Analytics",
+    "analytics_radar_title" to "Muscle Balance",
+    "analytics_anatomy_title" to "Physique Focus",
+    "analytics_volume_title" to "Total Volume",
+    "tab_overview" to "Overview",
+    "tab_analytics" to "Analytics",
     "app_name" to "FitBot",
     "nav_library" to "Library",
     "nav_plans" to "Plans",
@@ -141,6 +147,12 @@ private val stringsEn: Map<String, String> = mapOf(
 
 // Chinese string table — mirrors values-zh/strings.xml
 private val stringsZh: Map<String, String> = mapOf(
+    "analytics_title" to "数据分析",
+    "analytics_radar_title" to "肌肉均衡度",
+    "analytics_anatomy_title" to "体型热力图",
+    "analytics_volume_title" to "总训练容量",
+    "tab_overview" to "概览",
+    "tab_analytics" to "分析",
     "app_name" to "FitBot",
     "nav_library" to "动作库",
     "nav_plans" to "训练计划",
@@ -270,16 +282,19 @@ private val stringsZh: Map<String, String> = mapOf(
 )
 
 /**
+ * Returns the localized string for [key] using the provided [language] code.
+ */
+fun getLocalizedTypedString(key: String, language: String): String {
+    val baseLanguage = language.split("-")[0].lowercase()
+    val table = if (baseLanguage == "zh") stringsZh else stringsEn
+    return table[key] ?: key
+}
+
+/**
  * Returns the localized string for [key] using the language set in [LocalAppLanguage].
- *
- * On iOS, Compose Resources resolves stringResource() via NSLocale.preferredLanguages
- * (the system locale), so in-app language changes have no effect. This function reads
- * LocalAppLanguage instead, which is driven by SettingsRepository, ensuring the entire
- * UI responds immediately when the user switches language in Settings.
  */
 @Composable
 fun getString(key: String): String {
     val language = LocalAppLanguage.current
-    val table = if (language == "zh") stringsZh else stringsEn
-    return table[key] ?: key
+    return getLocalizedTypedString(key, language)
 }

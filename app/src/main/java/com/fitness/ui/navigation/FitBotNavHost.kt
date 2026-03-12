@@ -192,6 +192,12 @@ fun FitBotNavHost(
                         triggerAuthFlow()
                     }
                 },
+                onLogout = {
+                    authManager.signOut {
+                        lastAccount = null
+                        navController.popBackStack() // Go back to Profile after logout
+                    }
+                },
                 onBack = { navController.popBackStack() },
                 onThemeChange = { settingsViewModel.setThemeMode(it) },
                 onLanguageChange = { settingsViewModel.setLanguage(it) }

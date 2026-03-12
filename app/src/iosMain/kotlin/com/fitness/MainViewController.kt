@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.ComposeUIViewController
 import com.fitness.ui.library.ExerciseLibraryScreen
 import com.fitness.ui.library.ExerciseDetailScreen
@@ -74,6 +75,7 @@ fun MainViewController() = ComposeUIViewController {
         val routine by planViewModel.currentRoutine.collectAsState()
         val allSetsByDate by planViewModel.allSetsByDate.collectAsState()
         val heatmapData by profileViewModel.heatmapData.collectAsState()
+        val muscleVolumeData by profileViewModel.muscleVolumeData.collectAsState(initial = emptyMap())
         val userProfile by authManager.currentUser.collectAsState()
         val isSyncing by authManager.isSyncing.collectAsState()
 
@@ -102,7 +104,7 @@ fun MainViewController() = ComposeUIViewController {
                                     .fillMaxWidth()
                                     .background(MaterialTheme.colorScheme.surfaceVariant)
                                     .windowInsetsPadding(WindowInsets.navigationBars)
-                                    .height(48.dp),
+                                    .height(56.dp),
                                 horizontalArrangement = Arrangement.SpaceAround,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -117,11 +119,15 @@ fun MainViewController() = ComposeUIViewController {
                                                 interactionSource = remember { MutableInteractionSource() },
                                                 indication = null
                                             ) { currentScreen = screen }
-                                            .padding(vertical = 4.dp)
                                     ) {
                                         Icon(screen.icon!!, contentDescription = null, modifier = Modifier.size(24.dp), tint = color)
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Text(getString(screen.labelKey ?: screen.route), style = MaterialTheme.typography.labelSmall, color = color, fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal)
+                                        Text(
+                                            getString(screen.labelKey ?: screen.route), 
+                                            style = MaterialTheme.typography.labelSmall, 
+                                            color = color, 
+                                            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
+                                            fontSize = 10.sp
+                                        )
                                     }
                                 }
                             }
@@ -205,6 +211,12 @@ fun MainViewController() = ComposeUIViewController {
                                         isCloudConnected = userProfile != null,
                                         isSyncing = isSyncing,
                                         onSyncClick = { scope.launch { authManager.sync() } },
+                                        onLogout = {
+                                            scope.launch { 
+                                                authManager.signOut() 
+                                                currentScreen = Screen.Profile
+                                            }
+                                        },
                                         onBack = {
                                             currentScreen = previousScreen ?: Screen.Profile
                                         },

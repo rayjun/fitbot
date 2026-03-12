@@ -61,10 +61,7 @@ fun PlansScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        topBar = {
-            CompactTopAppBar(title = getString("nav_plans"))
-        }
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
             WeekSelectorHeader(weekOffset = weekOffset)

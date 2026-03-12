@@ -156,4 +156,10 @@
     <string name="ex_russian_twist_desc">Rotational core exercise for the obliques.</string>
     <string name="ex_plank_desc">Core stability training.</string>
     <string name="ex_burpee_desc">High-intensity full-body exercise.</string>
+    <string name="analytics_title">Data Analytics</string>
+    <string name="analytics_radar_title">Muscle Balance</string>
+    <string name="analytics_anatomy_title">Physique Focus</string>
+    <string name="analytics_volume_title">Total Volume</string>
+    <string name="tab_overview">Overview</string>
+    <string name="tab_analytics">Analytics</string>
 </resources>

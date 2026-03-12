@@ -156,4 +156,10 @@
     <string name="ex_russian_twist_desc">锻炼腹内外斜肌的旋转动作。</string>
     <string name="ex_plank_desc">核心稳定性训练。</string>
     <string name="ex_burpee_desc">高强度全身训练。</string>
+    <string name="analytics_title">数据分析</string>
+    <string name="analytics_radar_title">肌肉均衡度</string>
+    <string name="analytics_anatomy_title">体型热力图</string>
+    <string name="analytics_volume_title">总训练容量</string>
+    <string name="tab_overview">概览</string>
+    <string name="tab_analytics">分析</string>
 </resources>

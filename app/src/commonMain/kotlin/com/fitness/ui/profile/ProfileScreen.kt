@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.Settings
@@ -44,12 +45,7 @@ fun ProfileScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        topBar = { 
-            CompactTopAppBar(
-                title = getString("nav_profile")
-            ) 
-        }
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
         Column(
             modifier = Modifier
@@ -141,66 +137,101 @@ fun ProfileScreen(
             }
 
             Spacer(modifier = Modifier.height(24.dp))
+            
+            // Heatmap Section
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
+                    .padding(16.dp)
+            ) {
+                Text(
+                    getString("heatmap_title") ?: "Workout Heatmap", 
+                    style = MaterialTheme.typography.titleSmall, 
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Box(
+                    modifier = Modifier.fillMaxWidth(), 
+                    contentAlignment = Alignment.Center
+                ) {
+                    WorkoutHeatMap(heatmapData)
+                }
+            }
 
-            // Menu Items
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Menu Items Card
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                )
             ) {
                 Column {
                     ListItem(
-                        headlineContent = { Text(getString("analytics_title") ?: "Data Analytics", fontWeight = FontWeight.SemiBold) },
-                        leadingContent = { Icon(Icons.Default.ListAlt, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                        headlineContent = { 
+                            Text(
+                                getString("analytics_title") ?: "Data Analytics", 
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold
+                            ) 
+                        },
+                        leadingContent = { 
+                            Icon(
+                                Icons.Default.ListAlt, 
+                                contentDescription = null, 
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            ) 
+                        },
+                        trailingContent = {
+                            Icon(
+                                Icons.Default.ChevronRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                            )
+                        },
                         modifier = Modifier.clickable { onAnalyticsClick() },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 16.dp), 
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                    )
                     ListItem(
-                        headlineContent = { Text(getString("settings_title"), fontWeight = FontWeight.SemiBold) },
-                        leadingContent = { Icon(Icons.Default.Settings, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                        headlineContent = { 
+                            Text(
+                                getString("settings_title") ?: "Settings", 
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = FontWeight.SemiBold
+                            ) 
+                        },
+                        leadingContent = { 
+                            Icon(
+                                Icons.Default.Settings, 
+                                contentDescription = null, 
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(24.dp)
+                            ) 
+                        },
+                        trailingContent = {
+                            Icon(
+                                Icons.Default.ChevronRight,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                            )
+                        },
                         modifier = Modifier.clickable { onSettingsClick() },
                         colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                getString("heatmap_title"), 
-                style = MaterialTheme.typography.labelLarge, 
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Heatmap
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
-                    .padding(12.dp), 
-                contentAlignment = Alignment.Center
-            ) {
-                WorkoutHeatMap(heatmapData)
-            }
-
             Spacer(modifier = Modifier.weight(1f))
-            
-            if (accountName != null) {
-                TextButton(
-                    onClick = onLogout,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.textButtonColors(
-                        contentColor = MaterialTheme.colorScheme.error.copy(alpha = 0.7f)
-                    )
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.Logout, null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(getString("logout"), fontWeight = FontWeight.Bold)
-                }
-            }
         }
     }
 

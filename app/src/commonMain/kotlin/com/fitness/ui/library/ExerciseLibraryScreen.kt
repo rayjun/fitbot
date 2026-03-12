@@ -42,10 +42,7 @@ fun ExerciseLibraryScreen(
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0),
-        topBar = {
-            CompactTopAppBar(title = getString("nav_library"))
-        }
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
         Column(modifier = Modifier.padding(padding).fillMaxSize()) {
             val categories = ExerciseProvider.categories
