@@ -1,74 +1,140 @@
-from PIL import Image, ImageDraw
 import os
+import math
+from PIL import Image, ImageDraw
 
-def create_stickman_frame(draw, action, phase, cx=150, cy=150):
-    # Action defines the exercise, phase defines the animation step (0 to 1)
-    
-    # Head
-    draw.ellipse((cx-20, cy-70, cx+20, cy-30), fill="black")
-    # Body
-    draw.line((cx, cy-30, cx, cy+30), fill="black", width=5)
-    
-    if action == "running":
-        # Arms
-        arm_swing = 30 * (-1 if phase < 0.5 else 1)
-        draw.line((cx, cy-10, cx-30, cy+10+arm_swing), fill="black", width=4)
-        draw.line((cx, cy-10, cx+30, cy+10-arm_swing), fill="black", width=4)
-        # Legs
-        leg_swing = 40 * (-1 if phase < 0.5 else 1)
-        draw.line((cx, cy+30, cx-20, cy+80+leg_swing), fill="black", width=5)
-        draw.line((cx, cy+30, cx+20, cy+80-leg_swing), fill="black", width=5)
+OUTPUT_DIR = "app/src/main/assets/exercises"
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-    elif action == "walking":
-        # Arms
-        arm_swing = 15 * (-1 if phase < 0.5 else 1)
-        draw.line((cx, cy-10, cx-20, cy+10+arm_swing), fill="black", width=4)
-        draw.line((cx, cy-10, cx+20, cy+10-arm_swing), fill="black", width=4)
-        # Legs
-        leg_swing = 20 * (-1 if phase < 0.5 else 1)
-        draw.line((cx, cy+30, cx-15, cy+80+leg_swing), fill="black", width=5)
-        draw.line((cx, cy+30, cx+15, cy+80-leg_swing), fill="black", width=5)
+WIDTH, HEIGHT = 200, 200
+BG_COLOR = (250, 250, 250)
+LINE_COLOR = (255, 87, 34)
+HEAD_COLOR = (255, 87, 34)
+EQUIP_COLOR = (150, 150, 150)
+LINE_WIDTH = 6
+HEAD_RAD = 12
 
-    elif action == "cycling":
-        # Bike frame
-        draw.line((cx-40, cy+50, cx+40, cy+50), fill="gray", width=3) # bottom tube
-        draw.line((cx-40, cy+50, cx-20, cy-10), fill="gray", width=3) # seat tube
-        draw.line((cx+40, cy+50, cx+20, cy-10), fill="gray", width=3) # front tube
-        draw.line((cx-20, cy-10, cx+20, cy-10), fill="gray", width=3) # top tube
-        
-        # Wheels
-        draw.ellipse((cx-70, cy+20, cx-10, cy+80), outline="gray", width=3)
-        draw.ellipse((cx+10, cy+20, cx+70, cy+80), outline="gray", width=3)
-        
-        # Stickman
-        draw.ellipse((cx-30, cy-80, cx+10, cy-40), fill="black") # head leaning forward
-        draw.line((cx-10, cy-40, cx-20, cy-10), fill="black", width=5) # body leaning
-        draw.line((cx-10, cy-40, cx+20, cy-20), fill="black", width=4) # arm to handlebar
-        
-        # Pedaling legs
-        pedal_y = 20 * (-1 if phase < 0.5 else 1)
-        draw.line((cx-20, cy-10, cx, cy+50+pedal_y), fill="black", width=5)
-        draw.line((cx-20, cy-10, cx, cy+50-pedal_y), fill="black", width=5)
+def create_frame():
+    img = Image.new("RGB", (WIDTH, HEIGHT), BG_COLOR)
+    draw = ImageDraw.Draw(img)
+    return img, draw
 
-def create_exercise_gif(filename, action, num_frames=10, duration=100):
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
-    frames = []
-    for i in range(num_frames):
-        img = Image.new("RGB", (300, 300), "white")
-        draw = ImageDraw.Draw(img)
-        phase = i / num_frames
-        create_stickman_frame(draw, action, phase)
-        frames.append(img)
-    
+def save_gif(frames, filename, duration=100):
     frames[0].save(
-        filename,
+        os.path.join(OUTPUT_DIR, filename),
         save_all=True,
         append_images=frames[1:],
         duration=duration,
         loop=0
     )
 
-create_exercise_gif('app/src/main/assets/exercises/running.gif', 'running')
-create_exercise_gif('app/src/main/assets/exercises/brisk_walking.gif', 'walking')
-create_exercise_gif('app/src/main/assets/exercises/cycling.gif', 'cycling')
+def draw_head(draw, x, y):
+    draw.ellipse((x - HEAD_RAD, y - HEAD_RAD, x + HEAD_RAD, y + HEAD_RAD), fill=HEAD_COLOR)
 
+def create_running():
+    frames = []
+    for i in range(20):
+        img, draw = create_frame()
+        progress = i / 20.0
+        phase = progress
+        
+        cx, cy = 100, 100
+        
+        # Body
+        draw.line((cx, cy - 20, cx, cy + 30), fill=LINE_COLOR, width=LINE_WIDTH)
+        # Head
+        draw_head(draw, cx, cy - 35)
+        
+        # Arms
+        arm_swing = 20 * math.sin(phase * 2 * math.pi)
+        draw.line((cx, cy - 10, cx - 20, cy + 10 + arm_swing), fill=LINE_COLOR, width=LINE_WIDTH)
+        draw.line((cx, cy - 10, cx + 20, cy + 10 - arm_swing), fill=LINE_COLOR, width=LINE_WIDTH)
+        
+        # Legs
+        leg_swing = 30 * math.sin(phase * 2 * math.pi)
+        knee_lift = 15 * math.cos(phase * 2 * math.pi)
+        
+        # Back leg (drawn first so it's behind)
+        draw.line((cx, cy + 30, cx + 15 - leg_swing, cy + 60 - knee_lift), fill=LINE_COLOR, width=LINE_WIDTH)
+        draw.line((cx + 15 - leg_swing, cy + 60 - knee_lift, cx + 20 - leg_swing*1.2, cy + 90), fill=LINE_COLOR, width=LINE_WIDTH)
+        
+        # Front leg
+        draw.line((cx, cy + 30, cx - 15 + leg_swing, cy + 60 + knee_lift), fill=LINE_COLOR, width=LINE_WIDTH)
+        draw.line((cx - 15 + leg_swing, cy + 60 + knee_lift, cx - 20 + leg_swing*1.2, cy + 90), fill=LINE_COLOR, width=LINE_WIDTH)
+        
+        frames.append(img)
+    save_gif(frames, "running.gif", duration=50)
+
+def create_walking():
+    frames = []
+    for i in range(20):
+        img, draw = create_frame()
+        progress = i / 20.0
+        phase = progress
+        
+        cx, cy = 100, 100
+        
+        # Body
+        draw.line((cx, cy - 20, cx, cy + 30), fill=LINE_COLOR, width=LINE_WIDTH)
+        # Head
+        draw_head(draw, cx, cy - 35)
+        
+        # Arms
+        arm_swing = 15 * math.sin(phase * 2 * math.pi)
+        draw.line((cx, cy - 10, cx - 15, cy + 15 + arm_swing), fill=LINE_COLOR, width=LINE_WIDTH)
+        draw.line((cx, cy - 10, cx + 15, cy + 15 - arm_swing), fill=LINE_COLOR, width=LINE_WIDTH)
+        
+        # Legs
+        leg_swing = 20 * math.sin(phase * 2 * math.pi)
+        
+        draw.line((cx, cy + 30, cx - 15 + leg_swing, cy + 90), fill=LINE_COLOR, width=LINE_WIDTH)
+        draw.line((cx, cy + 30, cx + 15 - leg_swing, cy + 90), fill=LINE_COLOR, width=LINE_WIDTH)
+        
+        frames.append(img)
+    save_gif(frames, "brisk_walking.gif", duration=60)
+
+def create_cycling():
+    frames = []
+    for i in range(20):
+        img, draw = create_frame()
+        progress = i / 20.0
+        phase = progress
+        
+        cx, cy = 100, 100
+        
+        # Bike frame
+        draw.line((cx-30, cy+40, cx+30, cy+40), fill=EQUIP_COLOR, width=4) # bottom
+        draw.line((cx-30, cy+40, cx-15, cy-10), fill=EQUIP_COLOR, width=4) # seat
+        draw.line((cx+30, cy+40, cx+15, cy-10), fill=EQUIP_COLOR, width=4) # front
+        draw.line((cx-15, cy-10, cx+15, cy-10), fill=EQUIP_COLOR, width=4) # top
+        
+        # Handlebar
+        draw.line((cx+15, cy-10, cx+20, cy-20), fill=EQUIP_COLOR, width=4)
+        
+        # Wheels
+        draw.ellipse((cx-50, cy+20, cx-10, cy+60), outline=EQUIP_COLOR, width=4)
+        draw.ellipse((cx+10, cy+20, cx+50, cy+60), outline=EQUIP_COLOR, width=4)
+        
+        # Left leg (back)
+        pedal_x = 10 * math.cos(phase * 2 * math.pi)
+        pedal_y = 15 * math.sin(phase * 2 * math.pi)
+        draw.line((cx-15, cy-10, cx - pedal_x, cy + 40 - pedal_y), fill=LINE_COLOR, width=LINE_WIDTH)
+        
+        # Body (leaning forward)
+        draw.line((cx-15, cy-10, cx-5, cy-35), fill=LINE_COLOR, width=LINE_WIDTH)
+        # Head
+        draw_head(draw, cx-2, cy-48)
+        
+        # Arm
+        draw.line((cx-5, cy-30, cx+20, cy-20), fill=LINE_COLOR, width=LINE_WIDTH)
+        
+        # Right leg (front)
+        draw.line((cx-15, cy-10, cx + pedal_x, cy + 40 + pedal_y), fill=LINE_COLOR, width=LINE_WIDTH)
+        
+        frames.append(img)
+    save_gif(frames, "cycling.gif", duration=50)
+
+if __name__ == "__main__":
+    create_running()
+    create_walking()
+    create_cycling()
+    print("New cardio GIFs generated in original style.")
