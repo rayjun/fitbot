@@ -250,3 +250,8 @@ val isSyncing by authManager.isSyncing.collectAsState()
 - **New Cardio Exercises**: Added Running, Brisk Walking, and Cycling to the built-in library.
 - **Cardio Heatmap Tracking**: Cardio exercises correctly map to the new "Cardiovascular" target muscle and "Cardio" category.
 - **Animated Stickman GIFs**: Replaced static placeholders with procedurally generated stickman animations using Python for visual consistency across platforms.
+
+### Gym Isolation & Machine Expansion (v0.7.13)
+- **12 New Classic Exercises**: Added Dumbbell Fly, Cable Crossover, Lat Pulldown, Face Pull, Front Raise, Hammer Curl, Triceps Pushdown, Leg Press, Leg Extension, Leg Curl, Romanian Deadlift, and Hanging Leg Raise.
+- **Enhanced Muscle Tracking**: Introduced specific tracking for Rear Deltoids, Front Deltoids, and Hamstrings.
+- **Procedural Animations**: Generated 12 new matching procedural stickman animations simulating gym equipment and complex motions.

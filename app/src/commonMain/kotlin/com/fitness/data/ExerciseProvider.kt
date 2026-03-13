@@ -32,6 +32,24 @@ object ExerciseProvider {
             categoryKey = "cat_chest",
             isBodyweight = false
         ),
+        Exercise(
+            id = "dumbbell_fly",
+            nameKey = "ex_dumbbell_fly_name",
+            gifResPath = "exercises/dumbbell_fly.gif",
+            descriptionKey = "ex_dumbbell_fly_desc",
+            targetMuscleKey = "muscle_chest",
+            categoryKey = "cat_chest",
+            isBodyweight = false
+        ),
+        Exercise(
+            id = "cable_crossover",
+            nameKey = "ex_cable_crossover_name",
+            gifResPath = "exercises/cable_crossover.gif",
+            descriptionKey = "ex_cable_crossover_desc",
+            targetMuscleKey = "muscle_chest",
+            categoryKey = "cat_chest",
+            isBodyweight = false
+        ),
         
         // 肩部 (Shoulders)
         Exercise(
@@ -52,6 +70,15 @@ object ExerciseProvider {
             categoryKey = "cat_shoulders",
             isBodyweight = false
         ),
+        Exercise(
+            id = "front_raise",
+            nameKey = "ex_front_raise_name",
+            gifResPath = "exercises/front_raise.gif",
+            descriptionKey = "ex_front_raise_desc",
+            targetMuscleKey = "muscle_front_delts",
+            categoryKey = "cat_shoulders",
+            isBodyweight = false
+        ),
 
         // 背部 (Back)
         Exercise(
@@ -64,11 +91,29 @@ object ExerciseProvider {
             isBodyweight = true
         ),
         Exercise(
+            id = "lat_pulldown",
+            nameKey = "ex_lat_pulldown_name",
+            gifResPath = "exercises/lat_pulldown.gif",
+            descriptionKey = "ex_lat_pulldown_desc",
+            targetMuscleKey = "muscle_lats",
+            categoryKey = "cat_back",
+            isBodyweight = false
+        ),
+        Exercise(
             id = "row",
             nameKey = "ex_row_name",
             gifResPath = "exercises/row.gif",
             descriptionKey = "ex_row_desc",
             targetMuscleKey = "muscle_mid_back",
+            categoryKey = "cat_back",
+            isBodyweight = false
+        ),
+        Exercise(
+            id = "face_pull",
+            nameKey = "ex_face_pull_name",
+            gifResPath = "exercises/face_pull.gif",
+            descriptionKey = "ex_face_pull_desc",
+            targetMuscleKey = "muscle_rear_delts",
             categoryKey = "cat_back",
             isBodyweight = false
         ),
@@ -93,6 +138,15 @@ object ExerciseProvider {
             isBodyweight = false
         ),
         Exercise(
+            id = "hammer_curl",
+            nameKey = "ex_hammer_curl_name",
+            gifResPath = "exercises/hammer_curl.gif",
+            descriptionKey = "ex_hammer_curl_desc",
+            targetMuscleKey = "muscle_biceps",
+            categoryKey = "cat_arms",
+            isBodyweight = false
+        ),
+        Exercise(
             id = "tricep_dips",
             nameKey = "ex_tricep_dips_name",
             gifResPath = "exercises/tricep_dips.gif",
@@ -100,6 +154,15 @@ object ExerciseProvider {
             targetMuscleKey = "muscle_triceps",
             categoryKey = "cat_arms",
             isBodyweight = true
+        ),
+        Exercise(
+            id = "triceps_pushdown",
+            nameKey = "ex_triceps_pushdown_name",
+            gifResPath = "exercises/triceps_pushdown.gif",
+            descriptionKey = "ex_triceps_pushdown_desc",
+            targetMuscleKey = "muscle_triceps",
+            categoryKey = "cat_arms",
+            isBodyweight = false
         ),
 
         // 腿部 (Legs)
@@ -109,6 +172,42 @@ object ExerciseProvider {
             gifResPath = "exercises/squat.gif",
             descriptionKey = "ex_squat_desc",
             targetMuscleKey = "muscle_quads",
+            categoryKey = "cat_legs",
+            isBodyweight = false
+        ),
+        Exercise(
+            id = "leg_press",
+            nameKey = "ex_leg_press_name",
+            gifResPath = "exercises/leg_press.gif",
+            descriptionKey = "ex_leg_press_desc",
+            targetMuscleKey = "muscle_quads",
+            categoryKey = "cat_legs",
+            isBodyweight = false
+        ),
+        Exercise(
+            id = "leg_extension",
+            nameKey = "ex_leg_extension_name",
+            gifResPath = "exercises/leg_extension.gif",
+            descriptionKey = "ex_leg_extension_desc",
+            targetMuscleKey = "muscle_quads",
+            categoryKey = "cat_legs",
+            isBodyweight = false
+        ),
+        Exercise(
+            id = "leg_curl",
+            nameKey = "ex_leg_curl_name",
+            gifResPath = "exercises/leg_curl.gif",
+            descriptionKey = "ex_leg_curl_desc",
+            targetMuscleKey = "muscle_hamstrings",
+            categoryKey = "cat_legs",
+            isBodyweight = false
+        ),
+        Exercise(
+            id = "romanian_deadlift",
+            nameKey = "ex_romanian_deadlift_name",
+            gifResPath = "exercises/romanian_deadlift.gif",
+            descriptionKey = "ex_romanian_deadlift_desc",
+            targetMuscleKey = "muscle_hamstrings",
             categoryKey = "cat_legs",
             isBodyweight = false
         ),
@@ -137,6 +236,15 @@ object ExerciseProvider {
             nameKey = "ex_situp_name",
             gifResPath = "exercises/situp.gif",
             descriptionKey = "ex_situp_desc",
+            targetMuscleKey = "muscle_abs",
+            categoryKey = "cat_core",
+            isBodyweight = true
+        ),
+        Exercise(
+            id = "hanging_leg_raise",
+            nameKey = "ex_hanging_leg_raise_name",
+            gifResPath = "exercises/hanging_leg_raise.gif",
+            descriptionKey = "ex_hanging_leg_raise_desc",
             targetMuscleKey = "muscle_abs",
             categoryKey = "cat_core",
             isBodyweight = true
