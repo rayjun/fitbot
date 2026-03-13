@@ -3,14 +3,19 @@ package com.fitness.ui.profile
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,16 +33,22 @@ import com.fitness.util.getString
 fun SettingsScreen(
     themeMode: String,
     language: String,
+    aiApiKey: String,
+    aiBaseUrl: String,
+    aiModel: String,
     isCloudConnected: Boolean,
     isSyncing: Boolean,
     onSyncClick: () -> Unit,
     onLogout: () -> Unit,
     onBack: () -> Unit,
     onThemeChange: (String) -> Unit,
-    onLanguageChange: (String) -> Unit
+    onLanguageChange: (String) -> Unit,
+    onAiConfigChange: (key: String, url: String, model: String) -> Unit
 ) {
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showThemeDialog by remember { mutableStateOf(false) }
+    var showAiConfigDialog by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
 
     val infiniteTransition = rememberInfiniteTransition(label = "sync")
     val rotation by infiniteTransition.animateFloat(
@@ -64,6 +75,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize()
+                .verticalScroll(scrollState)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -112,6 +124,14 @@ fun SettingsScreen(
             Text(getString("settings_general"), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             
             Column {
+                SettingsItem(
+                    icon = Icons.Default.Psychology,
+                    title = getString("settings_ai_config"),
+                    supportingText = aiModel
+                ) {
+                    showAiConfigDialog = true
+                }
+
                 SettingsItem(
                     icon = Icons.Default.Settings, 
                     title = getString("settings_theme"), 
@@ -219,6 +239,76 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = { showThemeDialog = false }) { Text(getString("dialog_cancel")) }
+            }
+        )
+    }
+
+    if (showAiConfigDialog) {
+        var tempApiKey by remember { mutableStateOf(aiApiKey) }
+        var tempBaseUrl by remember { mutableStateOf(aiBaseUrl) }
+        var tempModel by remember { mutableStateOf(aiModel) }
+        var isKeyVisible by remember { mutableStateOf(false) }
+
+        AlertDialog(
+            onDismissRequest = { showAiConfigDialog = false },
+            title = { Text(getString("settings_ai_config")) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Text(
+                        text = getString("ai_config_hint"), 
+                        style = MaterialTheme.typography.bodySmall, 
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    
+                    OutlinedTextField(
+                        value = tempApiKey,
+                        onValueChange = { tempApiKey = it },
+                        label = { Text(getString("settings_ai_api_key")) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        visualTransformation = if (isKeyVisible) androidx.compose.ui.text.input.VisualTransformation.None else androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                        trailingIcon = {
+                            val image = if (isKeyVisible)
+                                androidx.compose.material.icons.Icons.Filled.Visibility
+                            else androidx.compose.material.icons.Icons.Filled.VisibilityOff
+
+                            val description = if (isKeyVisible) "Hide password" else "Show password"
+
+                            IconButton(onClick = {isKeyVisible = !isKeyVisible}){
+                                Icon(imageVector  = image, description)
+                            }
+                        }
+                    )
+                    
+                    OutlinedTextField(
+                        value = tempBaseUrl,
+                        onValueChange = { tempBaseUrl = it },
+                        label = { Text(getString("settings_ai_base_url")) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                    
+                    OutlinedTextField(
+                        value = tempModel,
+                        onValueChange = { tempModel = it },
+                        label = { Text(getString("settings_ai_model")) },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { 
+                    onAiConfigChange(tempApiKey, tempBaseUrl, tempModel)
+                    showAiConfigDialog = false 
+                }) { 
+                    Text(getString("save") ?: "Save") 
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showAiConfigDialog = false }) { 
+                    Text(getString("dialog_cancel")) 
+                }
             }
         )
     }

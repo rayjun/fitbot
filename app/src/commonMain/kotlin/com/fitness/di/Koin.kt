@@ -3,6 +3,8 @@ package com.fitness.di
 import com.fitness.data.DataStoreRepository
 import com.fitness.data.SettingsRepository
 import com.fitness.data.WorkoutRepository
+import com.fitness.data.AiRepository
+import com.fitness.data.KtorAiRepository
 import com.fitness.ui.plans.PlanViewModel
 import com.fitness.ui.profile.ProfileViewModel
 import com.fitness.ui.profile.SettingsViewModel
@@ -18,11 +20,12 @@ val commonModule = module {
     single { DataStoreRepository(get()) }
     single<WorkoutRepository> { get<DataStoreRepository>() }
     single<SettingsRepository> { get<DataStoreRepository>() }
+    single<AiRepository> { KtorAiRepository() }
 
     factory { PlanViewModel(get()) }
     factory { WorkoutViewModel(get()) }
     factory { SettingsViewModel(get()) }
-    factory { ProfileViewModel(get()) }
+    factory { ProfileViewModel(get(), get(), get()) }
 }
 
 expect val platformModule: Module

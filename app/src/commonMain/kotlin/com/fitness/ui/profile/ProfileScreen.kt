@@ -3,14 +3,18 @@ package com.fitness.ui.profile
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.ListAlt
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,240 +26,244 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.fitness.ui.components.ExerciseImage
+import com.fitness.auth.UserProfile
 import com.fitness.ui.components.RemoteImage
-import com.fitness.ui.components.CompactTopAppBar
 import com.fitness.util.getString
 import kotlinx.datetime.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
+    userProfile: UserProfile?,
     userQuote: String,
     heatmapData: Map<String, Int>,
-    accountName: String?,
-    accountPhotoUrl: String?,
     onLoginClick: () -> Unit,
-    onLogout: () -> Unit,
-    onSettingsClick: () -> Unit,
     onAnalyticsClick: () -> Unit,
-    onUpdateQuote: (String) -> Unit
+    onAiCoachClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+    onEditQuote: (String) -> Unit
 ) {
-    var showQuoteDialog by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
+    var showEditQuoteDialog by remember { mutableStateOf(false) }
+    var currentQuoteText by remember { mutableStateOf(userQuote) }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
-        contentWindowInsets = WindowInsets(0, 0, 0, 0)
-    ) { padding ->
-        Column(
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(scrollState)
+            .padding(16.dp)
+    ) {
+        // 1. User Info Header
+        Row(
             modifier = Modifier
-                .padding(padding)
-                .fillMaxSize()
-                .padding(16.dp)
+                .fillMaxWidth()
+                .padding(vertical = 24.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // User Info Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                )
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
             ) {
-                if (accountName == null) {
-                    Column(
-                        modifier = Modifier.padding(24.dp).fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                if (userProfile?.photoUrl != null) {
+                    RemoteImage(
+                        url = userProfile.photoUrl,
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop
+                    )
+                } else {
+                    Icon(Icons.Default.AccountCircle, null, modifier = Modifier.size(60.dp), tint = MaterialTheme.colorScheme.primary)
+                }
+            }
+            Spacer(modifier = Modifier.width(20.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                if (userProfile?.name != null) {
+                    Text(
+                        text = userProfile.name,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = userQuote,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    IconButton(onClick = { 
+                        currentQuoteText = userQuote
+                        showEditQuoteDialog = true 
+                    }) {
+                        Icon(Icons.Default.Edit, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.primary)
+                    }
+                }
+                
+                if (userProfile == null) {
+                    Button(
+                        onClick = onLoginClick,
+                        modifier = Modifier.padding(top = 8.dp),
+                        shape = RoundedCornerShape(8.dp),
+                        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
                     ) {
+                        Text(getString("login_drive") ?: "Login", style = MaterialTheme.typography.labelSmall)
+                    }
+                }
+            }
+        }
+
+        // 2. Training Heatmap Card
+        Text(
+            getString("heatmap_title") ?: "Workout Heatmap",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+        ) {
+            Box(modifier = Modifier.padding(16.dp)) {
+                WorkoutHeatMap(data = heatmapData)
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // 3. Menu List Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
+        ) {
+            Column {
+                // Analytics
+                ListItem(
+                    headlineContent = { 
+                        Text(
+                            getString("analytics_title") ?: "Analytics", 
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold
+                        ) 
+                    },
+                    leadingContent = { 
                         Icon(
-                            Icons.Default.AccountCircle, 
+                            Icons.Default.BarChart, 
                             contentDescription = null, 
-                            modifier = Modifier.size(64.dp), 
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        ) 
+                    },
+                    trailingContent = {
+                        Icon(
+                            Icons.Default.ChevronRight,
+                            contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = onLoginClick,
-                            shape = RoundedCornerShape(12.dp)
-                        ) {
-                            Text(getString("login_drive"), fontWeight = FontWeight.Bold)
-                        }
-                    }
-                } else {
-                    Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                        // Profile Image
-                        Box(
-                            modifier = Modifier.size(64.dp).clip(CircleShape)
-                        ) {
-                            if (accountPhotoUrl != null) {
-                                RemoteImage(
-                                    url = accountPhotoUrl,
-                                    contentDescription = null,
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
-                                )
-                            } else {
-                                Surface(
-                                    modifier = Modifier.fillMaxSize(),
-                                    shape = CircleShape,
-                                    color = MaterialTheme.colorScheme.primaryContainer
-                                ) {
-                                    Box(contentAlignment = Alignment.Center) {
-                                        Text(
-                                            accountName.firstOrNull()?.toString() ?: "U",
-                                            fontSize = 24.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                        
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(accountName, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.clickable { showQuoteDialog = true }.padding(top = 4.dp)
-                            ) {
-                                Text(
-                                    userQuote, 
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Icon(
-                                    Icons.Default.Edit, 
-                                    contentDescription = getString("edit_quote"), 
-                                    modifier = Modifier.size(14.dp),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Heatmap Section
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f))
-                    .padding(16.dp)
-            ) {
-                Text(
-                    getString("heatmap_title") ?: "Workout Heatmap", 
-                    style = MaterialTheme.typography.titleSmall, 
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    },
+                    modifier = Modifier.clickable { onAnalyticsClick() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
                 )
-                Spacer(modifier = Modifier.height(12.dp))
-                Box(
-                    modifier = Modifier.fillMaxWidth(), 
-                    contentAlignment = Alignment.Center
-                ) {
-                    WorkoutHeatMap(heatmapData)
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Menu Items Card
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f)
+                
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp), 
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
                 )
-            ) {
-                Column {
-                    ListItem(
-                        headlineContent = { 
-                            Text(
-                                getString("analytics_title") ?: "Data Analytics", 
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.SemiBold
-                            ) 
-                        },
-                        leadingContent = { 
-                            Icon(
-                                Icons.Default.ListAlt, 
-                                contentDescription = null, 
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            ) 
-                        },
-                        trailingContent = {
-                            Icon(
-                                Icons.Default.ChevronRight,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                            )
-                        },
-                        modifier = Modifier.clickable { onAnalyticsClick() },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                    )
-                    HorizontalDivider(
-                        modifier = Modifier.padding(horizontal = 16.dp), 
-                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
-                    )
-                    ListItem(
-                        headlineContent = { 
-                            Text(
-                                getString("settings_title") ?: "Settings", 
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.SemiBold
-                            ) 
-                        },
-                        leadingContent = { 
-                            Icon(
-                                Icons.Default.Settings, 
-                                contentDescription = null, 
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(24.dp)
-                            ) 
-                        },
-                        trailingContent = {
-                            Icon(
-                                Icons.Default.ChevronRight,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                            )
-                        },
-                        modifier = Modifier.clickable { onSettingsClick() },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                    )
-                }
-            }
 
-            Spacer(modifier = Modifier.weight(1f))
+                // AI Coach
+                ListItem(
+                    headlineContent = { 
+                        Text(
+                            getString("ai_coach_title") ?: "AI Coach", 
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold
+                        ) 
+                    },
+                    leadingContent = { 
+                        Icon(
+                            Icons.Default.Psychology, 
+                            contentDescription = null, 
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        ) 
+                    },
+                    trailingContent = {
+                        Icon(
+                            Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
+                    },
+                    modifier = Modifier.clickable { onAiCoachClick() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                )
+
+                HorizontalDivider(
+                    modifier = Modifier.padding(horizontal = 16.dp), 
+                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                )
+
+                // Settings
+                ListItem(
+                    headlineContent = { 
+                        Text(
+                            getString("settings_title") ?: "Settings", 
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold
+                        ) 
+                    },
+                    leadingContent = { 
+                        Icon(
+                            Icons.Default.Settings, 
+                            contentDescription = null, 
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        ) 
+                    },
+                    trailingContent = {
+                        Icon(
+                            Icons.Default.ChevronRight,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                        )
+                    },
+                    modifier = Modifier.clickable { onSettingsClick() },
+                    colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                )
+            }
         }
+
+        Spacer(modifier = Modifier.weight(1f))
     }
 
-    if (showQuoteDialog) {
-        var tempQuote by remember { mutableStateOf(userQuote) }
+    if (showEditQuoteDialog) {
         AlertDialog(
-            onDismissRequest = { showQuoteDialog = false },
-            title = { Text(getString("edit_quote"), fontWeight = FontWeight.Bold) },
+            onDismissRequest = { showEditQuoteDialog = false },
+            title = { Text(getString("edit_quote") ?: "Edit Quote") },
             text = {
                 OutlinedTextField(
-                    value = tempQuote,
-                    onValueChange = { tempQuote = it },
-                    singleLine = true,
-                    shape = RoundedCornerShape(12.dp)
+                    value = currentQuoteText,
+                    onValueChange = { currentQuoteText = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    maxLines = 2
                 )
             },
             confirmButton = {
                 TextButton(onClick = { 
-                    onUpdateQuote(tempQuote)
-                    showQuoteDialog = false 
-                }) { Text(getString("save"), fontWeight = FontWeight.Bold) }
+                    onEditQuote(currentQuoteText)
+                    showEditQuoteDialog = false 
+                }) {
+                    Text(getString("save") ?: "Save")
+                }
             },
             dismissButton = {
-                TextButton(onClick = { showQuoteDialog = false }) { Text(getString("dialog_cancel")) }
+                TextButton(onClick = { showEditQuoteDialog = false }) {
+                    Text(getString("dialog_cancel") ?: "Cancel")
+                }
             }
         )
     }

@@ -78,12 +78,19 @@ fun MainViewController() = ComposeUIViewController {
         val muscleVolumeData by profileViewModel.muscleVolumeData.collectAsState(initial = emptyMap())
         val selectedCategory by profileViewModel.selectedCategory.collectAsState()
         val selectedTimeRange by profileViewModel.selectedTimeRange.collectAsState()
+        val aiInsight by profileViewModel.aiInsight.collectAsState()
+        val isGeneratingInsight by profileViewModel.isGeneratingInsight.collectAsState()
+        val aiMessages by profileViewModel.chatMessages.collectAsState()
+        val isChatProcessing by profileViewModel.isChatProcessing.collectAsState()
         val userProfile by authManager.currentUser.collectAsState()
         val isSyncing by authManager.isSyncing.collectAsState()
 
         // Settings State
         val themeMode by settingsViewModel.themeMode.collectAsState()
         val language by settingsViewModel.language.collectAsState()
+        val aiApiKey by settingsViewModel.aiApiKey.collectAsState()
+        val aiBaseUrl by settingsViewModel.aiBaseUrl.collectAsState()
+        val aiModel by settingsViewModel.aiModel.collectAsState()
         val userQuote by settingsViewModel.userQuote.collectAsState()
 
         val isDark = when (themeMode) {
@@ -185,31 +192,34 @@ fun MainViewController() = ComposeUIViewController {
                                 }
                                 Screen.Profile -> {
                                     ProfileScreen(
+                                        userProfile = userProfile,
                                         userQuote = userQuote,
                                         heatmapData = heatmapData,
-                                        accountName = userProfile?.name,
-                                        accountPhotoUrl = userProfile?.photoUrl,
                                         onLoginClick = {
                                             scope.launch { authManager.signIn() }
-                                        },
-                                        onLogout = {
-                                            scope.launch { authManager.signOut() }
-                                        },
-                                        onSettingsClick = {
-                                            previousScreen = Screen.Profile
-                                            currentScreen = Screen.Settings
                                         },
                                         onAnalyticsClick = {
                                             previousScreen = Screen.Profile
                                             currentScreen = Screen.Analytics
                                         },
-                                        onUpdateQuote = { settingsViewModel.setUserQuote(it) }
+                                        onAiCoachClick = {
+                                            previousScreen = Screen.Profile
+                                            currentScreen = Screen.AiCoach
+                                        },
+                                        onSettingsClick = {
+                                            previousScreen = Screen.Profile
+                                            currentScreen = Screen.Settings
+                                        },
+                                        onEditQuote = { settingsViewModel.setUserQuote(it) }
                                     )
                                 }
                                 Screen.Settings -> {
                                     SettingsScreen(
                                         themeMode = themeMode,
                                         language = language,
+                                        aiApiKey = aiApiKey,
+                                        aiBaseUrl = aiBaseUrl,
+                                        aiModel = aiModel,
                                         isCloudConnected = userProfile != null,
                                         isSyncing = isSyncing,
                                         onSyncClick = { scope.launch { authManager.sync() } },
@@ -223,7 +233,12 @@ fun MainViewController() = ComposeUIViewController {
                                             currentScreen = previousScreen ?: Screen.Profile
                                         },
                                         onThemeChange = { settingsViewModel.setThemeMode(it) },
-                                        onLanguageChange = { settingsViewModel.setLanguage(it) }
+                                        onLanguageChange = { settingsViewModel.setLanguage(it) },
+                                        onAiConfigChange = { key, url, model ->
+                                            settingsViewModel.setAiApiKey(key)
+                                            settingsViewModel.setAiBaseUrl(url)
+                                            settingsViewModel.setAiModel(model)
+                                        }
                                     )
                                 }
                                 Screen.Analytics -> {
@@ -231,8 +246,21 @@ fun MainViewController() = ComposeUIViewController {
                                         muscleVolumeData = muscleVolumeData,
                                         selectedCategory = selectedCategory,
                                         selectedTimeRange = selectedTimeRange,
+                                        aiInsight = aiInsight,
+                                        isGeneratingInsight = isGeneratingInsight,
+                                        onGenerateInsight = { profileViewModel.generateAiInsight(language) },
                                         onCategoryClick = { profileViewModel.setSelectedCategory(it) },
                                         onTimeRangeClick = { profileViewModel.setSelectedTimeRange(it) },
+                                        onBack = {
+                                            currentScreen = previousScreen ?: Screen.Profile
+                                        }
+                                    )
+                                }
+                                Screen.AiCoach -> {
+                                    com.fitness.ui.profile.AiCoachScreen(
+                                        aiMessages = aiMessages,
+                                        isProcessing = isChatProcessing,
+                                        onSendMessage = { profileViewModel.sendChatMessage(it, language) },
                                         onBack = {
                                             currentScreen = previousScreen ?: Screen.Profile
                                         }

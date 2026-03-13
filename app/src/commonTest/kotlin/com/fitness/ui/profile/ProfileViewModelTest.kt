@@ -20,7 +20,8 @@ class ProfileViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         repository = FakeWorkoutRepository()
-        viewModel = ProfileViewModel(repository)
+        // FakeWorkoutRepository implements both WorkoutRepository and SettingsRepository
+        viewModel = ProfileViewModel(repository, repository, com.fitness.data.FakeAiRepository())
     }
 
     @AfterTest

@@ -24,4 +24,5 @@ sealed class Screen(val route: String, val labelKey: String? = null, val icon: I
     }
     object Settings : Screen("settings")
     object Analytics : Screen("analytics")
+    object AiCoach : Screen("ai_coach")
 }

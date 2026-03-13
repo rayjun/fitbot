@@ -21,6 +21,15 @@ class SettingsViewModel(
     val userQuote: StateFlow<String> = repository.getUserQuote()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Stay fit with FitBot")
 
+    val aiApiKey: StateFlow<String> = repository.getAiApiKey()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+
+    val aiBaseUrl: StateFlow<String> = repository.getAiBaseUrl()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "https://api.openai.com/v1")
+
+    val aiModel: StateFlow<String> = repository.getAiModel()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "gpt-3.5-turbo")
+
     fun setThemeMode(mode: String) {
         viewModelScope.launch {
             repository.setThemeMode(mode)
@@ -36,6 +45,24 @@ class SettingsViewModel(
     fun setUserQuote(quote: String) {
         viewModelScope.launch {
             repository.setUserQuote(quote)
+        }
+    }
+
+    fun setAiApiKey(key: String) {
+        viewModelScope.launch {
+            repository.setAiApiKey(key)
+        }
+    }
+
+    fun setAiBaseUrl(url: String) {
+        viewModelScope.launch {
+            repository.setAiBaseUrl(url)
+        }
+    }
+
+    fun setAiModel(model: String) {
+        viewModelScope.launch {
+            repository.setAiModel(model)
         }
     }
 }

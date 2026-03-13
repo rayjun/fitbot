@@ -239,3 +239,9 @@ val isSyncing by authManager.isSyncing.collectAsState()
 - **Time-series Filtering**: View workout volume aggregated by Week, Month, or Year.
 - **Muscle Category Drill-down**: Filter all charts by specific muscle groups (Chest, Back, etc.) using a streamlined tab interface.
 - **Pure Canvas Charts**: Responsive Radar and Bar charts built with zero dependencies.
+
+### AI Personal Coach (v0.7.9)
+- **Settings Configuration**: Securely store API Key, Base URL, and Model Name in local DataStore for privacy. Support any OpenAI-compatible endpoints (DeepSeek, Llama, etc.).
+- **Smart Analytics Insight**: Dynamically generate fitness performance summaries based on time ranges (Week/Month/Year) directly in the Analytics dashboard.
+- **AI Coach Chat**: A classic, polished chat interface allowing users to ask questions grounded in their actual workout data using dynamic prompt injection.
+- **Privacy-First Data Flow**: AI only receives aggregated statistics (muscle group volume, sets, and progress), never raw personal details or precise timestamps.

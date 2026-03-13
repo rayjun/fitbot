@@ -14,6 +14,9 @@ class FakeWorkoutRepository : WorkoutRepository, SettingsRepository {
     private val themeMode = MutableStateFlow("system")
     private val language = MutableStateFlow("en")
     private val userQuote = MutableStateFlow("Stay fit with FitBot")
+    private val aiApiKey = MutableStateFlow("")
+    private val aiBaseUrl = MutableStateFlow("https://api.openai.com/v1")
+    private val aiModel = MutableStateFlow("gpt-3.5-turbo")
 
     override fun getCurrentRoutine(): Flow<List<RoutineDay>> = routine
 
@@ -58,4 +61,11 @@ class FakeWorkoutRepository : WorkoutRepository, SettingsRepository {
     override suspend fun setLanguage(lang: String) { language.value = lang }
     override fun getUserQuote(): Flow<String> = userQuote
     override suspend fun setUserQuote(quote: String) { userQuote.value = quote }
+
+    override fun getAiApiKey(): Flow<String> = aiApiKey
+    override suspend fun setAiApiKey(key: String) { aiApiKey.value = key }
+    override fun getAiBaseUrl(): Flow<String> = aiBaseUrl
+    override suspend fun setAiBaseUrl(url: String) { aiBaseUrl.value = url }
+    override fun getAiModel(): Flow<String> = aiModel
+    override suspend fun setAiModel(model: String) { aiModel.value = model }
 }

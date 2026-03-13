@@ -27,7 +27,9 @@ import com.fitness.ui.plans.PlanViewModel
 import com.fitness.ui.workout.WorkoutViewModel
 import com.fitness.ui.profile.SettingsViewModel
 import com.fitness.ui.profile.ProfileViewModel
+import com.fitness.auth.UserProfile
 import com.fitness.util.getString
+import com.fitness.util.LocalAppLanguage
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.Scope
 import com.google.api.services.drive.DriveScopes
@@ -152,24 +154,30 @@ fun FitBotNavHost(
             val userQuote by settingsViewModel.userQuote.collectAsState()
             val heatmapData by profileViewModel.heatmapData.collectAsState()
             
+            val userProfile = lastAccount?.let {
+                UserProfile(
+                    id = it.id ?: "",
+                    name = it.displayName,
+                    email = it.email,
+                    photoUrl = it.photoUrl?.toString()
+                )
+            }
+
             ProfileScreen(
+                userProfile = userProfile,
                 userQuote = userQuote,
                 heatmapData = heatmapData,
-                accountName = lastAccount?.displayName,
-                accountPhotoUrl = lastAccount?.photoUrl?.toString(),
                 onLoginClick = { triggerAuthFlow() },
-                onLogout = {
-                    authManager.signOut {
-                        lastAccount = null
-                    }
+                onAnalyticsClick = {
+                    navController.navigate(Screen.Analytics.route)
+                },
+                onAiCoachClick = {
+                    navController.navigate(Screen.AiCoach.route)
                 },
                 onSettingsClick = {
                     navController.navigate(Screen.Settings.route)
                 },
-                onAnalyticsClick = {
-                    navController.navigate(Screen.Analytics.route)
-                },
-                onUpdateQuote = { settingsViewModel.setUserQuote(it) }
+                onEditQuote = { settingsViewModel.setUserQuote(it) }
             )
         }
 
@@ -177,11 +185,17 @@ fun FitBotNavHost(
             val settingsViewModel: SettingsViewModel = koinViewModel()
             val themeMode by settingsViewModel.themeMode.collectAsState()
             val language by settingsViewModel.language.collectAsState()
+            val aiApiKey by settingsViewModel.aiApiKey.collectAsState()
+            val aiBaseUrl by settingsViewModel.aiBaseUrl.collectAsState()
+            val aiModel by settingsViewModel.aiModel.collectAsState()
             val hasDrivePermission = lastAccount?.let { GoogleSignIn.hasPermissions(it, driveScope) } ?: false
             
             SettingsScreen(
                 themeMode = themeMode,
                 language = language,
+                aiApiKey = aiApiKey,
+                aiBaseUrl = aiBaseUrl,
+                aiModel = aiModel,
                 isCloudConnected = lastAccount != null && hasDrivePermission,
                 isSyncing = isSyncing,
                 onSyncClick = {
@@ -200,7 +214,12 @@ fun FitBotNavHost(
                 },
                 onBack = { navController.popBackStack() },
                 onThemeChange = { settingsViewModel.setThemeMode(it) },
-                onLanguageChange = { settingsViewModel.setLanguage(it) }
+                onLanguageChange = { settingsViewModel.setLanguage(it) },
+                onAiConfigChange = { key, url, model ->
+                    settingsViewModel.setAiApiKey(key)
+                    settingsViewModel.setAiBaseUrl(url)
+                    settingsViewModel.setAiModel(model)
+                }
             )
         }
 
@@ -209,13 +228,33 @@ fun FitBotNavHost(
             val muscleVolumeData by profileViewModel.muscleVolumeData.collectAsState(initial = emptyMap())
             val selectedCategory by profileViewModel.selectedCategory.collectAsState()
             val selectedTimeRange by profileViewModel.selectedTimeRange.collectAsState()
+            val aiInsight by profileViewModel.aiInsight.collectAsState()
+            val isGeneratingInsight by profileViewModel.isGeneratingInsight.collectAsState()
+            val language = LocalAppLanguage.current
             
             com.fitness.ui.profile.AnalyticsScreen(
                 muscleVolumeData = muscleVolumeData,
                 selectedCategory = selectedCategory,
                 selectedTimeRange = selectedTimeRange,
+                aiInsight = aiInsight,
+                isGeneratingInsight = isGeneratingInsight,
+                onGenerateInsight = { profileViewModel.generateAiInsight(language) },
                 onCategoryClick = { profileViewModel.setSelectedCategory(it) },
                 onTimeRangeClick = { profileViewModel.setSelectedTimeRange(it) },
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(Screen.AiCoach.route) {
+            val profileViewModel: ProfileViewModel = koinViewModel()
+            val aiMessages by profileViewModel.chatMessages.collectAsState()
+            val isProcessing by profileViewModel.isChatProcessing.collectAsState()
+            val language = LocalAppLanguage.current
+            
+            com.fitness.ui.profile.AiCoachScreen(
+                aiMessages = aiMessages,
+                isProcessing = isProcessing,
+                onSendMessage = { profileViewModel.sendChatMessage(it, language) },
                 onBack = { navController.popBackStack() }
             )
         }

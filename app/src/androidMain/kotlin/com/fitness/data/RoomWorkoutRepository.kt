@@ -115,6 +115,9 @@ class RoomWorkoutRepository(
     private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
     private val LANGUAGE_KEY = stringPreferencesKey("language")
     private val USER_QUOTE_KEY = stringPreferencesKey("user_quote")
+    private val AI_API_KEY = stringPreferencesKey("ai_api_key")
+    private val AI_BASE_URL = stringPreferencesKey("ai_base_url")
+    private val AI_MODEL = stringPreferencesKey("ai_model")
 
     override fun getThemeMode(): Flow<String> = dataStore.data.map { it[THEME_MODE_KEY] ?: "system" }
     override suspend fun setThemeMode(mode: String) { dataStore.edit { it[THEME_MODE_KEY] = mode } }
@@ -122,4 +125,11 @@ class RoomWorkoutRepository(
     override suspend fun setLanguage(lang: String) { dataStore.edit { it[LANGUAGE_KEY] = lang } }
     override fun getUserQuote(): Flow<String> = dataStore.data.map { it[USER_QUOTE_KEY] ?: "Stay fit with FitBot" }
     override suspend fun setUserQuote(quote: String) { dataStore.edit { it[USER_QUOTE_KEY] = quote } }
+
+    override fun getAiApiKey(): Flow<String> = dataStore.data.map { it[AI_API_KEY] ?: "" }
+    override suspend fun setAiApiKey(key: String) { dataStore.edit { it[AI_API_KEY] = key } }
+    override fun getAiBaseUrl(): Flow<String> = dataStore.data.map { it[AI_BASE_URL] ?: "https://api.openai.com/v1" }
+    override suspend fun setAiBaseUrl(url: String) { dataStore.edit { it[AI_BASE_URL] = url } }
+    override fun getAiModel(): Flow<String> = dataStore.data.map { it[AI_MODEL] ?: "gpt-3.5-turbo" }
+    override suspend fun setAiModel(model: String) { dataStore.edit { it[AI_MODEL] = model } }
 }

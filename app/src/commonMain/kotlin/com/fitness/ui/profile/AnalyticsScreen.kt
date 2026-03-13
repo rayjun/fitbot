@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import com.fitness.ui.components.CompactTopAppBar
 import com.fitness.ui.components.RadarChart
 import com.fitness.ui.components.VolumeBarChart
-import com.fitness.ui.components.AnatomyMap
 import com.fitness.util.getString
 import com.fitness.util.getLocalizedTypedString
 import com.fitness.util.LocalAppLanguage
@@ -27,13 +28,15 @@ fun AnalyticsScreen(
     muscleVolumeData: Map<String, Double>,
     selectedCategory: String?,
     selectedTimeRange: TimeRange,
+    aiInsight: String?,
+    isGeneratingInsight: Boolean,
+    onGenerateInsight: () -> Unit,
     onCategoryClick: (String?) -> Unit,
     onTimeRangeClick: (TimeRange) -> Unit,
     onBack: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     val currentLang = LocalAppLanguage.current
-    var isBackView by remember { mutableStateOf(false) }
     
     // Prepare translated labels for muscle categories
     val categories = listOf("cat_chest", "cat_back", "cat_legs", "cat_arms", "cat_shoulders", "cat_core", "cat_full_body")
@@ -60,6 +63,59 @@ fun AnalyticsScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
+
+            // AI Insight Card
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+                ),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            getString("ai_insight_title"),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    if (aiInsight != null) {
+                        Text(
+                            aiInsight,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    } else if (isGeneratingInsight) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(getString("ai_insight_loading"), style = MaterialTheme.typography.bodySmall)
+                        }
+                    } else {
+                        Button(
+                            onClick = onGenerateInsight,
+                            modifier = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(vertical = 4.dp),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text(getString("ai_generate_insight"), style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Time Range Selector
             Row(
@@ -106,7 +162,7 @@ fun AnalyticsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    getString("detail_target_muscle"), // Using an existing string like "Target Muscle"
+                    getString("detail_target_muscle"),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
