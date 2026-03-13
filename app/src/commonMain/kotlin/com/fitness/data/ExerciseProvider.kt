@@ -178,6 +178,35 @@ object ExerciseProvider {
             targetMuscleKey = "muscle_full_body",
             categoryKey = "cat_full_body",
             isBodyweight = true
+        ),
+
+        // 有氧 (Cardio)
+        Exercise(
+            id = "running",
+            nameKey = "ex_running_name",
+            gifResPath = "exercises/running.gif",
+            descriptionKey = "ex_running_desc",
+            targetMuscleKey = "muscle_cardio",
+            categoryKey = "cat_cardio",
+            isBodyweight = true
+        ),
+        Exercise(
+            id = "brisk_walking",
+            nameKey = "ex_brisk_walking_name",
+            gifResPath = "exercises/brisk_walking.gif",
+            descriptionKey = "ex_brisk_walking_desc",
+            targetMuscleKey = "muscle_cardio",
+            categoryKey = "cat_cardio",
+            isBodyweight = true
+        ),
+        Exercise(
+            id = "cycling",
+            nameKey = "ex_cycling_name",
+            gifResPath = "exercises/cycling.gif",
+            descriptionKey = "ex_cycling_desc",
+            targetMuscleKey = "muscle_cardio",
+            categoryKey = "cat_cardio",
+            isBodyweight = true
         )
     )
     

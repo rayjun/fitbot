@@ -245,3 +245,8 @@ val isSyncing by authManager.isSyncing.collectAsState()
 - **Smart Analytics Insight**: Dynamically generate fitness performance summaries based on time ranges (Week/Month/Year) directly in the Analytics dashboard.
 - **AI Coach Chat**: A classic, polished chat interface allowing users to ask questions grounded in their actual workout data using dynamic prompt injection.
 - **Privacy-First Data Flow**: AI only receives aggregated statistics (muscle group volume, sets, and progress), never raw personal details or precise timestamps.
+
+### Extended Library (v0.7.11)
+- **New Cardio Exercises**: Added Running, Brisk Walking, and Cycling to the built-in library.
+- **Cardio Heatmap Tracking**: Cardio exercises correctly map to the new "Cardiovascular" target muscle and "Cardio" category.
+- **Animated Stickman GIFs**: Replaced static placeholders with procedurally generated stickman animations using Python for visual consistency across platforms.
