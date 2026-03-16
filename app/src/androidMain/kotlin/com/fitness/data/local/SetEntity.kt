@@ -15,6 +15,8 @@ data class SetEntity(
     val exerciseName: String,  // 动作名称: 杠铃卧推
     val reps: Int,
     val weight: Double,
+    val distance: Double? = null,
+    val duration: Int? = null,
     val timestamp: Long,       // 用于记录和排序
     val timeStr: String,       // 格式: 09:05，方便序列化
     val remoteId: String = "", // 用于跨设备唯一标识
@@ -28,6 +30,8 @@ fun SetEntity.toModel() = com.fitness.model.ExerciseSet(
     exerciseName = exerciseName,
     reps = reps,
     weight = weight,
+    distance = distance,
+    duration = duration,
     timestamp = timestamp,
     timeStr = timeStr,
     remoteId = remoteId,

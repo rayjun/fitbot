@@ -255,3 +255,9 @@ val isSyncing by authManager.isSyncing.collectAsState()
 - **12 New Classic Exercises**: Added Dumbbell Fly, Cable Crossover, Lat Pulldown, Face Pull, Front Raise, Hammer Curl, Triceps Pushdown, Leg Press, Leg Extension, Leg Curl, Romanian Deadlift, and Hanging Leg Raise.
 - **Enhanced Muscle Tracking**: Introduced specific tracking for Rear Deltoids, Front Deltoids, and Hamstrings.
 - **Procedural Animations**: Generated 12 new matching procedural stickman animations simulating gym equipment and complex motions.
+
+### Cardio Metrics Support (v0.8.0)
+- **Schema Evolution**: Updated database to record `distance` (km) and `duration` (minutes) alongside weight and reps.
+- **Dynamic Input UI**: Workout recording screen automatically detects cardio exercises and presents distance/duration inputs instead of weight/reps.
+- **Smart Data Display**: History and timeline screens intelligently format records based on the exercise type (e.g., "30 min | 5.0 km" vs "100 kg x 10").
+- **Analytic Isolation**: Tonnage calculators explicitly ignore cardio to prevent skewing strength volume charts with arbitrary distance measurements.

@@ -13,6 +13,8 @@ data class ExerciseSet(
     val exerciseName: String,
     val reps: Int,
     val weight: Double,
+    val distance: Double? = null,
+    val duration: Int? = null,
     val timestamp: Long,
     val timeStr: String,
     val remoteId: String = "",

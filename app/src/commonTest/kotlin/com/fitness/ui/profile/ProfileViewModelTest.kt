@@ -45,9 +45,9 @@ class ProfileViewModelTest {
         val tenDaysAgo = getOffsetDate(10)
         val twoYearsAgo = getOffsetDate(400)
 
-        repository.addExerciseSet(ExerciseSet(id = 1, date = today, sessionId = "s1", exerciseName = "benchpress", reps = 10, weight = 100.0, timestamp = 0, timeStr = "12:00"))
-        repository.addExerciseSet(ExerciseSet(id = 2, date = tenDaysAgo, sessionId = "s2", exerciseName = "benchpress", reps = 10, weight = 100.0, timestamp = 0, timeStr = "12:00"))
-        repository.addExerciseSet(ExerciseSet(id = 3, date = twoYearsAgo, sessionId = "s3", exerciseName = "benchpress", reps = 10, weight = 100.0, timestamp = 0, timeStr = "12:00"))
+        repository.addExerciseSet(ExerciseSet(id = 1, date = today, sessionId = "s1", exerciseName = "benchpress", reps = 10, weight = 100.0, distance = null, duration = null, timestamp = 0, timeStr = "12:00"))
+        repository.addExerciseSet(ExerciseSet(id = 2, date = tenDaysAgo, sessionId = "s2", exerciseName = "benchpress", reps = 10, weight = 100.0, distance = null, duration = null, timestamp = 0, timeStr = "12:00"))
+        repository.addExerciseSet(ExerciseSet(id = 3, date = twoYearsAgo, sessionId = "s3", exerciseName = "benchpress", reps = 10, weight = 100.0, distance = null, duration = null, timestamp = 0, timeStr = "12:00"))
         
         advanceUntilIdle()
 
@@ -73,8 +73,8 @@ class ProfileViewModelTest {
         val tenDaysAgo = getOffsetDate(10)
 
         // Chest today, Legs 10 days ago
-        repository.addExerciseSet(ExerciseSet(id = 1, date = today, sessionId = "s1", exerciseName = "benchpress", reps = 10, weight = 100.0, timestamp = 0, timeStr = "12:00"))
-        repository.addExerciseSet(ExerciseSet(id = 2, date = tenDaysAgo, sessionId = "s2", exerciseName = "squat", reps = 10, weight = 100.0, timestamp = 0, timeStr = "12:00"))
+        repository.addExerciseSet(ExerciseSet(id = 1, date = today, sessionId = "s1", exerciseName = "benchpress", reps = 10, weight = 100.0, distance = null, duration = null, timestamp = 0, timeStr = "12:00"))
+        repository.addExerciseSet(ExerciseSet(id = 2, date = tenDaysAgo, sessionId = "s2", exerciseName = "squat", reps = 10, weight = 100.0, distance = null, duration = null, timestamp = 0, timeStr = "12:00"))
         
         advanceUntilIdle()
 

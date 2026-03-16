@@ -41,6 +41,7 @@ fun WorkoutRecordingScreen(
     val exercise = remember(exerciseId) { ExerciseProvider.exercises.find { it.id == exerciseId } }
     val localizedName = exercise?.let { getString(it.nameKey) } ?: exerciseId
     val isBodyweight = exercise?.isBodyweight ?: false
+    val isCardio = exercise?.categoryKey == "cat_cardio"
     val isToday = remember(date) { date == DateUtils.getTodayString() }
 
     val setsFlow = remember(repository, date) { repository.getSetsByDate(date) }
@@ -96,6 +97,7 @@ fun WorkoutRecordingScreen(
                         SetItemRow(
                             set = set, 
                             isBodyweight = isBodyweight,
+                            isCardio = isCardio,
                             onClick = if (isToday) { { editingSet = set } } else null
                         )
                     }
@@ -107,8 +109,9 @@ fun WorkoutRecordingScreen(
     if (showAddDialog) {
         RecordSetDialog(
             isBodyweight = isBodyweight,
+            isCardio = isCardio,
             onDismiss = { showAddDialog = false },
-            onSave = { weight, reps ->
+            onSave = { weight, reps, distance, duration ->
                 val now = Clock.System.now()
                 val localTime = now.toLocalDateTime(TimeZone.currentSystemDefault())
                 val timeStr = "${localTime.hour.toString().padStart(2, '0')}:${localTime.minute.toString().padStart(2, '0')}"
@@ -118,6 +121,8 @@ fun WorkoutRecordingScreen(
                     exerciseName = exerciseId,
                     reps = reps,
                     weight = weight,
+                    distance = distance,
+                    duration = duration,
                     timestamp = now.toEpochMilliseconds(),
                     timeStr = timeStr
                 )
@@ -134,13 +139,16 @@ fun WorkoutRecordingScreen(
         RecordSetDialog(
             initialWeight = set.weight.toString(),
             initialReps = set.reps.toString(),
+            initialDistance = set.distance?.toString() ?: "",
+            initialDuration = set.duration?.toString() ?: "",
             isBodyweight = isBodyweight,
+            isCardio = isCardio,
             isEdit = true,
             onDismiss = { editingSet = null },
-            onSave = { weight, reps ->
+            onSave = { weight, reps, distance, duration ->
                 editingSet?.let { currentSet ->
                     scope.launch {
-                        repository.updateExerciseSet(currentSet.copy(weight = weight, reps = reps))
+                        repository.updateExerciseSet(currentSet.copy(weight = weight, reps = reps, distance = distance, duration = duration))
                     }
                 }
                 editingSet = null
@@ -158,7 +166,7 @@ fun WorkoutRecordingScreen(
 }
 
 @Composable
-private fun SetItemRow(set: ExerciseSet, isBodyweight: Boolean, onClick: (() -> Unit)?) {
+private fun SetItemRow(set: ExerciseSet, isBodyweight: Boolean, isCardio: Boolean, onClick: (() -> Unit)?) {
     Card(
         modifier = Modifier.fillMaxWidth().let {
             if (onClick != null) it.clickable { onClick() } else it
@@ -167,7 +175,11 @@ private fun SetItemRow(set: ExerciseSet, isBodyweight: Boolean, onClick: (() -> 
     ) {
         ListItem(
             headlineContent = { 
-                val text = if (isBodyweight) {
+                val text = if (isCardio) {
+                    val dist = set.distance ?: 0.0
+                    val dur = set.duration ?: 0
+                    "${dur} ${getString("minutes")} | ${dist} ${getString("km")}"
+                } else if (isBodyweight) {
                     "${set.reps} ${getString("reps")}"
                 } else {
                     "${set.weight} ${getString("kg")} x ${set.reps}"
@@ -184,43 +196,71 @@ private fun SetItemRow(set: ExerciseSet, isBodyweight: Boolean, onClick: (() -> 
 private fun RecordSetDialog(
     initialWeight: String = "0",
     initialReps: String = "12",
+    initialDistance: String = "",
+    initialDuration: String = "",
     isBodyweight: Boolean,
+    isCardio: Boolean,
     isEdit: Boolean = false,
     onDismiss: () -> Unit,
-    onSave: (Double, Int) -> Unit,
+    onSave: (Double, Int, Double?, Int?) -> Unit,
     onDelete: (() -> Unit)? = null
 ) {
     var weightInput by remember { mutableStateOf(initialWeight) }
     var repsInput by remember { mutableStateOf(initialReps) }
+    var distanceInput by remember { mutableStateOf(initialDistance) }
+    var durationInput by remember { mutableStateOf(initialDuration) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(if (isEdit) getString("edit_record") else getString("add_record")) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                if (!isBodyweight) {
+                if (isCardio) {
                     OutlinedTextField(
-                        value = weightInput,
-                        onValueChange = { weightInput = it },
-                        label = { Text(getString("weight_kg")) },
+                        value = durationInput,
+                        onValueChange = { durationInput = it },
+                        label = { Text(getString("duration_min")) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    OutlinedTextField(
+                        value = distanceInput,
+                        onValueChange = { distanceInput = it },
+                        label = { Text(getString("distance_km")) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else {
+                    if (!isBodyweight) {
+                        OutlinedTextField(
+                            value = weightInput,
+                            onValueChange = { weightInput = it },
+                            label = { Text(getString("weight_kg")) },
+                            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    OutlinedTextField(
+                        value = repsInput,
+                        onValueChange = { repsInput = it },
+                        label = { Text(getString("reps")) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
-                OutlinedTextField(
-                    value = repsInput,
-                    onValueChange = { repsInput = it },
-                    label = { Text(getString("reps")) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
         },
         confirmButton = {
             Button(onClick = { 
-                val w = if (isBodyweight) 0.0 else (weightInput.toDoubleOrNull() ?: 0.0)
-                val r = repsInput.toIntOrNull() ?: 0
-                onSave(w, r)
+                if (isCardio) {
+                    val dist = distanceInput.toDoubleOrNull()
+                    val dur = durationInput.toIntOrNull()
+                    onSave(0.0, 0, dist, dur)
+                } else {
+                    val w = if (isBodyweight) 0.0 else (weightInput.toDoubleOrNull() ?: 0.0)
+                    val r = repsInput.toIntOrNull() ?: 0
+                    onSave(w, r, null, null)
+                }
             }) {
                 Text(getString("save"))
             }

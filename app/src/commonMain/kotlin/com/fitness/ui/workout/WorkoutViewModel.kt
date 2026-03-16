@@ -25,7 +25,7 @@ class WorkoutViewModel(
         _currentDate.value = date
     }
 
-    fun addSet(exerciseId: String, weight: Double, reps: Int) {
+    fun addSet(exerciseId: String, weight: Double, reps: Int, distance: Double? = null, duration: Int? = null) {
         viewModelScope.launch {
             val now = Clock.System.now()
             val localTime = now.toLocalDateTime(TimeZone.currentSystemDefault())
@@ -37,6 +37,8 @@ class WorkoutViewModel(
                 exerciseName = exerciseId,
                 reps = reps,
                 weight = weight,
+                distance = distance,
+                duration = duration,
                 timestamp = now.toEpochMilliseconds(),
                 timeStr = timeStr
             )

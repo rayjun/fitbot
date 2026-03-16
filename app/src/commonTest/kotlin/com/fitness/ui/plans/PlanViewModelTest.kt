@@ -57,9 +57,9 @@ class PlanViewModelTest {
         assertTrue(viewModel.allSetsByDate.value.isEmpty())
 
         // Add some sets across different dates
-        repository.addExerciseSet(com.fitness.model.ExerciseSet(1, "2024-03-01", "s1", "squat", 10, 50.0, 0, "10:00"))
-        repository.addExerciseSet(com.fitness.model.ExerciseSet(2, "2024-03-01", "s1", "squat", 10, 50.0, 0, "10:05"))
-        repository.addExerciseSet(com.fitness.model.ExerciseSet(3, "2024-03-02", "s2", "benchpress", 8, 60.0, 0, "11:00"))
+        repository.addExerciseSet(com.fitness.model.ExerciseSet(1, "2024-03-01", "s1", "squat", 10, 50.0, null, null, 0, "10:00"))
+        repository.addExerciseSet(com.fitness.model.ExerciseSet(2, "2024-03-01", "s1", "squat", 10, 50.0, null, null, 0, "10:05"))
+        repository.addExerciseSet(com.fitness.model.ExerciseSet(3, "2024-03-02", "s2", "benchpress", 8, 60.0, null, null, 0, "11:00"))
         
         advanceUntilIdle()
 
