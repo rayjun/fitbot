@@ -53,6 +53,25 @@ class WorkoutViewModelTest {
     }
 
     @Test
+    fun testAddCardioSet() = runTest {
+        backgroundScope.launch { viewModel.setsToday.collect() }
+        val date = "2024-03-13"
+        viewModel.setDate(date)
+        
+        // Add running set: 5.5 km, 45 minutes
+        viewModel.addSet("running", 0.0, 0, distance = 5.5, duration = 45)
+        advanceUntilIdle()
+        
+        val sets = viewModel.setsToday.value
+        assertEquals(1, sets.size)
+        assertEquals("running", sets[0].exerciseName)
+        assertEquals(5.5, sets[0].distance)
+        assertEquals(45, sets[0].duration)
+        assertEquals(0.0, sets[0].weight)
+        assertEquals(0, sets[0].reps)
+    }
+
+    @Test
     fun testDeleteSetIsSoftDelete() = runTest {
         backgroundScope.launch { viewModel.setsToday.collect() }
         val date = "2024-03-09"
