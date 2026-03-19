@@ -44,18 +44,18 @@ class RoomWorkoutRepository(
         }
 
         val now = System.currentTimeMillis()
-        if (currentPlan != null && isSameDay(currentPlan.createdAt, now)) {
-            planDao.insertPlan(currentPlan.copy(exercisesJson = json.encodeToString(routine), createdAt = now))
+        val newPlan = if (currentPlan != null && isSameDay(currentPlan.createdAt, now)) {
+            currentPlan.copy(exercisesJson = json.encodeToString(routine), createdAt = now)
         } else {
-            val newPlan = com.fitness.data.local.PlanEntity(
+            com.fitness.data.local.PlanEntity(
                 name = "Daily Routine",
                 exercisesJson = json.encodeToString(routine),
                 isCurrent = true,
                 version = (currentPlan?.version ?: 0) + 1,
                 createdAt = now
             )
-            planDao.updatePlan(newPlan)
         }
+        planDao.updatePlan(newPlan)
     }
 
     private fun isSameDay(t1: Long, t2: Long): Boolean {

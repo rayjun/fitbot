@@ -8,10 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.fitness.data.local.ExerciseDao
-import com.fitness.data.local.PlanDao
-import com.fitness.data.local.PlanEntity
-import com.fitness.data.local.SetEntity
+import com.fitness.data.local.*
 import com.fitness.model.*
 import com.fitness.util.dataStore
 import kotlinx.serialization.encodeToString
@@ -163,7 +160,17 @@ class SyncWorker @AssistedInject constructor(
             if (ts != null && !localPlans.containsKey(ts)) {
                 try {
                     val content = helper.downloadFileById(file.id)
-                    planDao.insertPlan(json.decodeFromString<PlanEntity>(content).copy(id = 0))
+                    // History is wrapped in WorkoutPlan list or PlanEntity list
+                    val planToInsert = try {
+                        val plans = json.decodeFromString<List<WorkoutPlan>>(content)
+                        plans.firstOrNull()?.toEntity()
+                    } catch (e: Exception) {
+                        try {
+                            json.decodeFromString<PlanEntity>(content).copy(id = 0)
+                        } catch (e2: Exception) { null }
+                    }
+                    
+                    planToInsert?.let { planDao.insertPlan(it.copy(isCurrent = false)) }
                 } catch (e: Exception) { Log.e(TAG, "Plan pull error: ${file.name}") }
             }
         }
@@ -171,63 +178,60 @@ class SyncWorker @AssistedInject constructor(
         planDao.getAllPlans().forEach { plan ->
             val name = "plan_history_${plan.createdAt}.json"
             if (!remoteMap.containsKey(name)) {
-                helper.createFile(folderId, name, json.encodeToString(plan))
+                helper.createFile(folderId, name, json.encodeToString(plan.toModel()))
             }
         }
 
         // 2. 同步当前计划 (Bidirectional - Latest Wins)
         val currentPlanFile = remoteMap["plans.json"]
-        val localPlan = planDao.getCurrentPlan()
+        val localPlan = planDao.getCurrentPlan()?.toModel()
         
         if (currentPlanFile != null) {
             val remoteContent = helper.downloadFileById(currentPlanFile.id)
             
             // Determine remote timestamp from content
             var remoteTimestamp: Long = 0
-            val remotePlanToInsert: PlanEntity? = try {
-                val remotePlans = json.decodeFromString<List<PlanEntity>>(remoteContent)
+            val remotePlanToInsert: WorkoutPlan? = try {
+                val remotePlans = json.decodeFromString<List<WorkoutPlan>>(remoteContent)
                 val bestRemote = remotePlans.firstOrNull { it.isCurrent } ?: remotePlans.maxByOrNull { it.createdAt }
                 remoteTimestamp = bestRemote?.createdAt ?: 0L
                 bestRemote
             } catch (e: Exception) {
-                // iOS format fallback: try parsing as List<RoutineDay>
+                // Fallback for PlanEntity format (old Android) or RoutineDay list (very old iOS)
                 try {
-                    val routineDays = json.decodeFromString<List<com.fitness.model.RoutineDay>>(remoteContent)
-                    // If no internal timestamp, fallback to Drive file's modification time
-                    remoteTimestamp = currentPlanFile.modifiedTime.value
-                    if (routineDays.isNotEmpty()) {
-                        PlanEntity(
-                            name = "Synced Routine",
-                            exercisesJson = json.encodeToString(routineDays),
-                            isCurrent = true,
-                            version = 1,
-                            createdAt = remoteTimestamp
-                        )
-                    } else null
+                    val remoteEntities = json.decodeFromString<List<PlanEntity>>(remoteContent)
+                    val best = remoteEntities.firstOrNull { it.isCurrent } ?: remoteEntities.maxByOrNull { it.createdAt }
+                    remoteTimestamp = best?.createdAt ?: 0L
+                    best?.toModel()
                 } catch (e2: Exception) {
-                    Log.e(TAG, "plans.json parse failed: ${e2.message}")
-                    null
+                    try {
+                        val routineDays = json.decodeFromString<List<com.fitness.model.RoutineDay>>(remoteContent)
+                        remoteTimestamp = currentPlanFile.modifiedTime.value
+                        if (routineDays.isNotEmpty()) {
+                            WorkoutPlan(name = "Synced Routine", exercisesJson = json.encodeToString(routineDays), createdAt = remoteTimestamp, isCurrent = true)
+                        } else null
+                    } catch (e3: Exception) { null }
                 }
             }
 
             val localTimestamp = localPlan?.createdAt ?: 0L
+            Log.d(TAG, "Sync: Comparing Plans - Local: $localTimestamp, Remote: $remoteTimestamp")
 
             if (remoteTimestamp > localTimestamp) {
-                // Remote is newer, update local
-                remotePlanToInsert?.let { planDao.insertPlan(it.copy(id = 0)) }
-                Log.d(TAG, "Sync: Remote plan is newer ($remoteTimestamp > $localTimestamp). Downloaded.")
+                remotePlanToInsert?.let { 
+                    Log.i(TAG, "Sync: Remote plan is newer. Overwriting local.")
+                    planDao.updatePlan(it.toEntity().copy(id = 0)) 
+                }
             } else if (localTimestamp > remoteTimestamp) {
-                // Local is newer, upload to remote
                 localPlan?.let {
+                    Log.i(TAG, "Sync: Local plan is newer. Uploading to cloud.")
                     val jsonStr = json.encodeToString(listOf(it))
                     helper.updateFile(currentPlanFile.id, jsonStr)
-                    Log.d(TAG, "Sync: Local plan is newer ($localTimestamp > $remoteTimestamp). Uploaded.")
                 }
             } else {
                 Log.d(TAG, "Sync: Plans are already in sync at $localTimestamp.")
             }
         } else {
-            // No remote file, upload local
             localPlan?.let { 
                 val jsonStr = json.encodeToString(listOf(it))
                 helper.createFile(folderId, "plans.json", jsonStr)

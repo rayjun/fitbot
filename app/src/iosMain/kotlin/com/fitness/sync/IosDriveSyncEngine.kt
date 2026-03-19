@@ -19,20 +19,9 @@ import kotlinx.serialization.json.Json
  *
  * Sync rules (same as Android):
  *  - Sets    : per-day YYYY-MM-DD.json, TrainingDay JSON, exerciseName+timeStr dedup
- *  - Plans   : plans.json (PlanEntity wrapper containing RoutineDay list JSON), bidirectional
+ *  - Plans   : plans.json (WorkoutPlan wrapper containing RoutineDay list JSON), bidirectional
  *  - Prefs   : user_prefs.json, Map<String,String>, latest-wins
  */
-
-/** Mirrors Android's PlanEntity for deserializing plans.json written by Android. */
-@Serializable
-private data class PlanEntity(
-    val id: Long = 0,
-    val name: String = "",
-    val exercisesJson: String = "[]",
-    val isCurrent: Boolean = true,
-    val version: Int = 0,
-    val createdAt: Long = 0
-)
 
 class IosDriveSyncEngine(
     accessToken: String,
@@ -135,13 +124,8 @@ class IosDriveSyncEngine(
         }
     }
 
-    /**
-     * Merges remote sets into local DataStore.
-     * Deduplication key: exerciseName + timeStr (remoteId may be empty for older Android records).
-     */
     private suspend fun mergeRemoteSetsIntoLocal(date: String, remoteDay: TrainingDay) {
         val existing = repository.getSetsByDate(date).first()
-        // Build a set of "exerciseName|timeStr" keys for dedup
         val existingKeys = existing.map { "${it.exerciseName}|${it.timeStr}" }.toSet()
         val existingRemoteIds = existing.map { it.remoteId }.filter { it.isNotEmpty() }.toSet()
 
@@ -149,7 +133,6 @@ class IosDriveSyncEngine(
             session.exercises.forEach { exercise ->
                 exercise.sets.forEach { setRecord ->
                     val dedupKey = "${exercise.name}|${setRecord.time}"
-                    // Skip if we already have this record (by remoteId or by name+time)
                     val alreadyExists = (setRecord.remoteId.isNotEmpty() && existingRemoteIds.contains(setRecord.remoteId))
                         || existingKeys.contains(dedupKey)
                     if (!alreadyExists) {
@@ -210,29 +193,31 @@ class IosDriveSyncEngine(
                 
                 var remoteTimestamp: Long = 0
                 val remoteDays: List<RoutineDay> = try {
-                    val planEntities = json.decodeFromString<List<PlanEntity>>(content)
-                    val activePlan = planEntities.firstOrNull { it.isCurrent }
-                        ?: planEntities.maxByOrNull { it.createdAt }
+                    val remotePlans = json.decodeFromString<List<WorkoutPlan>>(content)
+                    val activePlan = remotePlans.firstOrNull { it.isCurrent }
+                        ?: remotePlans.maxByOrNull { it.createdAt }
                     remoteTimestamp = activePlan?.createdAt ?: 0L
                     activePlan?.let { json.decodeFromString<List<RoutineDay>>(it.exercisesJson) } ?: emptyList()
                 } catch (_: Exception) {
-                    // Fallback for old format
+                    // Fallback for old formats (plain List<RoutineDay>)
                     remoteTimestamp = plansFile.modifiedTime?.let { parseIso8601ToMs(it) } ?: 0L
-                    json.decodeFromString<List<RoutineDay>>(content)
+                    try {
+                        json.decodeFromString<List<RoutineDay>>(content)
+                    } catch(_: Exception) { emptyList() }
                 }
 
                 if (remoteTimestamp > localModifiedMs) {
                     // Remote is newer
                     if (remoteDays.isNotEmpty()) {
-                        remoteDays.forEach { day ->
-                            repository.updateRoutineDay(day.dayOfWeek, day.isRest, day.exercises)
-                        }
-                        // Reset local modified key to remote timestamp to avoid immediate re-upload
-                        repository.dataStore.edit { it[ROUTINE_MODIFIED_KEY] = remoteTimestamp }
+                        println("Sync: Remote plan is newer ($remoteTimestamp > $localModifiedMs). Overwriting local.")
+                        repository.replaceFullRoutine(remoteDays, remoteTimestamp)
                     }
                 } else if (localModifiedMs > remoteTimestamp) {
                     // Local is newer
+                    println("Sync: Local plan is newer ($localModifiedMs > $remoteTimestamp). Uploading.")
                     uploadLocalPlan(folderId, plansFile.id, localRoutine, localModifiedMs)
+                } else {
+                    println("Sync: Plans are already in sync at $localModifiedMs.")
                 }
             } catch (_: Exception) {}
         } else {
@@ -244,12 +229,11 @@ class IosDriveSyncEngine(
     private suspend fun uploadLocalPlan(folderId: String, fileId: String?, routine: List<RoutineDay>, timestamp: Long) {
         if (routine.isEmpty()) return
         
-        // Wrap into Android-compatible PlanEntity
-        val entity = PlanEntity(
+        // Wrap into standard WorkoutPlan
+        val entity = WorkoutPlan(
             name = "iOS Synced Routine",
             exercisesJson = json.encodeToString(routine),
             isCurrent = true,
-            version = 1,
             createdAt = timestamp
         )
         val jsonStr = json.encodeToString(listOf(entity))

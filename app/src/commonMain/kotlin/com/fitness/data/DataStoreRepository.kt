@@ -77,6 +77,13 @@ class DataStoreRepository(
         }
     }
 
+    suspend fun replaceFullRoutine(days: List<RoutineDay>, timestamp: Long) {
+        dataStore.edit { preferences ->
+            preferences[ROUTINE_KEY] = json.encodeToString(days)
+            preferences[ROUTINE_MODIFIED_KEY] = timestamp
+        }
+    }
+
     override fun getHeatmapData(): Flow<Map<String, Int>> {
         return dataStore.data.map { preferences ->
             val result = mutableMapOf<String, Int>()

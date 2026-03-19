@@ -17,12 +17,29 @@ data class PlanEntity(
     val createdAt: Long // 作为唯一的版本标识
 )
 
+fun PlanEntity.toModel() = com.fitness.model.WorkoutPlan(
+    id = id,
+    name = name,
+    exercisesJson = exercisesJson,
+    createdAt = createdAt,
+    isCurrent = isCurrent
+)
+
+fun com.fitness.model.WorkoutPlan.toEntity() = PlanEntity(
+    id = id,
+    name = name,
+    exercisesJson = exercisesJson,
+    isCurrent = isCurrent,
+    version = 1,
+    createdAt = createdAt
+)
+
 @Dao
 interface PlanDao {
-    @Query("SELECT * FROM training_plans WHERE isCurrent = 1 LIMIT 1")
+    @Query("SELECT * FROM training_plans WHERE isCurrent = 1 ORDER BY createdAt DESC LIMIT 1")
     suspend fun getCurrentPlan(): PlanEntity?
 
-    @Query("SELECT * FROM training_plans WHERE isCurrent = 1 LIMIT 1")
+    @Query("SELECT * FROM training_plans WHERE isCurrent = 1 ORDER BY createdAt DESC LIMIT 1")
     fun getCurrentPlanFlow(): kotlinx.coroutines.flow.Flow<PlanEntity?>
 
     @Query("SELECT * FROM training_plans WHERE createdAt <= :timestamp ORDER BY createdAt DESC LIMIT 1")
