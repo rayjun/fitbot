@@ -175,25 +175,33 @@ class SyncWorker @AssistedInject constructor(
             }
         }
 
-        // 2. 同步当前计划 (Bidirectional)
+        // 2. 同步当前计划 (Bidirectional - Latest Wins)
         val currentPlanFile = remoteMap["plans.json"]
-        if (currentPlanFile != null && currentPlanFile.modifiedTime.value > lastSync) {
-            val content = helper.downloadFileById(currentPlanFile.id)
-            // Handle both Android format (List<PlanEntity>) and iOS format (List<RoutineDay>)
-            val planToInsert: PlanEntity? = try {
-                val remotePlans = json.decodeFromString<List<PlanEntity>>(content)
-                remotePlans.firstOrNull { it.isCurrent } ?: remotePlans.maxByOrNull { it.createdAt }
+        val localPlan = planDao.getCurrentPlan()
+        
+        if (currentPlanFile != null) {
+            val remoteContent = helper.downloadFileById(currentPlanFile.id)
+            
+            // Determine remote timestamp from content
+            var remoteTimestamp: Long = 0
+            val remotePlanToInsert: PlanEntity? = try {
+                val remotePlans = json.decodeFromString<List<PlanEntity>>(remoteContent)
+                val bestRemote = remotePlans.firstOrNull { it.isCurrent } ?: remotePlans.maxByOrNull { it.createdAt }
+                remoteTimestamp = bestRemote?.createdAt ?: 0L
+                bestRemote
             } catch (e: Exception) {
-                // iOS writes plain List<RoutineDay> — wrap it into a PlanEntity
+                // iOS format fallback: try parsing as List<RoutineDay>
                 try {
-                    val routineDays = json.decodeFromString<List<com.fitness.model.RoutineDay>>(content)
+                    val routineDays = json.decodeFromString<List<com.fitness.model.RoutineDay>>(remoteContent)
+                    // If no internal timestamp, fallback to Drive file's modification time
+                    remoteTimestamp = currentPlanFile.modifiedTime.value
                     if (routineDays.isNotEmpty()) {
                         PlanEntity(
                             name = "Synced Routine",
                             exercisesJson = json.encodeToString(routineDays),
                             isCurrent = true,
                             version = 1,
-                            createdAt = currentPlanFile.modifiedTime.value
+                            createdAt = remoteTimestamp
                         )
                     } else null
                 } catch (e2: Exception) {
@@ -201,12 +209,29 @@ class SyncWorker @AssistedInject constructor(
                     null
                 }
             }
-            planToInsert?.let { planDao.insertPlan(it.copy(id = 0)) }
+
+            val localTimestamp = localPlan?.createdAt ?: 0L
+
+            if (remoteTimestamp > localTimestamp) {
+                // Remote is newer, update local
+                remotePlanToInsert?.let { planDao.insertPlan(it.copy(id = 0)) }
+                Log.d(TAG, "Sync: Remote plan is newer ($remoteTimestamp > $localTimestamp). Downloaded.")
+            } else if (localTimestamp > remoteTimestamp) {
+                // Local is newer, upload to remote
+                localPlan?.let {
+                    val jsonStr = json.encodeToString(listOf(it))
+                    helper.updateFile(currentPlanFile.id, jsonStr)
+                    Log.d(TAG, "Sync: Local plan is newer ($localTimestamp > $remoteTimestamp). Uploaded.")
+                }
+            } else {
+                Log.d(TAG, "Sync: Plans are already in sync at $localTimestamp.")
+            }
         } else {
-            planDao.getCurrentPlan()?.let { 
+            // No remote file, upload local
+            localPlan?.let { 
                 val jsonStr = json.encodeToString(listOf(it))
-                if (currentPlanFile != null) helper.updateFile(currentPlanFile.id, jsonStr)
-                else helper.createFile(folderId, "plans.json", jsonStr)
+                helper.createFile(folderId, "plans.json", jsonStr)
+                Log.d(TAG, "Sync: No remote plans.json. Uploaded local.")
             }
         }
     }

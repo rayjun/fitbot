@@ -43,6 +43,7 @@ class IosDriveSyncEngine(
     private val FOLDER_NAME = "FitBot"
     private val LAST_SYNC_KEY = longPreferencesKey("last_sync_time")
     private val DIRTY_DATES_KEY = stringPreferencesKey("dirty_dates")
+    private val ROUTINE_MODIFIED_KEY = longPreferencesKey("workout_routine_modified")
 
     suspend fun sync() {
         val folderId = drive.getOrCreateFolder(FOLDER_NAME)
@@ -200,43 +201,63 @@ class IosDriveSyncEngine(
         lastSync: Long
     ) {
         val plansFile = remoteMap["plans.json"]
-        val remoteModifiedMs = plansFile?.modifiedTime?.let { parseIso8601ToMs(it) } ?: 0L
+        val localRoutine = repository.getCurrentRoutine().first()
+        val localModifiedMs = repository.dataStore.data.first()[ROUTINE_MODIFIED_KEY] ?: 0L
 
-        // Pull remote when first sync or remote is newer
-        if (plansFile != null && (lastSync == 0L || remoteModifiedMs > lastSync)) {
+        if (plansFile != null) {
             try {
                 val content = drive.downloadFile(plansFile.id)
-                // plans.json is written by Android as List<PlanEntity> where
-                // PlanEntity.exercisesJson contains the List<RoutineDay> as JSON string.
-                // Try that format first, fall back to plain List<RoutineDay>.
+                
+                var remoteTimestamp: Long = 0
                 val remoteDays: List<RoutineDay> = try {
                     val planEntities = json.decodeFromString<List<PlanEntity>>(content)
-                    // Use the first isCurrent plan, or the latest by createdAt
                     val activePlan = planEntities.firstOrNull { it.isCurrent }
                         ?: planEntities.maxByOrNull { it.createdAt }
+                    remoteTimestamp = activePlan?.createdAt ?: 0L
                     activePlan?.let { json.decodeFromString<List<RoutineDay>>(it.exercisesJson) } ?: emptyList()
                 } catch (_: Exception) {
-                    // Fallback: treat as plain List<RoutineDay> (iOS-written format)
+                    // Fallback for old format
+                    remoteTimestamp = plansFile.modifiedTime?.let { parseIso8601ToMs(it) } ?: 0L
                     json.decodeFromString<List<RoutineDay>>(content)
                 }
 
-                if (remoteDays.isNotEmpty()) {
-                    remoteDays.forEach { day ->
-                        repository.updateRoutineDay(day.dayOfWeek, day.isRest, day.exercises)
+                if (remoteTimestamp > localModifiedMs) {
+                    // Remote is newer
+                    if (remoteDays.isNotEmpty()) {
+                        remoteDays.forEach { day ->
+                            repository.updateRoutineDay(day.dayOfWeek, day.isRest, day.exercises)
+                        }
+                        // Reset local modified key to remote timestamp to avoid immediate re-upload
+                        repository.dataStore.edit { it[ROUTINE_MODIFIED_KEY] = remoteTimestamp }
                     }
+                } else if (localModifiedMs > remoteTimestamp) {
+                    // Local is newer
+                    uploadLocalPlan(folderId, plansFile.id, localRoutine, localModifiedMs)
                 }
             } catch (_: Exception) {}
         } else {
-            // Push local routine to remote (iOS uses plain List<RoutineDay>)
-            val localRoutine = repository.getCurrentRoutine().first()
-            if (localRoutine.isNotEmpty()) {
-                val jsonStr = json.encodeToString(localRoutine)
-                if (plansFile != null) {
-                    drive.updateFile(plansFile.id, jsonStr)
-                } else {
-                    drive.createFile(folderId, "plans.json", jsonStr)
-                }
-            }
+            // No remote file, upload local
+            uploadLocalPlan(folderId, null, localRoutine, localModifiedMs)
+        }
+    }
+
+    private suspend fun uploadLocalPlan(folderId: String, fileId: String?, routine: List<RoutineDay>, timestamp: Long) {
+        if (routine.isEmpty()) return
+        
+        // Wrap into Android-compatible PlanEntity
+        val entity = PlanEntity(
+            name = "iOS Synced Routine",
+            exercisesJson = json.encodeToString(routine),
+            isCurrent = true,
+            version = 1,
+            createdAt = timestamp
+        )
+        val jsonStr = json.encodeToString(listOf(entity))
+        
+        if (fileId != null) {
+            drive.updateFile(fileId, jsonStr)
+        } else {
+            drive.createFile(folderId, "plans.json", jsonStr)
         }
     }
 

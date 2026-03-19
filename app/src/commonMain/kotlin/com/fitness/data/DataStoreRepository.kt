@@ -20,6 +20,7 @@ class DataStoreRepository(
 
     // --- Keys ---
     private val ROUTINE_KEY = stringPreferencesKey("workout_routine")
+    private val ROUTINE_MODIFIED_KEY = longPreferencesKey("workout_routine_modified")
     private val HISTORY_KEY_PREFIX = "history_"
     private val LOCAL_MODIFIED_KEY_PREFIX = "local_modified_"
     private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
@@ -72,6 +73,7 @@ class DataStoreRepository(
             }
 
             preferences[ROUTINE_KEY] = json.encodeToString(currentList)
+            preferences[ROUTINE_MODIFIED_KEY] = kotlinx.datetime.Clock.System.now().toEpochMilliseconds()
         }
     }
 
