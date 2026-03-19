@@ -190,7 +190,7 @@ class SyncWorker @AssistedInject constructor(
             val remoteContent = helper.downloadFileById(currentPlanFile.id)
             
             // Determine remote timestamp from content
-            var remoteTimestamp: Long = 0
+            var remoteTimestamp: Long = -1 // -1 means unknown/unparseable
             val remotePlanToInsert: WorkoutPlan? = try {
                 val remotePlans = json.decodeFromString<List<WorkoutPlan>>(remoteContent)
                 val bestRemote = remotePlans.firstOrNull { it.isCurrent } ?: remotePlans.maxByOrNull { it.createdAt }
@@ -206,6 +206,7 @@ class SyncWorker @AssistedInject constructor(
                 } catch (e2: Exception) {
                     try {
                         val routineDays = json.decodeFromString<List<com.fitness.model.RoutineDay>>(remoteContent)
+                        // Content is valid but has no internal timestamp, fallback to File Metadata
                         remoteTimestamp = currentPlanFile.modifiedTime.value
                         if (routineDays.isNotEmpty()) {
                             WorkoutPlan(name = "Synced Routine", exercisesJson = json.encodeToString(routineDays), createdAt = remoteTimestamp, isCurrent = true)
@@ -217,19 +218,23 @@ class SyncWorker @AssistedInject constructor(
             val localTimestamp = localPlan?.createdAt ?: 0L
             Log.d(TAG, "Sync: Comparing Plans - Local: $localTimestamp, Remote: $remoteTimestamp")
 
-            if (remoteTimestamp > localTimestamp) {
-                remotePlanToInsert?.let { 
-                    Log.i(TAG, "Sync: Remote plan is newer. Overwriting local.")
-                    planDao.updatePlan(it.toEntity().copy(id = 0)) 
+            if (remoteTimestamp != -1L) {
+                if (localTimestamp == 0L || remoteTimestamp > localTimestamp) {
+                    // Local is empty OR remote is strictly newer
+                    remotePlanToInsert?.let { 
+                        Log.i(TAG, "Sync: Cloud plan is newer or local is empty. Updating local.")
+                        planDao.updatePlan(it.toEntity().copy(id = 0)) 
+                    }
+                } else if (localTimestamp > remoteTimestamp) {
+                    // Local is newer, upload to remote
+                    localPlan?.let {
+                        Log.i(TAG, "Sync: Local plan is newer. Uploading to cloud.")
+                        val jsonStr = json.encodeToString(listOf(it))
+                        helper.updateFile(currentPlanFile.id, jsonStr)
+                    }
+                } else {
+                    Log.d(TAG, "Sync: Plans are already in sync at $localTimestamp.")
                 }
-            } else if (localTimestamp > remoteTimestamp) {
-                localPlan?.let {
-                    Log.i(TAG, "Sync: Local plan is newer. Uploading to cloud.")
-                    val jsonStr = json.encodeToString(listOf(it))
-                    helper.updateFile(currentPlanFile.id, jsonStr)
-                }
-            } else {
-                Log.d(TAG, "Sync: Plans are already in sync at $localTimestamp.")
             }
         } else {
             localPlan?.let { 

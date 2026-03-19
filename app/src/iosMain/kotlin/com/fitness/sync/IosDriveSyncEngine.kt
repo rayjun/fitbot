@@ -191,7 +191,7 @@ class IosDriveSyncEngine(
             try {
                 val content = drive.downloadFile(plansFile.id)
                 
-                var remoteTimestamp: Long = 0
+                var remoteTimestamp: Long = -1 // -1 means truly unknown
                 val remoteDays: List<RoutineDay> = try {
                     val remotePlans = json.decodeFromString<List<WorkoutPlan>>(content)
                     val activePlan = remotePlans.firstOrNull { it.isCurrent }
@@ -200,24 +200,27 @@ class IosDriveSyncEngine(
                     activePlan?.let { json.decodeFromString<List<RoutineDay>>(it.exercisesJson) } ?: emptyList()
                 } catch (_: Exception) {
                     // Fallback for old formats (plain List<RoutineDay>)
-                    remoteTimestamp = plansFile.modifiedTime?.let { parseIso8601ToMs(it) } ?: 0L
                     try {
-                        json.decodeFromString<List<RoutineDay>>(content)
+                        val days = json.decodeFromString<List<RoutineDay>>(content)
+                        remoteTimestamp = plansFile.modifiedTime?.let { parseIso8601ToMs(it) } ?: 0L
+                        days
                     } catch(_: Exception) { emptyList() }
                 }
 
-                if (remoteTimestamp > localModifiedMs) {
-                    // Remote is newer
-                    if (remoteDays.isNotEmpty()) {
-                        println("Sync: Remote plan is newer ($remoteTimestamp > $localModifiedMs). Overwriting local.")
-                        repository.replaceFullRoutine(remoteDays, remoteTimestamp)
+                if (remoteTimestamp != -1L) {
+                    if (localModifiedMs == 0L || remoteTimestamp > localModifiedMs) {
+                        // Remote is newer OR local is empty
+                        if (remoteDays.isNotEmpty()) {
+                            println("Sync: Remote plan is newer ($remoteTimestamp > $localModifiedMs). Overwriting local.")
+                            repository.replaceFullRoutine(remoteDays, remoteTimestamp)
+                        }
+                    } else if (localModifiedMs > remoteTimestamp) {
+                        // Local is newer
+                        println("Sync: Local plan is newer ($localModifiedMs > $remoteTimestamp). Uploading.")
+                        uploadLocalPlan(folderId, plansFile.id, localRoutine, localModifiedMs)
+                    } else {
+                        println("Sync: Plans are already in sync at $localModifiedMs.")
                     }
-                } else if (localModifiedMs > remoteTimestamp) {
-                    // Local is newer
-                    println("Sync: Local plan is newer ($localModifiedMs > $remoteTimestamp). Uploading.")
-                    uploadLocalPlan(folderId, plansFile.id, localRoutine, localModifiedMs)
-                } else {
-                    println("Sync: Plans are already in sync at $localModifiedMs.")
                 }
             } catch (_: Exception) {}
         } else {
