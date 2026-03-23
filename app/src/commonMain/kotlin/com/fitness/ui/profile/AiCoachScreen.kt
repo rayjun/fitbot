@@ -63,7 +63,10 @@ fun AiCoachScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                items(aiMessages) { message ->
+                items(
+                    items = aiMessages,
+                    key = { it.role + it.content.hashCode() + aiMessages.indexOf(it) }
+                ) { message ->
                     val isUser = message.role == "user"
                     val alignment = if (isUser) Alignment.End else Alignment.Start
                     val containerColor = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant

@@ -24,8 +24,8 @@ val commonModule = module {
 
     factory { PlanViewModel(get()) }
     factory { WorkoutViewModel(get()) }
-    factory { SettingsViewModel(get()) }
-    factory { ProfileViewModel(get(), get(), get()) }
+    single { SettingsViewModel(get()) }
+    single { ProfileViewModel(get(), get(), get()) }
 }
 
 expect val platformModule: Module

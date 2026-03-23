@@ -6,6 +6,7 @@ import com.fitness.model.AiChatResponse
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
@@ -24,6 +25,11 @@ class KtorAiRepository(
     private val client: HttpClient = HttpClient {
         install(ContentNegotiation) {
             json(Json { ignoreUnknownKeys = true })
+        }
+        install(HttpTimeout) {
+            requestTimeoutMillis = 60000
+            connectTimeoutMillis = 15000
+            socketTimeoutMillis = 60000
         }
     }
 ) : AiRepository {
